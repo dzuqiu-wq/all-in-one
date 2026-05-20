@@ -41,7 +41,7 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Copy everything from builder
+# Copy the full build output including src folder
 COPY --from=builder /app ./
 
 USER nextjs
@@ -49,4 +49,5 @@ USER nextjs
 EXPOSE 3000
 ENV PORT 3000
 
-CMD ["node", ".next/standalone/server.js"]
+# Use next start for standard production server
+CMD ["npm", "start"]
