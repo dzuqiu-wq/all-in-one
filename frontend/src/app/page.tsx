@@ -1,14 +1,15 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { FileText, Image, QrCode, Merge, Zap, Server } from "lucide-react";
 import AdBanner from "@/components/AdBanner";
 
 interface ToolCardProps {
-  name: string;
-  description: string;
-  tag: string;
+  nameKey: string;
+  descriptionKey: string;
+  tagKey: string;
   tagColor?: "green" | "blue";
-  location: "Browser Local" | "Cloud Sandbox";
+  locationKey: string;
   locationType: "client" | "server";
   icon: React.ElementType;
   href: string;
@@ -16,16 +17,17 @@ interface ToolCardProps {
 }
 
 function ToolCard({
-  name,
-  description,
-  tag,
+  nameKey,
+  descriptionKey,
+  tagKey,
   tagColor = "green",
-  location,
+  locationKey,
   locationType,
   icon: Icon,
   href,
   status,
 }: ToolCardProps) {
+  const t = useTranslations();
   const isAvailable = status === "available";
   const glowColor = tagColor === "green" ? "var(--neon-green)" : "var(--neon-blue)";
   const glowRgb = tagColor === "green" ? "0, 255, 102" : "0, 229, 255";
@@ -71,7 +73,7 @@ function ToolCard({
       {/* Status Badge */}
       {!isAvailable && (
         <div className="absolute top-3 right-3 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider bg-[var(--bg-elevated)] text-[var(--text-muted)] rounded">
-          Soon
+          {t('common.comingSoon')}
         </div>
       )}
 
@@ -97,16 +99,16 @@ function ToolCard({
             border: `1px solid rgba(${glowRgb}, 0.2)`,
           }}
         >
-          {tag}
+          {t(tagKey)}
         </span>
       </div>
 
       {/* Title & Description */}
       <h3 className="text-base font-semibold text-[var(--text-primary)] mb-2 group-hover:text-[var(--neon-green)] transition-colors">
-        {name}
+        {t(nameKey)}
       </h3>
       <p className="text-sm text-[var(--text-secondary)] mb-4 flex-1">
-        {description}
+        {t(descriptionKey)}
       </p>
 
       {/* Location Tag */}
@@ -117,7 +119,7 @@ function ToolCard({
           <Server className="w-3 h-3 text-[var(--neon-blue)]" />
         )}
         <span className="text-[11px] font-mono text-[var(--text-muted)]">
-          {location}
+          {t(locationKey)}
         </span>
       </div>
 
@@ -134,44 +136,44 @@ function ToolCard({
 
 const tools: ToolCardProps[] = [
   {
-    name: "Word ↔ PDF",
-    description: "Convert Word documents to PDF and vice versa with server-side processing.",
-    tag: "SERVER-SIDE ULTRA",
+    nameKey: "tools.wordPdf.title",
+    descriptionKey: "tools.wordPdf.description",
+    tagKey: "tools.wordPdf.tag",
     tagColor: "blue",
-    location: "Cloud Sandbox",
+    locationKey: "tools.wordPdf.title",
     locationType: "server",
     icon: FileText,
     href: "/tools/word-to-pdf",
     status: "available",
   },
   {
-    name: "PDF Merge/Split",
-    description: "Combine multiple PDFs or split large documents with pure client-side processing.",
-    tag: "CLIENT-SIDE PURE",
+    nameKey: "tools.pdfMerge.title",
+    descriptionKey: "tools.pdfMerge.description",
+    tagKey: "tools.pdfMerge.tag",
     tagColor: "green",
-    location: "Browser Local",
+    locationKey: "tools.pdfMerge.browserLocal",
     locationType: "client",
     icon: Merge,
     href: "/tools/pdf-merge-split",
     status: "available",
   },
   {
-    name: "Image Optimizer",
-    description: "Compress and resize images directly in your browser with zero server upload.",
-    tag: "CLIENT-SIDE PURE",
+    nameKey: "tools.imageOptimizer.title",
+    descriptionKey: "tools.imageOptimizer.description",
+    tagKey: "tools.imageOptimizer.tag",
     tagColor: "green",
-    location: "Browser Local",
+    locationKey: "tools.imageOptimizer.browserLocal",
     locationType: "client",
     icon: Image,
     href: "/tools/image-optimizer",
     status: "available",
   },
   {
-    name: "QR Code Generator",
-    description: "Generate QR codes instantly with customizable colors and sizes.",
-    tag: "CLIENT-SIDE PURE",
+    nameKey: "tools.qrcode.title",
+    descriptionKey: "tools.qrcode.description",
+    tagKey: "tools.qrcode.tag",
     tagColor: "green",
-    location: "Browser Local",
+    locationKey: "tools.qrcode.browserLocal",
     locationType: "client",
     icon: QrCode,
     href: "/tools/qrcode-generator",
@@ -180,27 +182,29 @@ const tools: ToolCardProps[] = [
 ];
 
 export default function Home() {
+  const t = useTranslations();
+
   return (
     <div className="mx-auto px-4 py-8 space-y-8">
       {/* Hero Section */}
       <section className="text-center space-y-4 py-8">
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-          <span className="gradient-cyber">ALL-IN-ONE</span>
+          <span className="gradient-cyber">{t('home.title')}</span>
           <br />
-          <span className="text-[var(--text-primary)]">CYBERPUNK TOOLBOX</span>
+          <span className="text-[var(--text-primary)]">{t('home.subtitle')}</span>
         </h1>
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <span className="px-3 py-1 text-xs font-mono text-[var(--neon-green)] border border-[var(--neon-green)]/30 rounded bg-[var(--neon-green)]/5">
-            PURE CLIENT-SIDE
+            {t('home.pureClientSide')}
           </span>
           <span className="px-3 py-1 text-xs font-mono text-[var(--neon-blue)] border border-[var(--neon-blue)]/30 rounded bg-[var(--neon-blue)]/5">
-            ZERO COST
+            {t('home.zeroCost')}
           </span>
         </div>
         <p className="text-sm text-[var(--text-secondary)] max-w-xl mx-auto">
-          Open-source developer tools. No signup required. No data leaves your browser.
+          {t('home.description')}
           <br />
-          <span className="text-[var(--text-muted)]">Server-side tools powered by Gotenberg for maximum compatibility.</span>
+          <span className="text-[var(--text-muted)]">{t('home.serverSideNote')}</span>
         </p>
       </section>
 
@@ -208,15 +212,15 @@ export default function Home() {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-mono text-[var(--text-muted)] uppercase tracking-widest">
-            Featured Tools
+            {t('home.featuredTools')}
           </h2>
           <a href="/tools" className="text-xs font-mono text-[var(--neon-blue)] hover:underline">
-            View All →
+            {t('common.viewAll')} →
           </a>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {tools.map((tool) => (
-            <ToolCard key={tool.name} {...tool} />
+          {tools.map((tool, index) => (
+            <ToolCard key={index} {...tool} />
           ))}
         </div>
       </section>
@@ -229,12 +233,12 @@ export default function Home() {
       {/* Stats Section */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-y border-[var(--border-default)]">
         {[
-          { label: "Tools Available", value: "4", mono: true },
-          { label: "Files Processed", value: "12,847", mono: true },
-          { label: "Server Uptime", value: "99.9%", mono: true },
-          { label: "Data Privacy", value: "100%", mono: true },
-        ].map((stat) => (
-          <div key={stat.label} className="text-center">
+          { label: t('home.stats.toolsAvailable'), value: "4", mono: true },
+          { label: t('home.stats.filesProcessed'), value: "12,847", mono: true },
+          { label: t('home.stats.serverUptime'), value: "99.9%", mono: true },
+          { label: t('home.stats.dataPrivacy'), value: "100%", mono: true },
+        ].map((stat, index) => (
+          <div key={index} className="text-center">
             <div className="text-2xl font-bold text-[var(--neon-green)] font-mono">
               {stat.value}
             </div>
@@ -248,17 +252,17 @@ export default function Home() {
       {/* CTA Section */}
       <section className="text-center py-8 space-y-4">
         <h2 className="text-xl font-semibold text-[var(--text-primary)]">
-          Ready to boost your workflow?
+          {t('common.readyToBoost')}
         </h2>
         <p className="text-sm text-[var(--text-secondary)]">
-          Start using our tools now, or contribute to make them even better.
+          {t('common.startUsingTools')}
         </p>
         <div className="flex items-center justify-center gap-4">
           <a
             href="/tools"
             className="px-5 py-2.5 text-sm font-medium bg-[var(--neon-green)] text-[var(--bg-primary)] rounded-md hover:bg-[var(--neon-green)]/90 transition-colors"
           >
-            Get Started
+            {t('common.getStarted')}
           </a>
           <a
             href="https://github.com"
@@ -266,7 +270,7 @@ export default function Home() {
             rel="noopener noreferrer"
             className="px-5 py-2.5 text-sm font-medium border border-[var(--border-default)] text-[var(--text-primary)] rounded-md hover:border-[var(--neon-green)] hover:text-[var(--neon-green)] transition-all"
           >
-            Contribute on GitHub
+            {t('common.contributeOnGithub')}
           </a>
         </div>
       </section>

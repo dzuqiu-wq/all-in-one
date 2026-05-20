@@ -3,8 +3,11 @@
 import { useState } from "react";
 import { ChevronDown, Box, ExternalLink } from "lucide-react";
 import { ToolIcons, tools } from "./ToolConfig";
+import LanguageSwitcher from "./LanguageSwitcher";
+import { useTranslations } from "next-intl";
 
 export default function Navbar() {
+  const t = useTranslations();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [serverLatency] = useState("0.02ms");
 
@@ -36,7 +39,7 @@ export default function Navbar() {
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-default)] hover:border-[var(--border-hover)] rounded-md transition-all duration-200"
             >
-              <span>Tools</span>
+              <span>{t('common.tools')}</span>
               <ChevronDown
                 className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`}
               />
@@ -97,6 +100,7 @@ export default function Navbar() {
 
           {/* Right: Status Tag */}
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <a
               href="https://github.com"
               target="_blank"

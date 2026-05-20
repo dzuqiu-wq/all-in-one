@@ -5,6 +5,8 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AdBanner from "@/components/AdBanner";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale } from "next-intl/server";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -28,13 +30,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang={locale} className="dark" suppressHydrationWarning>
       <head>
         {/* Google AdSense - Auto Ads Script */}
         {/* Replace 'ca-pub-0000000000000000' with your actual AdSense publisher ID */}
@@ -57,21 +61,23 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${robotoMono.variable} font-sans antialiased bg-[var(--bg-primary)]`}
       >
-        <div className="min-h-screen flex flex-col bg-grid">
-          {/* Top Ad Banner */}
-          <div className="mx-auto w-full max-w-5xl px-4 pt-3">
-            <AdBanner slot="global-top" format="auto" className="w-full" />
+        <NextIntlClientProvider>
+          <div className="min-h-screen flex flex-col bg-grid">
+            {/* Top Ad Banner */}
+            <div className="mx-auto w-full max-w-5xl px-4 pt-3">
+              <AdBanner slot="global-top" format="auto" className="w-full" />
+            </div>
+
+            {/* Navbar */}
+            <Navbar />
+
+            {/* Main Content */}
+            <main className="flex-1">{children}</main>
+
+            {/* Footer */}
+            <Footer version="0.1.0" />
           </div>
-
-          {/* Navbar */}
-          <Navbar />
-
-          {/* Main Content */}
-          <main className="flex-1">{children}</main>
-
-          {/* Footer */}
-          <Footer version="0.1.0" />
-        </div>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
