@@ -128,29 +128,211 @@ all-in-one-toolbox/
 
 # VPS Production Deployment Guide
 
-## Step 1: VPS Initial Setup
+## Step 1: VPS Initial Setup (Ubuntu 22.04/20.04)
+
+### 1.1 连接到 VPS
 
 ```bash
-# Connect to your VPS
+# 使用 SSH 连接到你的 VPS
 ssh root@yourdomain.com
 
-# Update system
+# 或者使用 IP 地址
+ssh root@192.168.1.100
+```
+
+### 1.2 创建 sudo 用户 (推荐)
+
+```bash
+# 创建新用户
+adduser deploy
+
+# 添加到 sudo 组
+usermod -aG sudo deploy
+
+# 切换到新用户
+su - deploy
+```
+
+### 1.3 系统基础配置
+
+```bash
+# 更新系统包
+sudo apt update && sudo apt upgrade -y
+
+# 安装基础工具
+sudo apt install -y curl wget git vim unzip ufw fail2ban
+```
+
+### 1.4 配置防火墙 (UFW)
+
+```bash
+# 设置默认规则
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+# 允许 SSH (重要! 先允许,否则会断开连接!)
+sudo ufw allow 22/tcp
+
+# 允许 HTTP/HTTPS
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+
+# 启用防火墙
+sudo ufw enable
+
+# 检查状态
+sudo ufw status verbose
+```
+
+### 1.5 安装 Docker
+
+```bash
+# 安装依赖
+sudo apt install -y ca-certificates curl gnupg lsb-release
+
+# 添加 Docker GPG 密钥
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+# 添加 Docker 仓库
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# 安装 Docker Engine
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+# 启动并启用 Docker
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# 将用户添加到 docker 组 (免 sudo)
+sudo usermod -aG docker $USER
+
+# 验证安装
+docker --version
+docker compose version
+```
+
+### 1.6 配置 SSH 安全 (可选但推荐)
+
+```bash
+# 编辑 SSH 配置
+sudo vim /etc/ssh/sshd_config
+
+# 修改以下配置:
+# Port 2222                  # 更改默认端口
+# PermitRootLogin no          # 禁止 root 登录
+# PasswordAuthentication no    # 禁用密码登录
+# PubkeyAuthentication yes    # 启用密钥登录
+
+# 重启 SSH 服务
+sudo systemctl restart sshd
+```
+
+### 1.7 配置 Swap (防止内存不足)
+
+```bash
+# 检查当前 swap
+sudo swapon --show
+
+# 创建 2GB swap 文件
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+# 添加到 fstab
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+# 配置 swappiness
+echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
+```
+
+### 1.8 安装 Certbot (SSL 证书)
+
+```bash
+# 安装 Certbot
+sudo apt install -y certbot python3-certbot-nginx
+
+# 验证 Certbot
+certbot --version
+```
+
+### 1.9 一键自动化脚本
+
+创建 `setup-vps.sh` 脚本:
+
+```bash
+#!/bin/bash
+# VPS 初始化一键脚本
+
+set -e
+
+echo "=========================================="
+echo "  VPS Initial Setup Script"
+echo "=========================================="
+
+# 变量
+USERNAME="deploy"
+DOMAIN="yourdomain.com"
+
+# 1. 更新系统
+echo "[1/7] Updating system..."
 apt update && apt upgrade -y
 
-# Install Docker
-curl -fsSL https://get.docker.com | sh
+# 2. 安装基础工具
+echo "[2/7] Installing base tools..."
+apt install -y curl wget git vim unzip ufw fail2ban software-properties-common
 
-# Install Docker Compose
-curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
+# 3. 配置防火墙
+echo "[3/7] Configuring firewall..."
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow 22/tcp
+ufw allow 80/tcp
+ufw allow 443/tcp
+echo "y" | ufw enable
 
-# Enable Docker
-systemctl enable docker
+# 4. 安装 Docker
+echo "[4/7] Installing Docker..."
+mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+apt update
+apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 systemctl start docker
+systemctl enable docker
 
-# Verify installation
-docker --version
-docker-compose --version
+# 5. 创建部署用户
+echo "[5/7] Creating deploy user..."
+if ! id "$USERNAME" &>/dev/null; then
+    useradd -m -s /bin/bash $USERNAME
+    usermod -aG sudo $USERNAME
+    usermod -aG docker $USERNAME
+fi
+
+# 6. 配置 Swap
+echo "[6/7] Configuring swap..."
+if ! swapon --show | grep -q "/swapfile"; then
+    fallocate -l 2G /swapfile
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    echo '/swapfile none swap sw 0 0' >> /etc/fstab
+fi
+
+# 7. 安装 Certbot
+echo "[7/7] Installing Certbot..."
+apt install -y certbot python3-certbot-nginx
+
+echo ""
+echo "=========================================="
+echo "  Setup Complete!"
+echo "=========================================="
+echo "Next steps:"
+echo "  1. Login as deploy user: su - $USERNAME"
+echo "  2. Clone your repository"
+echo "  3. Run ./deploy.sh"
 ```
 
 ## Step 2: Clone and Configure
