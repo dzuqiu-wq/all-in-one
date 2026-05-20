@@ -49,5 +49,4 @@ USER nextjs
 EXPOSE 3000
 ENV PORT 3000
 
-# Use next start for standard production server
-CMD ["npm", "start"]
+CMD ["node", ".next/standalone/server.js"]
