@@ -1,0 +1,104 @@
+# =============================================================================
+# All-in-One Toolbox - Production Docker Compose Configuration
+# =============================================================================
+# Production version - NO volume mounts, uses pre-built images
+# Architecture:
+#   [User] -> [Nginx:80] -> [Frontend:3000] (Next.js)
+#                     |-> [Backend:8000] (FastAPI) -> [Gotenberg:7000]
+# =============================================================================
+
+services:
+  # ==========================================================================
+  # Nginx Reverse Proxy - Single Entry Point
+  # ==========================================================================
+  nginx:
+    image: nginx:alpine
+    container_name: all-in-one-toolbox-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ==========================================================================
+  # Frontend - Next.js Production Build
+  # ==========================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: all-in-one-toolbox-frontend
+    # NO volume mounts - uses pre-built image
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # ==========================================================================
+  # Backend - FastAPI Application
+  # ==========================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: all-in-one-toolbox-backend
+    environment:
+      - APP_NAME=All-in-One Toolbox
+      - APP_VERSION=0.1.0
+      - DEBUG=false
+      - HOST=0.0.0.0
+      - PORT=8000
+      - GOTENBERG_URL=http://gotenberg:7000
+      - CORS_ORIGINS=["http://localhost"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    depends_on:
+      gotenberg:
+        condition: service_started
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # ==========================================================================
+  # Gotenberg - PDF Conversion Service
+  # ==========================================================================
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: all-in-one-toolbox-gotenberg
+    tmpfs:
+      - /tmp:size=512M,mode=1777
+    networks:
+      - app-network
+    restart: unless-stopped
+
+# =============================================================================
+# Docker Networks
+# =============================================================================
+networks:
+  app-network:
+    driver: bridge
