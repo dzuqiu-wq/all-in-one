@@ -25,7 +25,7 @@
     --neon-blue-dim: #00B8CC;
     --neon-blue-glow: rgba(0, 229, 255, 0.3);
 
-    /* Text Hierarchy (awesome-design-md typography) */
+    /* Text Hierarchy */
     --text-primary: #E2E8F0;
     --text-secondary: #8B949E;
     --text-muted: #484F58;
@@ -48,7 +48,7 @@
     --radius-md: 6px;
     --radius-lg: 8px;
 
-    /* Spacing (awesome-design-md grid system) */
+    /* Spacing */
     --space-1: 4px;
     --space-2: 8px;
     --space-3: 12px;
@@ -78,42 +78,23 @@
     letter-spacing: 0.01em;
   }
 
-  /* Typography Hierarchy - awesome-design-md */
   h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
     letter-spacing: -0.01em;
     line-height: 1.3;
   }
 
-  h1 {
-    font-size: 2.25rem;
-    margin-bottom: var(--space-6);
-    letter-spacing: -0.02em;
-  }
+  h1 { font-size: 2.25rem; margin-bottom: var(--space-6); }
+  h2 { font-size: 1.75rem; margin-bottom: var(--space-5); }
+  h3 { font-size: 1.375rem; margin-bottom: var(--space-4); }
 
-  h2 {
-    font-size: 1.75rem;
-    margin-bottom: var(--space-5);
-  }
+  p { margin-bottom: var(--space-4); line-height: 1.7; }
 
-  h3 {
-    font-size: 1.375rem;
-    margin-bottom: var(--space-4);
-  }
-
-  p {
-    margin-bottom: var(--space-4);
-    line-height: 1.7;
-  }
-
-  /* Monospace for Technical Content */
   code, pre, kbd, samp {
-    font-family: 'Roboto Mono', 'JetBrains Mono', 'Fira Code', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-family: 'Roboto Mono', 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
     font-feature-settings: 'liga' 1, 'calt' 1;
-    letter-spacing: 0;
   }
 
-  /* Code blocks */
   code:not([class*="language-"]) {
     background-color: var(--bg-elevated);
     color: var(--neon-green);
@@ -130,22 +111,11 @@
     overflow-x: auto;
   }
 
-  /* Links */
-  a {
-    color: var(--text-link);
-    transition: color 0.2s;
-  }
+  a { color: var(--text-link); transition: color 0.2s; }
+  a:hover { text-decoration: underline; }
 
-  a:hover {
-    text-decoration: underline;
-  }
+  button, [role="button"] { cursor: pointer; }
 
-  /* Buttons base */
-  button, [role="button"] {
-    cursor: pointer;
-  }
-
-  /* Selection */
   ::selection {
     background-color: var(--neon-green);
     color: var(--bg-primary);
@@ -153,68 +123,38 @@
 }
 
 /* Cyberpunk Neon Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
-  border-left: 1px solid var(--border-default);
-}
-
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); border-left: 1px solid var(--border-default); }
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, var(--neon-green), var(--neon-green-dim));
   border-radius: 3px;
-  transition: all 0.2s ease;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, var(--neon-green), var(--neon-blue));
   box-shadow: 0 0 8px var(--neon-green-glow);
 }
-
-::-webkit-scrollbar-corner {
-  background: var(--bg-secondary);
-}
+::-webkit-scrollbar-corner { background: var(--bg-secondary); }
 
 /* Firefox Scrollbar */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--neon-green) var(--bg-secondary);
-}
+* { scrollbar-width: thin; scrollbar-color: var(--neon-green) var(--bg-secondary); }
 
-/* Neon Micro-Glow Effect (hover states) */
+/* Utility Classes */
 @layer utilities {
   .neon-border-glow {
     border: 1px solid var(--neon-green);
     transition: all 0.3s;
-    box-shadow:
-      0 0 0 1px var(--neon-green),
-      0 0 15px var(--neon-green-glow),
-      inset 0 0 15px rgba(0, 255, 102, 0.05);
+    box-shadow: 0 0 0 1px var(--neon-green), 0 0 15px var(--neon-green-glow), inset 0 0 15px rgba(0, 255, 102, 0.05);
   }
 
   .neon-border-glow-blue {
     border: 1px solid var(--neon-blue);
     transition: all 0.3s;
-    box-shadow:
-      0 0 0 1px var(--neon-blue),
-      0 0 15px var(--neon-blue-glow),
-      inset 0 0 15px rgba(0, 229, 255, 0.05);
+    box-shadow: 0 0 0 1px var(--neon-blue), 0 0 15px var(--neon-blue-glow), inset 0 0 15px rgba(0, 229, 255, 0.05);
   }
 
-  /* Pulse animation for status indicators */
-  .pulse-green {
-    animation: pulseGreen 2s ease-in-out infinite;
-  }
+  .pulse-green { animation: pulseGreen 2s ease-in-out infinite; }
+  .breathing-glow { animation: breathingGlow 3s ease-in-out infinite; }
 
-  /* Breathing glow for status tags */
-  .breathing-glow {
-    animation: breathingGlow 3s ease-in-out infinite;
-  }
-
-  /* Cyberpunk gradient text */
   .gradient-cyber {
     background: linear-gradient(135deg, var(--neon-green) 0%, var(--neon-blue) 100%);
     -webkit-background-clip: text;
@@ -222,7 +162,6 @@
     background-clip: text;
   }
 
-  /* Grid pattern background */
   .bg-grid {
     background-image:
       linear-gradient(rgba(0, 255, 102, 0.03) 1px, transparent 1px),
@@ -233,44 +172,19 @@
 
 /* Keyframes */
 @keyframes pulseGreen {
-  0%, 100% {
-    opacity: 1;
-    box-shadow: 0 0 4px var(--neon-green);
-  }
-  50% {
-    opacity: 0.6;
-    box-shadow: 0 0 8px var(--neon-green), 0 0 16px var(--neon-green-glow);
-  }
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--neon-green); }
+  50% { opacity: 0.6; box-shadow: 0 0 8px var(--neon-green), 0 0 16px var(--neon-green-glow); }
 }
 
 @keyframes breathingGlow {
-  0%, 100% {
-    box-shadow: 0 0 4px var(--neon-green);
-    opacity: 0.8;
-  }
-  50% {
-    box-shadow: 0 0 12px var(--neon-green), 0 0 24px var(--neon-green-glow);
-    opacity: 1;
-  }
+  0%, 100% { box-shadow: 0 0 4px var(--neon-green); opacity: 0.8; }
+  50% { box-shadow: 0 0 12px var(--neon-green), 0 0 24px var(--neon-green-glow); opacity: 1; }
 }
 
-/* AdSense placeholder styling */
-ins.adsbygoogle {
-  display: block;
-  min-height: 90px;
-}
+/* AdSense */
+ins.adsbygoogle { display: block; min-height: 90px; }
+ins.adsbygoogle[data-ad-status="unfilled"] { display: none; }
 
-ins.adsbygoogle[data-ad-status="unfilled"] {
-  display: none;
-}
-
-/* Focus visible for accessibility */
-:focus-visible {
-  outline: 2px solid var(--neon-green);
-  outline-offset: 2px;
-}
-
-/* Disable default focus for mouse users */
-:focus:not(:focus-visible) {
-  outline: none;
-}
+/* Focus */
+:focus-visible { outline: 2px solid var(--neon-green); outline-offset: 2px; }
+:focus:not(:focus-visible) { outline: none; }
