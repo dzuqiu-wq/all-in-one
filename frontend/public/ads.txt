@@ -1,0 +1,17 @@
+# =============================================================================
+# Google AdSense ads.txt - Compliance File
+# =============================================================================
+# This file must be accessible at yourdomain.com/ads.txt
+# Replace the placeholder publisher ID with your actual AdSense publisher ID
+# Get your publisher ID from: https://www.google.com/adsense/settings/profile
+# =============================================================================
+
+google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+
+# =============================================================================
+# AdSense Verification Instructions:
+# 1. Replace 'pub-0000000000000000' with your actual Google AdSense Publisher ID
+# 2. Upload this file to your domain's root directory
+# 3. Wait 24-48 hours for Google to crawl and verify
+# 4. Check status in AdSense dashboard > Sites > Review status
+# =============================================================================

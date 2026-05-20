@@ -1,0 +1,137 @@
+# =============================================================================
+# All-in-One Toolbox - Production Docker Compose Configuration
+# =============================================================================
+# Architecture:
+#   [User] -> [Nginx:80] -> [Frontend:3000] (Next.js)
+#                     |-> [Backend:8000] (FastAPI) -> [Gotenberg:7000]
+#
+# Security:
+#   - Nginx is the ONLY exposed port (80)
+#   - Frontend and Backend are internal-only (no host ports)
+#   - All real IPs are forwarded via X-Real-IP headers
+# =============================================================================
+
+services:
+  # ==========================================================================
+  # Nginx Reverse Proxy - Single Entry Point
+  # ==========================================================================
+  nginx:
+    image: nginx:alpine
+    container_name: all-in-one-toolbox-nginx
+    ports:
+      - "80:80"  # Only exposed port
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ==========================================================================
+  # Frontend - Next.js Application (Internal Only)
+  # ==========================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: all-in-one-toolbox-frontend
+    # NO host ports - only accessible via Nginx
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+      - NODE_ENV=development
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # ==========================================================================
+  # Backend - FastAPI Application (Internal Only)
+  # ==========================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: all-in-one-toolbox-backend
+    # NO host ports - only accessible via Nginx
+    environment:
+      - APP_NAME=All-in-One Toolbox
+      - APP_VERSION=0.1.0
+      - DEBUG=false
+      - HOST=0.0.0.0
+      - PORT=8000
+      - GOTENBERG_URL=http://gotenberg:7000
+      - CORS_ORIGINS=["http://localhost"]
+    volumes:
+      - ./backend:/app
+      - /app/__pycache__
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    depends_on:
+      gotenberg:
+        condition: service_started
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # ==========================================================================
+  # Gotenberg - PDF Conversion Service (Internal Only)
+  # ==========================================================================
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: all-in-one-toolbox-gotenberg
+    # NO host ports - only accessible via backend
+    # tmpfs mount for /tmp with 512MB memory
+    tmpfs:
+      - /tmp:size=512M,mode=1777
+    networks:
+      - app-network
+    restart: unless-stopped
+
+# =============================================================================
+# Docker Networks
+# =============================================================================
+networks:
+  app-network:
+    driver: bridge
+
+# =============================================================================
+# Deployment Notes
+# =============================================================================
+# Local Development: docker-compose up -d
+# Production VPS: docker-compose -f docker-compose.yml up -d
+#
+# SSL Certificate Setup (after deployment):
+#   certbot --nginx -d yourdomain.com
+#
+# Volume Notes:
+# - Frontend and Backend use bind mounts for live reloading during development
+# - Node_modules and __pycache__ are mounted as volumes to avoid overwrite issues
+# - Gotenberg uses tmpfs for temporary files (memory-based, 512MB limit)
+#
+# Port Security:
+# - Only port 80 is exposed to host (Nginx)
+# - Internal ports 3000, 7000, 8000 are NOT mapped to host
+# - Real client IPs are forwarded via X-Real-IP and X-Forwarded-For headers

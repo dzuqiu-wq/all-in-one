@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+__pycache__/
+.venv/
+venv/
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+
+# Docker
+.dockerignore
+
+# Large files
+*.zip
+*.tar.gz
+
+# OMC internal files
+.omc/
+
+# Exclude Python scripts in root only
+/*.py
+
+# Don't ignore backend and frontend source files
+!backend/
+!frontend/
