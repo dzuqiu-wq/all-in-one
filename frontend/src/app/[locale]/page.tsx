@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { FileText, Image as ImageIcon, QrCode, Merge, ArrowRight, Shield, Zap, Lock } from "lucide-react";
 import AdBanner from "@/components/AdBanner";
 
@@ -55,12 +55,13 @@ const tools: Tool[] = [
 
 function ToolCard({ tool }: { tool: Tool }) {
   const t = useTranslations();
+  const locale = useLocale();
   const isAvailable = tool.status === "available";
   const Icon = tool.icon;
 
   return (
     <a
-      href={isAvailable ? tool.href : undefined}
+      href={isAvailable ? `/${locale}${tool.href}` : undefined}
       className={`group block surface-card hairline rounded-lg p-xl transition-all duration-300 ${
         isAvailable ? "hover:bg-surface-cream-strong cursor-pointer" : "opacity-60 cursor-default"
       } no-underline hover:no-underline`}
@@ -100,6 +101,7 @@ function ToolCard({ tool }: { tool: Tool }) {
 
 export default function Home() {
   const t = useTranslations();
+  const locale = useLocale();
 
   return (
     <div className="bg-canvas">
@@ -120,7 +122,7 @@ export default function Home() {
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <a
-                href="/tools/word-to-pdf"
+                href={`/${locale}/tools/word-to-pdf`}
                 className="inline-flex items-center gap-2 px-5 py-3 bg-primary text-on-primary text-body-sm font-medium rounded-md hover:bg-primary-active transition-colors no-underline"
               >
                 {t("home.startWithWordPdf")}
@@ -224,7 +226,7 @@ export default function Home() {
             {t("home.cta.description")}
           </p>
           <a
-            href="/tools/word-to-pdf"
+            href={`/${locale}/tools/word-to-pdf`}
             className="inline-flex items-center gap-2 px-6 py-3 bg-canvas text-ink text-body-sm font-medium rounded-md hover:bg-surface-card transition-colors no-underline"
           >
             {t("home.cta.button")}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "next-intl";
 import { FileText, Image as ImageIcon, QrCode, Merge } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -17,6 +18,11 @@ export interface ToolItem {
   category: "document" | "utility";
   type: "client" | "server";
   description: string;
+}
+
+export function useToolHref(path: string): string {
+  const locale = useLocale();
+  return `/${locale}${path}`;
 }
 
 export const tools: ToolItem[] = [

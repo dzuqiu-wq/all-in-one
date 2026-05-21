@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
 import { ToolIcons, tools } from "./ToolConfig";
 import LanguageSwitcher from "./LanguageSwitcher";
 
 export default function Navbar() {
+  const t = useTranslations();
+  const locale = useLocale();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const documentTools = tools.filter(t => t.category === "document");
@@ -16,7 +19,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Brand */}
-          <a href="/" className="flex items-center gap-2 text-ink hover:text-ink no-underline hover:no-underline">
+          <a href={`/${locale}`} className="flex items-center gap-2 text-ink hover:text-ink no-underline hover:no-underline">
             <span className="spike-mark text-ink" />
             <span className="font-sans text-title-md font-medium">
               All-in-One
@@ -30,7 +33,7 @@ export default function Navbar() {
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center gap-1.5 px-3 py-2 text-body-sm font-medium text-body hover:text-ink transition-colors"
               >
-                <span>Tools</span>
+                <span>{t("common.tools")}</span>
                 <ChevronDown
                   className={`w-3.5 h-3.5 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`}
                 />
@@ -49,7 +52,7 @@ export default function Navbar() {
                         return (
                           <a
                             key={tool.name}
-                            href={tool.href}
+                            href={`/${locale}${tool.href}`}
                             className="flex items-start gap-3 px-3 py-2.5 rounded-md hover:bg-surface-card transition-colors text-ink hover:text-ink no-underline hover:no-underline"
                             onClick={() => setIsDropdownOpen(false)}
                           >
@@ -70,7 +73,7 @@ export default function Navbar() {
                         return (
                           <a
                             key={tool.name}
-                            href={tool.href}
+                            href={`/${locale}${tool.href}`}
                             className="flex items-start gap-3 px-3 py-2.5 rounded-md hover:bg-surface-card transition-colors text-ink hover:text-ink no-underline hover:no-underline"
                             onClick={() => setIsDropdownOpen(false)}
                           >
@@ -88,10 +91,10 @@ export default function Navbar() {
               )}
             </div>
 
-            <a href="/about" className="px-3 py-2 text-body-sm font-medium text-body hover:text-ink transition-colors no-underline">
+            <a href={`/${locale}/about`} className="px-3 py-2 text-body-sm font-medium text-body hover:text-ink transition-colors no-underline">
               About
             </a>
-            <a href="/docs" className="px-3 py-2 text-body-sm font-medium text-body hover:text-ink transition-colors no-underline">
+            <a href={`/${locale}/docs`} className="px-3 py-2 text-body-sm font-medium text-body hover:text-ink transition-colors no-underline">
               Docs
             </a>
           </nav>
@@ -105,10 +108,10 @@ export default function Navbar() {
               rel="noopener noreferrer"
               className="hidden sm:inline-block text-body-sm font-medium text-body hover:text-ink transition-colors no-underline"
             >
-              GitHub
+              {t("common.github")}
             </a>
             <a
-              href="/tools/word-to-pdf"
+              href={`/${locale}/tools/word-to-pdf`}
               className="px-5 py-2.5 bg-primary text-on-primary text-body-sm font-medium rounded-md hover:bg-primary-active transition-colors no-underline"
             >
               Try it

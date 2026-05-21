@@ -1,10 +1,13 @@
 "use client";
 
+import { useLocale } from "next-intl";
+
 interface FooterProps {
   version?: string;
 }
 
 export default function Footer({ version = "0.1.0" }: FooterProps) {
+  const locale = useLocale();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -33,16 +36,16 @@ export default function Footer({ version = "0.1.0" }: FooterProps) {
               Product
             </h4>
             <nav className="flex flex-col gap-3">
-              <a href="/tools/word-to-pdf" className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
+              <a href={`/${locale}/tools/word-to-pdf`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
                 Word → PDF
               </a>
-              <a href="/tools/pdf-merge-split" className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
+              <a href={`/${locale}/tools/pdf-merge-split`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
                 PDF Tools
               </a>
-              <a href="/tools/image-optimizer" className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
+              <a href={`/${locale}/tools/image-optimizer`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
                 Image Optimizer
               </a>
-              <a href="/tools/qrcode-generator" className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
+              <a href={`/${locale}/tools/qrcode-generator`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
                 QR Generator
               </a>
             </nav>
@@ -54,16 +57,16 @@ export default function Footer({ version = "0.1.0" }: FooterProps) {
               Resources
             </h4>
             <nav className="flex flex-col gap-3">
-              <a href="/docs" className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
+              <a href={`/${locale}/docs`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
                 Documentation
               </a>
-              <a href="/changelog" className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
+              <a href={`/${locale}/changelog`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
                 Changelog
               </a>
               <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
                 GitHub
               </a>
-              <a href="/api" className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
+              <a href={`/${locale}/api`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
                 API
               </a>
             </nav>
@@ -75,16 +78,16 @@ export default function Footer({ version = "0.1.0" }: FooterProps) {
               Legal
             </h4>
             <nav className="flex flex-col gap-3">
-              <a href="/privacy" className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
+              <a href={`/${locale}/privacy`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
                 Privacy Policy
               </a>
-              <a href="/terms" className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
+              <a href={`/${locale}/terms`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
                 Terms of Service
               </a>
-              <a href="/cookies" className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
+              <a href={`/${locale}/cookies`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
                 Cookie Policy
               </a>
-              <a href="/about" className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
+              <a href={`/${locale}/about`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
                 About
               </a>
             </nav>
