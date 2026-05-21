@@ -110,7 +110,7 @@ export default function Navbar() {
             >
               {t("common.github")}
             </a>
-            <a
+<a
               href={`/${locale}/tools/word-to-pdf`}
               className="px-5 py-2.5 bg-primary text-on-primary text-body-sm font-medium rounded-md hover:bg-primary-active transition-colors no-underline"
             >
