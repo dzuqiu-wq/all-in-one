@@ -19,9 +19,12 @@ services:
     image: nginx:alpine
     container_name: all-in-one-toolbox-nginx
     ports:
-      - "80:80"  # Only exposed port
+      - "80:80"  # HTTP
+      - "443:443"  # HTTPS
     volumes:
       - ./nginx/default.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot:ro
     depends_on:
       frontend:
         condition: service_healthy
