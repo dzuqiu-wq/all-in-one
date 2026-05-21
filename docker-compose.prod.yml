@@ -16,8 +16,11 @@ services:
     container_name: all-in-one-toolbox-nginx
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/default.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/certbot:/var/www/certbot:ro
     depends_on:
       frontend:
         condition: service_healthy
