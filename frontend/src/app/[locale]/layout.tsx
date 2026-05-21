@@ -19,6 +19,8 @@ const robotoMono = Roboto_Mono({
   display: "swap",
 });
 
+export const dynamic = 'force-dynamic';
+
 export async function generateStaticParams() {
   return [{ locale: "en" }, { locale: "zh" }];
 }
