@@ -17,32 +17,19 @@ interface LogEntry {
   type: "info" | "success" | "warning" | "system";
 }
 
-const LOG_MESSAGES = {
-  info: [
-    "[SYSTEM]: Reading Buffer...",
-    "[MODULE]: Allocation Matrix...",
-    "[AD_DECK]: Optimizing Viewport...",
-    "[PROCESS]: Scanning File Stream...",
-    "[CRYPTO]: Verifying Integrity...",
-    "[MEMORY]: Defragmenting Heap...",
-    "[I/O]: Mapping Block Device...",
-  ],
-  success: [
-    "[OK] Buffer Read Complete",
-    "[OK] Matrix Allocation Success",
-    "[OK] Viewport Optimization Done",
-    "[OK] Stream Scan Complete",
-  ],
-  system: [
-    "[SYS] Loading compression module...",
-    "[SYS] Initializing quantum engine...",
-    "[SYS] Warming up neural network...",
-  ],
-  warning: [
-    "[WARN] High memory threshold detected",
-    "[WARN] Parallel thread limit reached",
-  ],
-};
+const LOG_MESSAGES = [
+  "[init] Reading buffer...",
+  "[module] Allocating memory matrix...",
+  "[process] Stream verification active...",
+  "[ad] Optimizing viewport...",
+  "[crypto] Verifying integrity...",
+  "[memory] Defragmenting heap...",
+  "[i/o] Mapping block device...",
+  "[ok] Buffer complete",
+  "[ok] Matrix allocation success",
+  "[ok] Stream scan complete",
+  "[sys] Initializing pipeline...",
+];
 
 export default function PseudoProcessor({
   isProcessing,
@@ -54,11 +41,10 @@ export default function PseudoProcessor({
   const [isActive, setIsActive] = useState(false);
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [adRefreshTrigger, setAdRefreshTrigger] = useState(0);
 
   const generateTimestamp = useCallback((): string => {
     const now = new Date();
-    return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}.${String(now.getMilliseconds()).padStart(3, "0")}`;
+    return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
   }, []);
 
   const addLog = useCallback((type: LogEntry["type"], text: string) => {
@@ -68,7 +54,7 @@ export default function PseudoProcessor({
       timestamp: generateTimestamp(),
       type,
     };
-    setLogs((prev) => [...prev.slice(-20), newLog]); // Keep last 20 logs
+    setLogs((prev) => [...prev.slice(-15), newLog]);
   }, [generateTimestamp]);
 
   useEffect(() => {
@@ -82,47 +68,34 @@ export default function PseudoProcessor({
     setProgress(0);
     setCurrentTextIndex(0);
 
-    // Cycle through loading texts
     const textCycleInterval = setInterval(() => {
       setCurrentTextIndex((prev) => (prev + 1) % loadingTexts.length);
     }, 800);
 
-    // Simulate log output
     let logIndex = 0;
     const logInterval = setInterval(() => {
       if (logIndex < 12) {
-        const types: LogEntry["type"][] = ["info", "system", "info", "success", "info", "warning", "info", "system", "info", "success", "info", "system"];
-        const allLogs = [
-          ...LOG_MESSAGES.info,
-          ...LOG_MESSAGES.system,
-          ...LOG_MESSAGES.success,
-        ];
-        addLog(types[logIndex % types.length], allLogs[logIndex % allLogs.length]);
+        const types: LogEntry["type"][] = ["info", "system", "success", "info", "system", "success", "info"];
+        addLog(types[logIndex % types.length], LOG_MESSAGES[logIndex % LOG_MESSAGES.length]);
         logIndex++;
       }
     }, 200);
 
-    // Progress simulation
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(progressInterval);
           return 100;
         }
-        // Trigger ad refresh at 30% and 60%
-        if ((prev < 30 && prev + 8 >= 30) || (prev < 60 && prev + 8 >= 60)) {
-          setAdRefreshTrigger((p) => p + 1);
-        }
-        return Math.min(prev + (Math.random() * 8 + 4));
+        return Math.min(prev + Math.random() * 8 + 4, 100);
       });
     }, 250);
 
-    // Completion timer
     const completeTimer = setTimeout(() => {
       clearInterval(textCycleInterval);
       clearInterval(logInterval);
       clearInterval(progressInterval);
-      addLog("success", "[DONE] Processing Complete. Output Ready.");
+      addLog("success", "[done] Processing complete");
       setTimeout(onComplete, 500);
     }, 2500);
 
@@ -137,122 +110,62 @@ export default function PseudoProcessor({
   if (!isActive) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[var(--bg-primary)]/95 backdrop-blur-sm">
-      {/* Matrix Scan Animation Background */}
-      <div className="absolute inset-0 overflow-hidden opacity-20 pointer-events-none">
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div
-            key={i}
-            className="absolute h-px bg-gradient-to-r from-transparent via-[var(--neon-green)] to-transparent animate-pulse"
-            style={{
-              top: `${i * 5}%`,
-              left: 0,
-              right: 0,
-              animationDelay: `${i * 0.1}s`,
-              animationDuration: "2s",
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Ad Banner - Forces visual focus */}
-      <div className="absolute top-8 mx-auto max-w-lg w-full px-4">
-        <AdBanner key={`ad-${adRefreshTrigger}`} slot={adSlot} format="auto" />
-      </div>
-
-      {/* Central Processing Unit */}
-      <div className="relative w-full max-w-2xl mx-auto px-4">
-        {/* Terminal Header */}
-        <div className="flex items-center justify-between px-4 py-3 bg-[var(--bg-card)] border border-[var(--border-default)] rounded-t-lg">
-          <div className="flex items-center gap-2">
-            <div className="flex gap-1.5">
-              <div className="w-3 h-3 rounded-full bg-[var(--error)]" />
-              <div className="w-3 h-3 rounded-full bg-[var(--warning)]" />
-              <div className="w-3 h-3 rounded-full bg-[var(--success)]" />
-            </div>
-            <span className="text-xs font-mono text-[var(--text-muted)] ml-2">
-              system_processor.exe
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-sm p-4">
+      <div className="bg-canvas rounded-xl max-w-2xl w-full overflow-hidden border border-hairline shadow-2xl">
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-hairline flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-title-md font-serif text-ink">
+              {loadingTexts[currentTextIndex]}
             </span>
           </div>
-          <span className="text-xs font-mono text-[var(--neon-green)]">
-            PID: {Math.floor(Math.random() * 9000) + 1000}
+          <span className="text-xs font-mono text-muted-soft">
+            {Math.min(Math.floor(progress), 100)}%
           </span>
         </div>
 
-        {/* Terminal Body */}
-        <div className="bg-[var(--bg-secondary)] border-x border-b border-[var(--border-default)] rounded-b-lg p-4 h-80 overflow-hidden">
-          {/* Current Operation */}
-          <div className="mb-4 pb-3 border-b border-[var(--border-default)]">
-            <div className="flex items-center gap-2 text-[var(--neon-green)]">
-              <span className="w-2 h-2 rounded-full bg-[var(--neon-green)] animate-pulse" />
-              <span className="text-sm font-mono animate-pulse">
-                {loadingTexts[currentTextIndex]}
-              </span>
-            </div>
-          </div>
-
-          {/* Log Output */}
-          <div className="space-y-1 font-mono text-xs">
-            {logs.map((log) => (
-              <div
-                key={log.id}
-                className={`flex gap-3 opacity-0 animate-in fade-in slide-in-from-left-2 duration-200 ${
-                  log.type === "success"
-                    ? "text-[var(--neon-green)]"
-                    : log.type === "warning"
-                    ? "text-[var(--warning)]"
-                    : log.type === "system"
-                    ? "text-[var(--neon-blue)]"
-                    : "text-[var(--text-secondary)]"
-                }`}
-              >
-                <span className="text-[var(--text-muted)]">[{log.timestamp}]</span>
-                <span>{log.text}</span>
-              </div>
-            ))}
-            {/* Cursor blink */}
-            <div className="flex items-center gap-1 mt-2">
-              <span className="text-[var(--neon-green)]">›</span>
-              <span className="w-2 h-4 bg-[var(--neon-green)] animate-pulse" />
-            </div>
-          </div>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="mt-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
-              Processing Progress
-            </span>
-            <span className="text-xs font-mono text-[var(--neon-green)]">
-              {Math.min(Math.floor(progress), 100)}%
-            </span>
-          </div>
-          <div className="h-1 bg-[var(--bg-card)] rounded-full overflow-hidden border border-[var(--border-default)]">
+        {/* Progress */}
+        <div className="px-6 pt-4">
+          <div className="h-1 bg-surface-card rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-[var(--neon-green)] to-[var(--neon-blue)] transition-all duration-300 ease-out"
+              className="h-full bg-primary transition-all duration-300 ease-out"
               style={{ width: `${Math.min(progress, 100)}%` }}
             />
           </div>
         </div>
 
-        {/* Matrix Decoration */}
-        <div className="mt-6 flex items-center justify-center gap-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div
-              key={i}
-              className="text-[var(--neon-green)] font-mono text-xs opacity-50"
-              style={{ animationDelay: `${i * 0.1}s` }}
-            >
-              {["0x00", "0xFF", "SYS", "OK", ">>", "##", "[+]", "<<<"][i]}
+        {/* Terminal Body */}
+        <div className="surface-dark mx-6 my-6 rounded-lg p-5 h-60 overflow-hidden">
+          <div className="space-y-1.5 font-mono text-xs">
+            {logs.map((log) => (
+              <div
+                key={log.id}
+                className={`flex gap-3 ${
+                  log.type === "success"
+                    ? "text-success"
+                    : log.type === "warning"
+                    ? "text-warning"
+                    : log.type === "system"
+                    ? "text-accent-teal"
+                    : "text-on-dark-soft"
+                }`}
+              >
+                <span className="text-on-dark-soft opacity-60">[{log.timestamp}]</span>
+                <span>{log.text}</span>
+              </div>
+            ))}
+            <div className="flex items-center gap-1 mt-2">
+              <span className="text-primary">›</span>
+              <span className="inline-block w-2 h-3 bg-on-dark animate-pulse" />
             </div>
-          ))}
+          </div>
         </div>
-      </div>
 
-      {/* Bottom Ad - Second ad impression */}
-      <div className="absolute bottom-8 mx-auto max-w-lg w-full px-4">
-        <AdBanner key={`ad-bottom-${adRefreshTrigger}`} slot="processing-bottom" format="rectangle" className="mx-auto max-w-[336px]" />
+        {/* Ad Banner */}
+        <div className="px-6 pb-6">
+          <AdBanner slot={adSlot} format="auto" />
+        </div>
       </div>
     </div>
   );

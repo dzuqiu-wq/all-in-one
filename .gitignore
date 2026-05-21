@@ -42,6 +42,16 @@ npm-debug.log*
 
 # OMC internal files
 .omc/
+.opencode/
+.worktrees/
+
+# Backup files
+*.bak
+*.bak2
+
+# i18n plan
+i18n_plan.yaml
+decision.json
 
 # Exclude Python scripts in root only
 /*.py

@@ -1,10 +1,9 @@
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
+import { getMessages } from "next-intl/server";
+import { Inter, Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
+import Script from "next/script";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import AdBanner from "@/components/AdBanner";
-import { Inter, Roboto_Mono } from "next/font/google";
-import Script from "next/script";
 import "../globals.css";
 
 const inter = Inter({
@@ -13,13 +12,20 @@ const inter = Inter({
   display: "swap",
 });
 
-const robotoMono = Roboto_Mono({
+const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  variable: "--font-roboto-mono",
+  weight: ["400", "500"],
+  variable: "--font-cormorant",
   display: "swap",
 });
 
-export const dynamic = 'force-dynamic';
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains",
+  display: "swap",
+});
+
+export const dynamic = "force-dynamic";
 
 export async function generateStaticParams() {
   return [{ locale: "en" }, { locale: "zh" }];
@@ -36,7 +42,7 @@ export default async function LocaleLayout({
   const messages = await getMessages({ locale });
 
   return (
-    <html lang={locale} className="dark" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <Script
           async
@@ -44,27 +50,14 @@ export default async function LocaleLayout({
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
-        <Script id="adsbygoogle-init" strategy="afterInteractive">
-          {`
-            (adsbygoogle = window.adsbygoogle || []).push({
-              google_ad_client: "ca-pub-0000000000000000",
-              enable_page_level_ads: true
-            });
-          `}
-        </Script>
       </head>
       <body
-        className={`${inter.variable} ${robotoMono.variable} font-sans antialiased bg-[var(--bg-primary)]`}
+        className={`${inter.variable} ${cormorant.variable} ${jetbrainsMono.variable} antialiased bg-canvas text-ink min-h-screen flex flex-col`}
       >
         <NextIntlClientProvider messages={messages}>
-          <div className="min-h-screen flex flex-col bg-grid">
-            <div className="mx-auto w-full max-w-5xl px-4 pt-3">
-              <AdBanner slot="global-top" format="auto" className="w-full" />
-            </div>
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer version="0.1.0" />
-          </div>
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer version="0.1.0" />
         </NextIntlClientProvider>
       </body>
     </html>

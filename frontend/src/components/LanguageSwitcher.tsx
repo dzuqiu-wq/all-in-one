@@ -6,22 +6,15 @@ import { Globe } from 'lucide-react';
 
 type Locale = 'en' | 'zh';
 
-const localeNames: Record<Locale, string> = {
-  en: 'EN',
-  zh: '中',
-};
-
 export default function LanguageSwitcher() {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const pathname = usePathname();
 
-  // Extract current locale from pathname
-  const currentLocale = pathname.startsWith('/zh') ? 'zh' : 'en';
+  const currentLocale: Locale = pathname.startsWith('/zh') ? 'zh' : 'en';
 
   const switchLocale = (newLocale: Locale) => {
     startTransition(() => {
-      // Remove existing locale prefix
       let newPathname = pathname;
       if (newPathname.startsWith('/en')) {
         newPathname = newPathname.replace(/^\/en/, '') || '/';
@@ -29,7 +22,6 @@ export default function LanguageSwitcher() {
         newPathname = newPathname.replace(/^\/zh/, '') || '/';
       }
 
-      // Add new locale prefix
       if (newLocale === 'en') {
         router.push(newPathname);
       } else {
@@ -39,16 +31,14 @@ export default function LanguageSwitcher() {
   };
 
   return (
-    <div className="relative flex items-center gap-1">
-      <Globe className="w-4 h-4 text-[var(--text-muted)]" />
-      <button
-        onClick={() => switchLocale(currentLocale === 'en' ? 'zh' : 'en')}
-        disabled={isPending}
-        className="px-2 py-1 text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--neon-green)] border border-[var(--border-default)] hover:border-[var(--neon-green)] rounded transition-all duration-200 disabled:opacity-50"
-        title={currentLocale === 'en' ? 'Switch to Chinese' : '切换到英文'}
-      >
-        {localeNames[currentLocale === 'en' ? 'zh' : 'en']}
-      </button>
-    </div>
+    <button
+      onClick={() => switchLocale(currentLocale === 'en' ? 'zh' : 'en')}
+      disabled={isPending}
+      className="flex items-center gap-1.5 px-3 py-1.5 text-body-sm font-medium text-body hover:text-ink transition-colors disabled:opacity-50"
+      title={currentLocale === 'en' ? 'Switch to Chinese' : '切换到英文'}
+    >
+      <Globe className="w-4 h-4" />
+      <span>{currentLocale === 'en' ? '中文' : 'EN'}</span>
+    </button>
   );
 }
