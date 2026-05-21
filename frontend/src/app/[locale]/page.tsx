@@ -5,8 +5,8 @@ import { FileText, Image as ImageIcon, QrCode, Merge, ArrowRight, Shield, Zap, L
 import AdBanner from "@/components/AdBanner";
 
 interface Tool {
-  name: string;
-  description: string;
+  nameKey: string;
+  descriptionKey: string;
   category: "document" | "utility";
   type: "client" | "server";
   icon: React.ElementType;
@@ -16,8 +16,8 @@ interface Tool {
 
 const tools: Tool[] = [
   {
-    name: "Word → PDF",
-    description: "Convert Word documents to PDF with server-side LibreOffice processing for maximum compatibility.",
+    nameKey: "tools.wordPdf.name",
+    descriptionKey: "tools.wordPdf.description",
     category: "document",
     type: "server",
     icon: FileText,
@@ -25,8 +25,8 @@ const tools: Tool[] = [
     status: "available",
   },
   {
-    name: "PDF Merge & Split",
-    description: "Combine multiple PDFs or extract pages from documents. Pure browser processing — your files never leave your device.",
+    nameKey: "tools.pdfMerge.name",
+    descriptionKey: "tools.pdfMerge.description",
     category: "document",
     type: "client",
     icon: Merge,
@@ -34,8 +34,8 @@ const tools: Tool[] = [
     status: "available",
   },
   {
-    name: "Image Optimizer",
-    description: "Compress images and convert to WebP format. Smart compression preserves quality while reducing file size by up to 80%.",
+    nameKey: "tools.imageOptimizer.name",
+    descriptionKey: "tools.imageOptimizer.description",
     category: "utility",
     type: "client",
     icon: ImageIcon,
@@ -43,8 +43,8 @@ const tools: Tool[] = [
     status: "available",
   },
   {
-    name: "QR Code Generator",
-    description: "Generate beautiful, customizable QR codes for URLs, text, and contact information with multiple color presets.",
+    nameKey: "tools.qrcode.name",
+    descriptionKey: "tools.qrcode.description",
     category: "utility",
     type: "client",
     icon: QrCode,
@@ -54,6 +54,7 @@ const tools: Tool[] = [
 ];
 
 function ToolCard({ tool }: { tool: Tool }) {
+  const t = useTranslations();
   const isAvailable = tool.status === "available";
   const Icon = tool.icon;
 
@@ -71,26 +72,26 @@ function ToolCard({ tool }: { tool: Tool }) {
         </div>
         {tool.type === "server" ? (
           <span className="caption-upper text-muted-soft px-3 py-1 bg-canvas rounded-pill">
-            Server
+            {t("tools.server")}
           </span>
         ) : (
           <span className="caption-upper text-muted-soft px-3 py-1 bg-canvas rounded-pill">
-            Browser
+            {t("tools.browser")}
           </span>
         )}
       </div>
 
       {/* Content */}
       <h3 className="text-display-sm font-serif text-ink mb-3" style={{ marginBottom: "12px" }}>
-        {tool.name}
+        {t(tool.nameKey)}
       </h3>
       <p className="text-body-md text-body leading-relaxed mb-6">
-        {tool.description}
+        {t(tool.descriptionKey)}
       </p>
 
       {/* Footer */}
       <div className="flex items-center gap-2 text-body-sm font-medium text-primary group-hover:text-primary-active transition-colors">
-        Try it now
+        {t("home.tryItNow")}
         <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
       </div>
     </a>
@@ -98,6 +99,8 @@ function ToolCard({ tool }: { tool: Tool }) {
 }
 
 export default function Home() {
+  const t = useTranslations();
+
   return (
     <div className="bg-canvas">
       {/* Hero Section */}
@@ -106,29 +109,28 @@ export default function Home() {
           {/* Left: Headline */}
           <div>
             <div className="caption-upper text-muted mb-6">
-              All-in-One Toolbox
+              {t("home.brand")}
             </div>
             <h1 className="text-display-xl font-serif text-ink mb-6" style={{ fontSize: "clamp(40px, 6vw, 64px)" }}>
-              Thoughtful tools for{" "}
-              <span className="italic text-primary">everyday work</span>.
+              {t("home.headline")}
+              <span className="italic text-primary">{t("home.headlineAccent")}</span>.
             </h1>
             <p className="text-title-md text-body mb-8 leading-relaxed max-w-xl">
-              A considered collection of document conversion, image optimization, and productivity tools.
-              Privacy-first, browser-based processing.
+              {t("home.subtitle")}
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <a
                 href="/tools/word-to-pdf"
                 className="inline-flex items-center gap-2 px-5 py-3 bg-primary text-on-primary text-body-sm font-medium rounded-md hover:bg-primary-active transition-colors no-underline"
               >
-                Start with Word → PDF
+                {t("home.startWithWordPdf")}
                 <ArrowRight className="w-4 h-4" />
               </a>
               <a
                 href="#tools"
                 className="inline-flex items-center gap-2 px-5 py-3 bg-canvas border border-hairline text-ink text-body-sm font-medium rounded-md hover:bg-surface-card transition-colors no-underline"
               >
-                Browse all tools
+                {t("home.browseAll")}
               </a>
             </div>
           </div>
@@ -144,12 +146,12 @@ export default function Home() {
             <div className="space-y-3 font-mono text-sm">
               <div className="flex gap-3">
                 <span className="text-on-dark-soft">$</span>
-                <span className="text-on-dark">convert document.docx</span>
+                <span className="text-on-dark">{t("home.terminal.convert")}</span>
               </div>
-              <div className="text-success">→ Processing with LibreOffice...</div>
-              <div className="text-on-dark-soft">→ Memory-only pipeline (0 disk I/O)</div>
-              <div className="text-on-dark-soft">→ Stream response (5s timeout)</div>
-              <div className="text-success">✓ document.pdf ready</div>
+              <div className="text-success">{t("home.terminal.processing")}</div>
+              <div className="text-on-dark-soft">{t("home.terminal.memoryOnly")}</div>
+              <div className="text-on-dark-soft">{t("home.terminal.streamResponse")}</div>
+              <div className="text-success">{t("home.terminal.ready")}</div>
               <div className="flex gap-3 pt-2">
                 <span className="text-on-dark-soft">$</span>
                 <span className="inline-block w-2 h-4 bg-on-dark animate-pulse" />
@@ -165,23 +167,23 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div>
               <Shield className="w-6 h-6 text-primary mb-4" strokeWidth={1.5} />
-              <h4 className="text-title-md font-sans text-ink mb-2">Privacy by default</h4>
+              <h4 className="text-title-md font-sans text-ink mb-2">{t("home.values.privacy.title")}</h4>
               <p className="text-body-md text-body leading-relaxed">
-                Client-side tools process everything in your browser. Your files never touch a server.
+                {t("home.values.privacy.description")}
               </p>
             </div>
             <div>
               <Zap className="w-6 h-6 text-primary mb-4" strokeWidth={1.5} />
-              <h4 className="text-title-md font-sans text-ink mb-2">Built for speed</h4>
+              <h4 className="text-title-md font-sans text-ink mb-2">{t("home.values.speed.title")}</h4>
               <p className="text-body-md text-body leading-relaxed">
-                Server tools use memory-only pipelines with 5-second hard timeouts. No queues, no waiting.
+                {t("home.values.speed.description")}
               </p>
             </div>
             <div>
               <Lock className="w-6 h-6 text-primary mb-4" strokeWidth={1.5} />
-              <h4 className="text-title-md font-sans text-ink mb-2">Open source</h4>
+              <h4 className="text-title-md font-sans text-ink mb-2">{t("home.values.opensource.title")}</h4>
               <p className="text-body-md text-body leading-relaxed">
-                MIT licensed and transparent. Read the code, run it locally, or contribute on GitHub.
+                {t("home.values.opensource.description")}
               </p>
             </div>
           </div>
@@ -191,19 +193,18 @@ export default function Home() {
       {/* Tools Section */}
       <section id="tools" className="max-w-7xl mx-auto px-6 py-section">
         <div className="mb-12">
-          <div className="caption-upper text-muted mb-4">The collection</div>
+          <div className="caption-upper text-muted mb-4">{t("home.tools.label")}</div>
           <h2 className="text-display-lg font-serif text-ink mb-4">
-            Tools, considered.
+            {t("home.tools.title")}
           </h2>
           <p className="text-title-md text-body max-w-2xl">
-            Each tool is purpose-built for a specific job. Choose between browser-based privacy or
-            server-side power.
+            {t("home.tools.description")}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {tools.map((tool) => (
-            <ToolCard key={tool.name} tool={tool} />
+            <ToolCard key={tool.nameKey} tool={tool} />
           ))}
         </div>
       </section>
@@ -217,17 +218,16 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-6 pb-section">
         <div className="bg-primary rounded-xl p-section text-center">
           <h2 className="text-display-md font-serif text-on-primary mb-6">
-            Start with a single task.
+            {t("home.cta.title")}
           </h2>
           <p className="text-title-md text-on-primary opacity-90 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Whether you need to convert a document, compress an image, or generate a QR code —
-            we have built the right tool for it.
+            {t("home.cta.description")}
           </p>
           <a
             href="/tools/word-to-pdf"
             className="inline-flex items-center gap-2 px-6 py-3 bg-canvas text-ink text-body-sm font-medium rounded-md hover:bg-surface-card transition-colors no-underline"
           >
-            Try Word → PDF
+            {t("home.cta.button")}
             <ArrowRight className="w-4 h-4" />
           </a>
         </div>

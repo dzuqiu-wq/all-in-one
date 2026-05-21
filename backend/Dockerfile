@@ -77,6 +77,11 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Install dev tools
 RUN pip install --no-cache-dir pytest pytest-asyncio httpx
 
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy application code
 COPY app/ ./app/
 
