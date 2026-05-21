@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import imageCompression from "browser-image-compression";
 import { Upload, Download, Image as ImageIcon, Zap, ArrowLeft } from "lucide-react";
 import AdBanner from "@/components/AdBanner";
@@ -15,6 +16,8 @@ interface CompressionResult {
 }
 
 export default function ImageOptimizerPage() {
+  const t = useTranslations("tools.imageOptimizer");
+  const locale = useLocale();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -26,7 +29,7 @@ export default function ImageOptimizerPage() {
 
   const handleFileSelect = useCallback((f: File) => {
     if (!f.type.startsWith("image/")) {
-      alert("Please select an image file");
+      alert(t("errorInvalid"));
       return;
     }
     setFile(f);
@@ -35,7 +38,7 @@ export default function ImageOptimizerPage() {
     const reader = new FileReader();
     reader.onload = (e) => setPreview(e.target?.result as string);
     reader.readAsDataURL(f);
-  }, []);
+  }, [t]);
 
   const extractHistogram = (img: HTMLImageElement) => {
     const canvas = document.createElement("canvas");
@@ -112,19 +115,18 @@ export default function ImageOptimizerPage() {
   return (
     <div className="min-h-screen bg-canvas">
       <div className="max-w-4xl mx-auto px-6 py-section">
-        <a href="/" className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
+        <a href={`/${locale}/`} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
           <ArrowLeft className="w-4 h-4" />
-          Back to all tools
+          {t("back")}
         </a>
 
         <div className="mb-12">
-          <div className="caption-upper text-muted mb-4">Image Utility</div>
+          <div className="caption-upper text-muted mb-4">{t("tag")}</div>
           <h1 className="text-display-lg font-serif text-ink mb-4" style={{ fontSize: "clamp(36px, 5vw, 48px)" }}>
-            Image Optimizer
+            {t("title")}
           </h1>
           <p className="text-title-md text-body max-w-2xl leading-relaxed">
-            Compress images and convert to modern formats — entirely in your browser.
-            Your files never leave your device.
+            {t("description")}
           </p>
         </div>
 
@@ -148,9 +150,9 @@ export default function ImageOptimizerPage() {
           />
           <ImageIcon className="w-12 h-12 mx-auto mb-4 text-primary" strokeWidth={1.5} />
           <h4 className="text-title-md font-sans text-ink mb-2">
-            {file ? file.name : "Drop your image here"}
+            {file ? file.name : t("dropzone")}
           </h4>
-          <p className="text-body-sm text-muted">JPG, PNG, GIF, WebP supported</p>
+          <p className="text-body-sm text-muted">{t("supportedFormats")}</p>
         </div>
 
         {/* Preview & Options */}
@@ -162,7 +164,7 @@ export default function ImageOptimizerPage() {
 
             <div className="surface-card rounded-lg p-lg grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="caption-upper text-muted-soft block mb-3">Output Format</label>
+                <label className="caption-upper text-muted-soft block mb-3">{t("outputFormat")}</label>
                 <div className="flex gap-2">
                   {(["webp", "jpeg", "png"] as const).map((fmt) => (
                     <button
@@ -181,7 +183,7 @@ export default function ImageOptimizerPage() {
               </div>
 
               <div>
-                <label className="caption-upper text-muted-soft block mb-3">Quality: {quality}%</label>
+                <label className="caption-upper text-muted-soft block mb-3">{t("quality")}: {quality}%</label>
                 <input
                   type="range"
                   min="10"
@@ -199,7 +201,7 @@ export default function ImageOptimizerPage() {
                   className="w-full py-3 bg-primary text-on-primary text-body-sm font-medium rounded-md hover:bg-primary-active transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <Zap className="w-4 h-4" />
-                  {isProcessing ? "Processing..." : "Optimize"}
+                  {isProcessing ? t("processing") : t("optimize")}
                 </button>
               </div>
             </div>
@@ -211,10 +213,10 @@ export default function ImageOptimizerPage() {
           <div className="mt-8 space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: "Original", value: formatBytes(result.originalSize) },
-                { label: "Compressed", value: formatBytes(result.compressedSize) },
-                { label: "Space Saved", value: `${compressionRatio}%`, highlight: true },
-                { label: "Dimensions", value: `${result.width}×${result.height}` },
+                { label: t("original"), value: formatBytes(result.originalSize) },
+                { label: t("compressed"), value: formatBytes(result.compressedSize) },
+                { label: t("saved"), value: `${compressionRatio}%`, highlight: true },
+                { label: t("dimensions"), value: `${result.width}×${result.height}` },
               ].map((stat) => (
                 <div key={stat.label} className="surface-card rounded-lg p-md">
                   <div className="caption-upper text-muted-soft mb-1">{stat.label}</div>
@@ -227,7 +229,7 @@ export default function ImageOptimizerPage() {
 
             {/* Histogram */}
             <div className="surface-card rounded-lg p-lg">
-              <div className="caption-upper text-muted-soft mb-4">Color Channel Density</div>
+              <div className="caption-upper text-muted-soft mb-4">{t("colorDensity")}</div>
               <div className="space-y-3">
                 {[
                   { label: "R", value: result.histogram.r, color: "#c64545" },
@@ -243,7 +245,7 @@ export default function ImageOptimizerPage() {
                   </div>
                 ))}
               </div>
-              <p className="mt-3 text-body-sm text-muted">Aspect Ratio: {result.aspectRatio}</p>
+              <p className="mt-3 text-body-sm text-muted">{t("aspectRatio")}: {result.aspectRatio}</p>
             </div>
 
             <button
@@ -251,7 +253,7 @@ export default function ImageOptimizerPage() {
               className="w-full py-3 bg-primary text-on-primary text-body-sm font-medium rounded-md hover:bg-primary-active transition-colors flex items-center justify-center gap-2"
             >
               <Download className="w-4 h-4" />
-              Download Optimized Image
+              {t("download")}
             </button>
 
             <AdBanner slot="image-tool-mid" format="rectangle" className="mx-auto max-w-[336px]" />
@@ -260,14 +262,14 @@ export default function ImageOptimizerPage() {
 
         {/* FAQ */}
         <section className="mt-section pt-xl border-t border-hairline">
-          <h2 className="text-display-md font-serif text-ink mb-8">Common questions</h2>
+          <h2 className="text-display-md font-serif text-ink mb-8">{t("faqTitle")}</h2>
           <div className="space-y-4">
             {[
-              { q: "How does browser-based compression work?", a: "We use the browser-image-compression library and HTML5 Canvas API. Your image is processed entirely in your device using JavaScript — no upload required, ensuring complete privacy." },
-              { q: "What is WebP and should I use it?", a: "WebP is a modern image format by Google, providing 25-35% smaller file sizes than JPEG at equivalent quality. We recommend WebP for web use; JPEG for universal compatibility; PNG for transparency." },
-              { q: "What quality setting is best?", a: "60-75% works well for web images. For print or detailed graphics, use 85-95%. Our real-time preview helps you find the optimal balance." },
-              { q: "Are my images private?", a: "Yes. Everything happens in your browser — your images never touch our servers. The processing uses the File API and stays in local memory." },
-              { q: "Can I process multiple images?", a: "Currently one image at a time. Batch processing is on our roadmap." },
+              { q: t("faq1Q"), a: t("faq1A") },
+              { q: t("faq2Q"), a: t("faq2A") },
+              { q: t("faq3Q"), a: t("faq3A") },
+              { q: t("faq4Q"), a: t("faq4A") },
+              { q: t("faq5Q"), a: t("faq5A") },
             ].map((item, idx) => (
               <details key={idx} className="group surface-card rounded-lg p-lg">
                 <summary className="cursor-pointer text-title-sm font-sans font-medium text-ink hover:text-primary transition-colors">{item.q}</summary>

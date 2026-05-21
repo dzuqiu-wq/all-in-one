@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { PDFDocument } from "pdf-lib";
 import { Download, FileText, Merge, Scissors, X, GripVertical, ArrowLeft, CheckCircle } from "lucide-react";
 import AdBanner from "@/components/AdBanner";
@@ -16,6 +17,8 @@ interface PDFFile {
 type Mode = "merge" | "split";
 
 export default function PDFMergeSplitPage() {
+  const t = useTranslations("tools.pdfMerge");
+  const locale = useLocale();
   const [mode, setMode] = useState<Mode>("merge");
   const [files, setFiles] = useState<PDFFile[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -117,18 +120,18 @@ export default function PDFMergeSplitPage() {
   return (
     <div className="min-h-screen bg-canvas">
       <div className="max-w-4xl mx-auto px-6 py-section">
-        <a href="/" className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
+        <a href={`/${locale}/`} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
           <ArrowLeft className="w-4 h-4" />
-          Back to all tools
+          {t("back")}
         </a>
 
         <div className="mb-12">
-          <div className="caption-upper text-muted mb-4">Document Conversion</div>
+          <div className="caption-upper text-muted mb-4">{t("tag")}</div>
           <h1 className="text-display-lg font-serif text-ink mb-4" style={{ fontSize: "clamp(36px, 5vw, 48px)" }}>
-            PDF Merge & Split
+            {t("title")}
           </h1>
           <p className="text-title-md text-body max-w-2xl leading-relaxed">
-            Combine multiple PDFs or extract specific pages. Powered by pdf-lib, runs entirely in your browser.
+            {t("description")}
           </p>
         </div>
 
@@ -138,26 +141,28 @@ export default function PDFMergeSplitPage() {
 
         {/* Mode Selector */}
         <div className="flex gap-2 mb-6">
-          {[
-            { id: "merge" as Mode, label: "Merge", icon: Merge },
-            { id: "split" as Mode, label: "Split", icon: Scissors },
-          ].map((m) => {
-            const Icon = m.icon;
-            return (
-              <button
-                key={m.id}
-                onClick={() => { setMode(m.id); setResult(null); }}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-md font-medium transition-colors ${
-                  mode === m.id
-                    ? "bg-primary text-on-primary"
-                    : "bg-canvas border border-hairline text-body hover:text-ink"
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                {m.label}
-              </button>
-            );
-          })}
+          <button
+            onClick={() => { setMode("merge"); setResult(null); }}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-md font-medium transition-colors ${
+              mode === "merge"
+                ? "bg-primary text-on-primary"
+                : "bg-canvas border border-hairline text-body hover:text-ink"
+            }`}
+          >
+            <Merge className="w-4 h-4" />
+            {t("merge")}
+          </button>
+          <button
+            onClick={() => { setMode("split"); setResult(null); }}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-md font-medium transition-colors ${
+              mode === "split"
+                ? "bg-primary text-on-primary"
+                : "bg-canvas border border-hairline text-body hover:text-ink"
+            }`}
+          >
+            <Scissors className="w-4 h-4" />
+            {t("split")}
+          </button>
         </div>
 
         {/* Upload Zone */}
@@ -177,10 +182,10 @@ export default function PDFMergeSplitPage() {
           />
           <FileText className="w-12 h-12 mx-auto mb-4 text-primary" strokeWidth={1.5} />
           <h4 className="text-title-md font-sans text-ink mb-2">
-            {mode === "merge" ? "Drop PDF files to merge" : "Drop a single PDF to split"}
+            {mode === "merge" ? t("dropzoneMerge") : t("dropzoneSplit")}
           </h4>
           <p className="text-body-sm text-muted">
-            {mode === "merge" ? "Select 2 or more PDF files" : "Single PDF file"}
+            {mode === "merge" ? t("selectMerge") : t("selectSplit")}
           </p>
         </div>
 
@@ -189,7 +194,7 @@ export default function PDFMergeSplitPage() {
           <div className="mt-6 space-y-4">
             <div className="surface-card rounded-lg p-lg">
               <div className="caption-upper text-muted-soft mb-4">
-                Files ({files.length}{files.length > 0 ? ` · ${files.reduce((s, f) => s + f.pageCount, 0)} pages` : ""})
+                {t("files")} ({files.length}{files.length > 0 ? ` · ${files.reduce((s, f) => s + f.pageCount, 0)} ${t("pages")}` : ""})
               </div>
               <div className="space-y-2">
                 {files.map((f, idx) => (
@@ -208,7 +213,7 @@ export default function PDFMergeSplitPage() {
                     <FileText className="w-5 h-5 text-primary flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="text-body-sm font-medium text-ink truncate">{f.name}</div>
-                      <div className="text-xs font-mono text-muted">{f.pageCount} pages · PDF v{f.version}</div>
+                      <div className="text-xs font-mono text-muted">{f.pageCount} {t("pages")} · PDF v{f.version}</div>
                     </div>
                     <button
                       onClick={() => setFiles((p) => p.filter((x) => x.id !== f.id))}
@@ -224,17 +229,17 @@ export default function PDFMergeSplitPage() {
             {mode === "split" && (
               <div className="surface-card rounded-lg p-lg">
                 <label className="caption-upper text-muted-soft block mb-3">
-                  Page Range (e.g., 1-3, 5, 7-9)
+                  {t("pageRangeLabel")}
                 </label>
                 <input
                   type="text"
                   value={splitRanges}
                   onChange={(e) => setSplitRanges(e.target.value)}
-                  placeholder="1-3, 5, 7-9"
+                  placeholder={t("pageRangePlaceholder")}
                   className="w-full px-4 py-2.5 bg-canvas border border-hairline rounded-md text-ink font-mono focus:border-primary focus:outline-none"
                 />
                 <p className="mt-2 text-body-sm text-muted">
-                  Total pages: {files[0]?.pageCount || 0}
+                  {t("totalPages")}: {files[0]?.pageCount || 0}
                 </p>
               </div>
             )}
@@ -245,7 +250,7 @@ export default function PDFMergeSplitPage() {
               className="w-full py-3 bg-primary text-on-primary text-body-sm font-medium rounded-md hover:bg-primary-active transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {mode === "merge" ? <Merge className="w-4 h-4" /> : <Scissors className="w-4 h-4" />}
-              {isProcessing ? "Processing..." : `${mode === "merge" ? "Merge" : "Split"} PDF`}
+              {isProcessing ? t("processing") : `${mode === "merge" ? t("merge") : t("split")} PDF`}
             </button>
           </div>
         )}
@@ -255,14 +260,14 @@ export default function PDFMergeSplitPage() {
           <div className="mt-8 surface-card rounded-xl p-xl">
             <div className="flex items-center gap-3 mb-6">
               <CheckCircle className="w-6 h-6 text-success" />
-              <h4 className="text-title-md font-sans text-ink">Processing complete</h4>
+              <h4 className="text-title-md font-sans text-ink">{t("success")}</h4>
             </div>
             <button
               onClick={handleDownload}
               className="w-full py-3 bg-primary text-on-primary text-body-sm font-medium rounded-md hover:bg-primary-active transition-colors flex items-center justify-center gap-2"
             >
               <Download className="w-4 h-4" />
-              Download PDF
+              {t("download")}
             </button>
           </div>
         )}
@@ -275,14 +280,14 @@ export default function PDFMergeSplitPage() {
 
         {/* FAQ */}
         <section className="mt-section pt-xl border-t border-hairline">
-          <h2 className="text-display-md font-serif text-ink mb-8">Common questions</h2>
+          <h2 className="text-display-md font-serif text-ink mb-8">{t("faqTitle")}</h2>
           <div className="space-y-4">
             {[
-              { q: "How does browser-based PDF processing work?", a: "We use pdf-lib, a pure JavaScript library running in your browser. Your PDFs are loaded into memory using the File API, processed locally, and made available for download — without ever touching a server." },
-              { q: "Can I merge encrypted PDFs?", a: "Encrypted or password-protected PDFs cannot be processed for security reasons. Decrypt them in the original software first, then upload to our tool." },
-              { q: "What page range formats work?", a: "Flexible formats: single pages (1, 2, 3), ranges (1-5, 10-15), and mixed (1-3, 7, 10-12). Invalid pages are silently ignored." },
-              { q: "Is there a file size limit?", a: "Processing depends on your device RAM. We recommend files under 50MB and total pages under 500 for optimal performance." },
-              { q: "Are bookmarks and annotations preserved?", a: "Page content is preserved, but advanced features like bookmarks, annotations, and form fields require server-side processing not available in browsers." },
+              { q: t("faq1Q"), a: t("faq1A") },
+              { q: t("faq2Q"), a: t("faq2A") },
+              { q: t("faq3Q"), a: t("faq3A") },
+              { q: t("faq4Q"), a: t("faq4A") },
+              { q: t("faq5Q"), a: t("faq5A") },
             ].map((item, idx) => (
               <details key={idx} className="group surface-card rounded-lg p-lg">
                 <summary className="cursor-pointer text-title-sm font-sans font-medium text-ink hover:text-primary transition-colors">{item.q}</summary>
