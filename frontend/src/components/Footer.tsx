@@ -1,13 +1,30 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import Link from "next/link";
+import { useLocalizedHref } from "@/i18n/useLocalizedHref";
 
 interface FooterProps {
   version?: string;
 }
 
+interface FooterLinkProps {
+  path: string;
+  label: string;
+}
+
+function FooterLink({ path, label }: FooterLinkProps) {
+  const href = useLocalizedHref(path);
+  return (
+    <Link
+      href={href}
+      className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline"
+    >
+      {label}
+    </Link>
+  );
+}
+
 export default function Footer({ version = "0.1.0" }: FooterProps) {
-  const locale = useLocale();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -25,71 +42,46 @@ export default function Footer({ version = "0.1.0" }: FooterProps) {
             <p className="text-body-sm text-on-dark-soft leading-relaxed">
               Thoughtful tools for documents, images, and everyday productivity.
             </p>
-            <div className="mt-6 text-xs font-mono text-on-dark-soft">
-              v{version}
-            </div>
+            <div className="mt-6 text-xs font-mono text-on-dark-soft">v{version}</div>
           </div>
 
           {/* Product */}
           <div>
-            <h4 className="caption-upper text-on-dark-soft mb-4 font-sans">
-              Product
-            </h4>
+            <h4 className="caption-upper text-on-dark-soft mb-4 font-sans">Product</h4>
             <nav className="flex flex-col gap-3">
-              <a href={`/${locale}/tools/word-to-pdf`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
-                Word → PDF
-              </a>
-              <a href={`/${locale}/tools/pdf-merge-split`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
-                PDF Tools
-              </a>
-              <a href={`/${locale}/tools/image-optimizer`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
-                Image Optimizer
-              </a>
-              <a href={`/${locale}/tools/qrcode-generator`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
-                QR Generator
-              </a>
+              <FooterLink path="/tools/word-to-pdf" label="Word → PDF" />
+              <FooterLink path="/tools/pdf-merge-split" label="PDF Tools" />
+              <FooterLink path="/tools/image-optimizer" label="Image Optimizer" />
+              <FooterLink path="/tools/qrcode-generator" label="QR Generator" />
             </nav>
           </div>
 
           {/* Resources */}
           <div>
-            <h4 className="caption-upper text-on-dark-soft mb-4 font-sans">
-              Resources
-            </h4>
+            <h4 className="caption-upper text-on-dark-soft mb-4 font-sans">Resources</h4>
             <nav className="flex flex-col gap-3">
-              <a href={`/${locale}/docs`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
-                Documentation
-              </a>
-              <a href={`/${locale}/changelog`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
-                Changelog
-              </a>
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
+              <FooterLink path="/docs" label="Documentation" />
+              <FooterLink path="/changelog" label="Changelog" />
+              <a
+                href="https://github.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline"
+              >
                 GitHub
               </a>
-              <a href={`/${locale}/api`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
-                API
-              </a>
+              <FooterLink path="/api" label="API" />
             </nav>
           </div>
 
           {/* Legal */}
           <div>
-            <h4 className="caption-upper text-on-dark-soft mb-4 font-sans">
-              Legal
-            </h4>
+            <h4 className="caption-upper text-on-dark-soft mb-4 font-sans">Legal</h4>
             <nav className="flex flex-col gap-3">
-              <a href={`/${locale}/privacy`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
-                Privacy Policy
-              </a>
-              <a href={`/${locale}/terms`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
-                Terms of Service
-              </a>
-              <a href={`/${locale}/cookies`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
-                Cookie Policy
-              </a>
-              <a href={`/${locale}/about`} className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline">
-                About
-              </a>
+              <FooterLink path="/privacy" label="Privacy Policy" />
+              <FooterLink path="/terms" label="Terms of Service" />
+              <FooterLink path="/cookies" label="Cookie Policy" />
+              <FooterLink path="/about" label="About" />
             </nav>
           </div>
         </div>

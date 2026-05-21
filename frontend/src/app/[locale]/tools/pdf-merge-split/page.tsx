@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { PDFDocument } from "pdf-lib";
 import { Download, FileText, Merge, Scissors, X, GripVertical, ArrowLeft, CheckCircle } from "lucide-react";
 import AdBanner from "@/components/AdBanner";
+import { useLocalizedHref } from "@/i18n/useLocalizedHref";
 
 interface PDFFile {
   id: string;
@@ -18,7 +20,7 @@ type Mode = "merge" | "split";
 
 export default function PDFMergeSplitPage() {
   const t = useTranslations("tools.pdfMerge");
-  const locale = useLocale();
+  const homeHref = useLocalizedHref("/");
   const [mode, setMode] = useState<Mode>("merge");
   const [files, setFiles] = useState<PDFFile[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -120,10 +122,10 @@ export default function PDFMergeSplitPage() {
   return (
     <div className="min-h-screen bg-canvas">
       <div className="max-w-4xl mx-auto px-6 py-section">
-        <a href={`/${locale}/`} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
+        <Link href={homeHref} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
           <ArrowLeft className="w-4 h-4" />
           {t("back")}
-        </a>
+        </Link>
 
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4">{t("tag")}</div>

@@ -1,8 +1,8 @@
 "use client";
 
-import { useLocale } from "next-intl";
 import { FileText, Image as ImageIcon, QrCode, Merge } from "lucide-react";
 import type { ComponentType } from "react";
+import { useLocalizedHref } from "@/i18n/useLocalizedHref";
 
 export const ToolIcons: Record<string, ComponentType<{ className?: string }>> = {
   FileText,
@@ -20,9 +20,12 @@ export interface ToolItem {
   description: string;
 }
 
+/**
+ * @deprecated Prefer `useLocalizedHref` from "@/i18n/useLocalizedHref".
+ * Kept here only for backward compatibility with previously generated code.
+ */
 export function useToolHref(path: string): string {
-  const locale = useLocale();
-  return `/${locale}${path}`;
+  return useLocalizedHref(path);
 }
 
 export const tools: ToolItem[] = [

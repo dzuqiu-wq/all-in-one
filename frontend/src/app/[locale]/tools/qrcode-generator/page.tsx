@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { QRCodeSVG } from "qrcode.react";
 import { Download, RefreshCw, Copy, Check, QrCode, ArrowLeft, Palette } from "lucide-react";
 import AdBanner from "@/components/AdBanner";
+import { useLocalizedHref } from "@/i18n/useLocalizedHref";
 
 interface ColorPreset {
   name: string;
@@ -22,7 +24,7 @@ const PRESETS: ColorPreset[] = [
 
 export default function QRCodeGeneratorPage() {
   const t = useTranslations("tools.qrcode");
-  const locale = useLocale();
+  const homeHref = useLocalizedHref("/");
   const [text, setText] = useState("");
   const [fg, setFg] = useState("#181715");
   const [bg, setBg] = useState("#faf9f5");
@@ -91,10 +93,10 @@ export default function QRCodeGeneratorPage() {
   return (
     <div className="min-h-screen bg-canvas">
       <div className="max-w-5xl mx-auto px-6 py-section">
-        <a href={`/${locale}/`} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
+        <Link href={homeHref} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
           <ArrowLeft className="w-4 h-4" />
           {t("back")}
-        </a>
+        </Link>
 
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4">{t("tag")}</div>

@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Upload, Download, FileText, AlertCircle, CheckCircle, ArrowLeft } from "lucide-react";
 import PseudoProcessor from "@/components/PseudoProcessor";
 import AdBanner from "@/components/AdBanner";
+import { useLocalizedHref } from "@/i18n/useLocalizedHref";
 
 interface ConversionResult {
   fileName: string;
@@ -18,7 +20,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export default function WordToPDFPage() {
   const t = useTranslations("tools.wordPdf");
-  const locale = useLocale();
+  const homeHref = useLocalizedHref("/");
   const [file, setFile] = useState<File | null>(null);
   const [state, setState] = useState<"idle" | "processing" | "success" | "error">("idle");
   const [result, setResult] = useState<ConversionResult | null>(null);
@@ -135,10 +137,10 @@ export default function WordToPDFPage() {
 
       <div className="max-w-4xl mx-auto px-6 py-section">
         {/* Back Link */}
-        <a href={`/${locale}/`} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
+        <Link href={homeHref} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
           <ArrowLeft className="w-4 h-4" />
           {t("back")}
-        </a>
+        </Link>
 
         {/* Hero */}
         <div className="mb-12">

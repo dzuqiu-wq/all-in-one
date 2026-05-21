@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
 import imageCompression from "browser-image-compression";
 import { Upload, Download, Image as ImageIcon, Zap, ArrowLeft } from "lucide-react";
 import AdBanner from "@/components/AdBanner";
+import { useLocalizedHref } from "@/i18n/useLocalizedHref";
 
 interface CompressionResult {
   originalSize: number;
@@ -17,7 +19,7 @@ interface CompressionResult {
 
 export default function ImageOptimizerPage() {
   const t = useTranslations("tools.imageOptimizer");
-  const locale = useLocale();
+  const homeHref = useLocalizedHref("/");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -115,10 +117,10 @@ export default function ImageOptimizerPage() {
   return (
     <div className="min-h-screen bg-canvas">
       <div className="max-w-4xl mx-auto px-6 py-section">
-        <a href={`/${locale}/`} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
+        <Link href={homeHref} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
           <ArrowLeft className="w-4 h-4" />
           {t("back")}
-        </a>
+        </Link>
 
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4">{t("tag")}</div>
