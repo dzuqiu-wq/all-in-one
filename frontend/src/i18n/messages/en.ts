@@ -67,6 +67,30 @@ export default {
       generate: 'Generate',
       browserLocal: 'Browser Local',
     },
+    jsonFormatter: {
+      title: 'JSON Formatter',
+      description: 'Format, validate and minify JSON data with syntax highlighting.',
+      tag: 'CLIENT-SIDE PURE',
+      browserLocal: 'Browser Local',
+    },
+    urlEncoder: {
+      title: 'URL Encoder/Decoder',
+      description: 'Encode and decode URLs for safe web transmission.',
+      tag: 'CLIENT-SIDE PURE',
+      browserLocal: 'Browser Local',
+    },
+    colorPicker: {
+      title: 'Color Picker',
+      description: 'Pick colors, convert between formats, and generate palettes.',
+      tag: 'CLIENT-SIDE PURE',
+      browserLocal: 'Browser Local',
+    },
+    timestamp: {
+      title: 'Timestamp Converter',
+      description: 'Convert between Unix timestamps and human-readable dates.',
+      tag: 'CLIENT-SIDE PURE',
+      browserLocal: 'Browser Local',
+    },
   },
   footer: {
     copyright: 'All-in-One Toolbox. Open source under MIT License.',

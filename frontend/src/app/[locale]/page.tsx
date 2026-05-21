@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { FileText, Image, QrCode, Merge, Zap, Server } from "lucide-react";
+import { FileText, Image, QrCode, Merge, Zap, Server, Shield, Clock, Smartphone } from "lucide-react";
 import AdBanner from "@/components/AdBanner";
 
 interface ToolCardProps {
@@ -179,6 +179,51 @@ const tools: ToolCardProps[] = [
     href: "/tools/qrcode-generator",
     status: "available",
   },
+  // Coming soon tools
+  {
+    nameKey: "tools.jsonFormatter.title",
+    descriptionKey: "tools.jsonFormatter.description",
+    tagKey: "tools.jsonFormatter.tag",
+    tagColor: "green",
+    locationKey: "tools.jsonFormatter.browserLocal",
+    locationType: "client",
+    icon: Shield,
+    href: "#",
+    status: "coming-soon",
+  },
+  {
+    nameKey: "tools.urlEncoder.title",
+    descriptionKey: "tools.urlEncoder.description",
+    tagKey: "tools.urlEncoder.tag",
+    tagColor: "green",
+    locationKey: "tools.urlEncoder.browserLocal",
+    locationType: "client",
+    icon: Clock,
+    href: "#",
+    status: "coming-soon",
+  },
+  {
+    nameKey: "tools.colorPicker.title",
+    descriptionKey: "tools.colorPicker.description",
+    tagKey: "tools.colorPicker.tag",
+    tagColor: "green",
+    locationKey: "tools.colorPicker.browserLocal",
+    locationType: "client",
+    icon: Smartphone,
+    href: "#",
+    status: "coming-soon",
+  },
+  {
+    nameKey: "tools.timestamp.title",
+    descriptionKey: "tools.timestamp.description",
+    tagKey: "tools.timestamp.tag",
+    tagColor: "green",
+    locationKey: "tools.timestamp.browserLocal",
+    locationType: "client",
+    icon: Clock,
+    href: "#",
+    status: "coming-soon",
+  },
 ];
 
 export default function Home() {
@@ -233,7 +278,7 @@ export default function Home() {
       {/* Stats Section */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-y border-[var(--border-default)]">
         {[
-          { label: t('home.stats.toolsAvailable'), value: "4", mono: true },
+          { label: t('home.stats.toolsAvailable'), value: "8", mono: true },
           { label: t('home.stats.filesProcessed'), value: "12,847", mono: true },
           { label: t('home.stats.serverUptime'), value: "99.9%", mono: true },
           { label: t('home.stats.dataPrivacy'), value: "100%", mono: true },

@@ -67,6 +67,30 @@ export default {
       generate: '生成',
       browserLocal: '浏览器本地',
     },
+    jsonFormatter: {
+      title: 'JSON 格式化工具',
+      description: '格式化、验证和压缩 JSON 数据，支持语法高亮。',
+      tag: '纯客户端',
+      browserLocal: '浏览器本地',
+    },
+    urlEncoder: {
+      title: 'URL 编码/解码',
+      description: '对 URL 进行编码和解码，确保安全传输。',
+      tag: '纯客户端',
+      browserLocal: '浏览器本地',
+    },
+    colorPicker: {
+      title: '颜色选择器',
+      description: '选择颜色，在不同格式间转换，生成调色板。',
+      tag: '纯客户端',
+      browserLocal: '浏览器本地',
+    },
+    timestamp: {
+      title: '时间戳转换器',
+      description: '在 Unix 时间戳和可读日期之间转换。',
+      tag: '纯客户端',
+      browserLocal: '浏览器本地',
+    },
   },
   footer: {
     copyright: 'All-in-One Toolbox，开源 MIT 协议。',
