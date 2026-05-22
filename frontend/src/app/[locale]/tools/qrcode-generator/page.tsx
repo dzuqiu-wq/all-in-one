@@ -22,6 +22,153 @@ const PRESETS: ColorPreset[] = [
   { name: "Teal", fg: "#5db8a6", bg: "#faf9f5" },
 ];
 
+// Structured data for SEO
+function StructuredDataEN() {
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            name: "QR Code Generator",
+            operatingSystem: "All",
+            applicationCategory: "DesignApplication",
+            browserRequirements: "Requires HTML5 Canvas API and File API support",
+            url: "https://333654.xyz/tools/qrcode-generator",
+            description: "Generate beautiful QR codes for URLs, text, and contact information. Customizable colors, sizes, and error correction levels. Client-side generation.",
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "What can I encode in a QR code?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "You can encode URLs, plain text, email addresses, phone numbers, SMS messages, WiFi credentials, vCard contact information, and calendar events. The generator handles encoding automatically.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "What error correction level should I use?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Level L (7%) is for clean environments, M (15%) for standard use, Q (25%) for industrial, H (30%) for severely damaged surfaces. Higher levels mean denser QR patterns.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Will custom colors affect scannability?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Custom colors work if you maintain high contrast (at least 7:1). Light backgrounds with dark foreground modules work best. Avoid red colors. Our presets are tested for optimal scanning.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "What size should I use?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "128-256px for digital, 512px+ for print. When printing, each QR module should be at least 2-3mm wide for reliable scanning.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Do QR codes expire?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Static QR codes never expire — the encoded data is permanently embedded. However, if you encode a URL, that webpage may change or be deleted over time.",
+                },
+              },
+            ],
+          }),
+        }}
+      />
+    </>
+  );
+}
+
+function StructuredDataZH() {
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            name: "二维码生成器",
+            operatingSystem: "All",
+            applicationCategory: "DesignApplication",
+            browserRequirements: "Requires HTML5 Canvas API and File API support",
+            url: "https://333654.xyz/zh/tools/qrcode-generator",
+            description: "为网址、文本和联系人信息生成精美的二维码。可自定义颜色、尺寸和纠错级别。纯客户端生成，无需服务器处理。",
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "可以在二维码中编码什么内容？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "您可以编码网址、纯文本、邮箱地址、电话号码、短信、WiFi 凭证、vCard 联系人和日历事件。生成器会自动处理编码。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "应该使用哪种纠错级别？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Level L（7%）适合清洁环境，M（15%）适合标准用途，Q（25%）适合工业环境，H（30%）适合可能严重损坏的表面。更高的纠错级别意味着更密集的 QR 图案。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "自定义颜色会影响扫描吗？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "自定义颜色可以工作，只要您保持足够的对比度（至少 7:1）。浅色背景上的深色前景模块效果最佳。应避免使用红色系。我们的预设配色方案经过测试，确保与大多数二维码扫描器兼容。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "应该使用什么尺寸？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "对于数字用途（网站、电子邮件），128-256 像素就足够了。对于印刷材料，使用 512 像素或更高。当印刷时，确保每个二维码模块至少有 2-3 毫米宽。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "二维码会过期吗？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "静态二维码永远不会过期——编码的数据永久嵌入在 QR 图案本身中。但是，如果您编码的是网址，那个外部网页可能会随时间变化或被删除。",
+                },
+              },
+            ],
+          }),
+        }}
+      />
+    </>
+  );
+}
+
 export default function QRCodeGeneratorPage() {
   const t = useTranslations("tools.qrcode");
   const homeHref = useLocalizedHref("/");
@@ -92,6 +239,9 @@ export default function QRCodeGeneratorPage() {
 
   return (
     <div className="min-h-screen bg-canvas">
+      {/* SEO Structured Data */}
+      <StructuredDataEN />
+      
       <div className="max-w-5xl mx-auto px-6 py-section">
         <Link href={homeHref} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
           <ArrowLeft className="w-4 h-4" />

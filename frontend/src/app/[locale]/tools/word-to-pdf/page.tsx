@@ -18,6 +18,169 @@ interface ConversionResult {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+// Structured data for SEO
+function StructuredDataEN() {
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            name: "Word to PDF Converter",
+            operatingSystem: "All",
+            applicationCategory: "BusinessApplication",
+            browserRequirements: "Requires HTML5 Canvas API and File API support",
+            url: "https://333654.xyz/tools/word-to-pdf",
+            description: "Convert Word documents (.docx, .doc) to PDF format using server-side LibreOffice processing. Features 5-second timeout, memory-only pipeline, and no file storage.",
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "How does the conversion work?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Our server uses Gotenberg, a powerful document conversion service powered by LibreOffice. When you upload a Word document, it streams directly to memory, gets processed by LibreOffice, and streams back as PDF. Your file never touches disk — this is a true memory-only pipeline architecture.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "What is the 5-second timeout?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Our server enforces a strict 5-second timeout for all conversions to ensure fair resource sharing and prevent long-running tasks from blocking other users. If you hit the limit, try a smaller document or simpler formatting.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Why is the file size limit 5MB?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Combined with the 5-second timeout, the 5MB limit ensures fast conversions and fair resource sharing. For larger documents, consider splitting them first or using desktop software.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Is my document secure during conversion?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Yes, security is our top priority. We implement a zero-footprint policy: files are processed entirely in server memory using stream-based pipelines and never written to disk.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "What formats are supported?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "We support .docx (Office Open XML, the standard since 2007) and legacy .doc format. For best results, use .docx with standard fonts. Macros are stripped during conversion since PDF does not support them.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "How does rate limiting work?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Each IP address is limited to 5 conversions per minute using a sliding window algorithm. If you hit the limit, you will receive a 429 response with a Retry-After header indicating when you can try again.",
+                },
+              },
+            ],
+          }),
+        }}
+      />
+    </>
+  );
+}
+
+function StructuredDataZH() {
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            name: "Word 转 PDF 转换器",
+            operatingSystem: "All",
+            applicationCategory: "BusinessApplication",
+            browserRequirements: "Requires HTML5 Canvas API and File API support",
+            url: "https://333654.xyz/zh/tools/word-to-pdf",
+            description: "使用服务端 LibreOffice 处理将 Word 文档转换为 PDF。纯内存管道处理，文件绝不上传磁盘。5秒快速超时，100%隐私安全。",
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "转换是如何工作的？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "我们的服务器使用 Gotenberg，一个由强大的 LibreOffice 驱动的文档转换服务提供支持。当您上传 Word 文档时，它会直接流式传输到内存中，由 LibreOffice 处理后流式返回为 PDF——您的文件永不触碰磁盘。这是一个真正的纯内存管道架构。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "什么是 5 秒超时限制？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "我们的服务器对所有转换强制执行严格的 5 秒超时限制。这个超时设置确保所有用户都能获得可预测的性能。如果您遇到超时错误，建议尝试更小的文档或更简单的格式。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "为什么文件大小限制为 5MB？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "结合 5 秒超时限制，5MB 的文件大小限制确保了快速转换和资源公平共享。这个限制是经过仔细权衡的：它足够大以处理大多数日常文档，又足够小以保证在 5 秒内完成处理。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "转换过程中我的文档安全吗？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "是的，安全性是我们的首要任务。我们实施零占用（Zero-Footprint）策略：文件完全在服务器内存中使用流式管道处理，从不写入磁盘。所有转换操作都在隔离的内存空间中进行，转换完成后内存缓冲区会立即释放。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "支持哪些 Word 格式？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "我们支持两种主要的 Word 格式：.docx（Office Open XML 格式，自 Microsoft Office 2007 起成为标准格式）和传统的 .doc 格式。为获得最佳转换效果，建议使用 .docx 格式配合标准字体。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "速率限制是如何工作的？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "每个 IP 地址使用滑动窗口算法限制为每分钟 5 次转换。当您达到限制时，服务器会返回 429 状态码，并在响应头中包含 Retry-After 字段，指示您需要等待多长时间才能再次尝试。",
+                },
+              },
+            ],
+          }),
+        }}
+      />
+    </>
+  );
+}
+
 export default function WordToPDFPage() {
   const t = useTranslations("tools.wordPdf");
   const homeHref = useLocalizedHref("/");
@@ -129,6 +292,9 @@ export default function WordToPDFPage() {
 
   return (
     <div className="min-h-screen bg-canvas">
+      {/* SEO Structured Data - English */}
+      <StructuredDataEN />
+      
       <PseudoProcessor
         isProcessing={false}
         onComplete={() => {}}

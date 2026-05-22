@@ -17,6 +17,153 @@ interface CompressionResult {
   histogram: { r: number; g: number; b: number };
 }
 
+// Structured data for SEO
+function StructuredDataEN() {
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            name: "Image Optimizer & Compressor",
+            operatingSystem: "All",
+            applicationCategory: "DesignApplication",
+            browserRequirements: "Requires HTML5 Canvas API and File API support",
+            url: "https://333654.xyz/tools/image-optimizer",
+            description: "Compress images and convert to WebP format. Smart compression reduces file size by up to 80% while preserving quality. Pure browser processing with Web Workers.",
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "Will EXIF data be preserved?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "For privacy protection, optimized images automatically remove all EXIF metadata including camera information, GPS location data, creation timestamps, and device information.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "What output formats are supported?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "You can output to WebP (recommended for best compression), JPEG, or PNG formats. WebP typically provides 25-35% better compression than JPEG at the same quality level.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "How does quality setting affect images?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Higher quality values preserve more visual detail but result in larger files. Lower values create smaller files but may introduce visible compression artifacts. 80-85% is usually the best balance.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Can I use this on mobile devices?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Yes, the image optimizer works on all modern mobile browsers including Chrome and Safari on iOS and Android devices. Performance depends on your device specs.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "How do I choose the best quality value?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "For most uses, 80-85% is the optimal balance. Above 90%, visual differences are hard to distinguish but files become larger; below 70%, visible noise appears.",
+                },
+              },
+            ],
+          }),
+        }}
+      />
+    </>
+  );
+}
+
+function StructuredDataZH() {
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            name: "图片优化器与压缩器",
+            operatingSystem: "All",
+            applicationCategory: "DesignApplication",
+            browserRequirements: "Requires HTML5 Canvas API and File API support",
+            url: "https://333654.xyz/zh/tools/image-optimizer",
+            description: "压缩图片并转换为 WebP 格式。智能压缩可在保持质量的同时将文件大小减少 80%。纯浏览器处理，无需上传，隐私安全。",
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "图片会保留 EXIF 数据吗？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "出于隐私保护，优化后的图片会自动移除所有 EXIF 元数据，包括相机信息、GPS 位置数据、创建时间戳和设备信息。当您在网上分享照片时，这确保您的个人元数据不会泄露。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "支持哪些输出格式？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "您可以输出为 WebP（推荐以获得最佳压缩效果）、JPEG 或 PNG 格式。WebP 通常在相同质量水平下提供比 JPEG 好 25-35% 的压缩效果。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "质量设置如何影响图片？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "较高的质量值保留更多视觉细节，但生成更大的文件。较低的值创建更小的文件，但可能会引入可见的压缩伪影。80-85% 通常是最佳平衡点。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "可以在移动设备上使用吗？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "是的，图片优化器可在所有现代移动浏览器上运行，包括 iOS 上的 Chrome 和 Safari 以及 Android 设备。性能取决于您的设备配置。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "如何选择最佳的质量值？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "对于大多数用途，80-85% 是最佳平衡点。超过 90% 质量时，肉眼难以分辨差异但文件会明显变大；低于 70% 会出现明显噪点。",
+                },
+              },
+            ],
+          }),
+        }}
+      />
+    </>
+  );
+}
+
 export default function ImageOptimizerPage() {
   const t = useTranslations("tools.imageOptimizer");
   const homeHref = useLocalizedHref("/");
@@ -116,6 +263,9 @@ export default function ImageOptimizerPage() {
 
   return (
     <div className="min-h-screen bg-canvas">
+      {/* SEO Structured Data */}
+      <StructuredDataEN />
+      
       <div className="max-w-4xl mx-auto px-6 py-section">
         <Link href={homeHref} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
           <ArrowLeft className="w-4 h-4" />
@@ -216,9 +366,9 @@ export default function ImageOptimizerPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { label: t("original"), value: formatBytes(result.originalSize) },
-                { label: t("compressed"), value: formatBytes(result.compressedSize) },
+                { label: t("optimized"), value: formatBytes(result.compressedSize) },
                 { label: t("saved"), value: `${compressionRatio}%`, highlight: true },
-                { label: t("dimensions"), value: `${result.width}×${result.height}` },
+                { label: "Dimensions", value: `${result.width}×${result.height}` },
               ].map((stat) => (
                 <div key={stat.label} className="surface-card rounded-lg p-md">
                   <div className="caption-upper text-muted-soft mb-1">{stat.label}</div>
@@ -231,7 +381,7 @@ export default function ImageOptimizerPage() {
 
             {/* Histogram */}
             <div className="surface-card rounded-lg p-lg">
-              <div className="caption-upper text-muted-soft mb-4">{t("colorDensity")}</div>
+              <div className="caption-upper text-muted-soft mb-4">Color Density</div>
               <div className="space-y-3">
                 {[
                   { label: "R", value: result.histogram.r, color: "#c64545" },
@@ -247,7 +397,7 @@ export default function ImageOptimizerPage() {
                   </div>
                 ))}
               </div>
-              <p className="mt-3 text-body-sm text-muted">{t("aspectRatio")}: {result.aspectRatio}</p>
+              <p className="mt-3 text-body-sm text-muted">Aspect Ratio: {result.aspectRatio}</p>
             </div>
 
             <button

@@ -18,6 +18,153 @@ interface PDFFile {
 
 type Mode = "merge" | "split";
 
+// Structured data for SEO
+function StructuredDataEN() {
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            name: "PDF Merge & Split Tool",
+            operatingSystem: "All",
+            applicationCategory: "BusinessApplication",
+            browserRequirements: "Requires HTML5 Canvas API and File API support",
+            url: "https://333654.xyz/tools/pdf-merge-split",
+            description: "Merge multiple PDF files into one document or extract specific pages from PDF files. Pure client-side processing using pdf-lib library — files never leave your browser.",
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "Is my file secure?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Absolutely. All processing happens in your browser using the pdf-lib library for PDF operations. Your files are processed locally through Canvas API and File API, never leaving your device, never uploaded to any server.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "What operations are supported?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "You can merge multiple PDF files into a single document, or extract specific pages from a single PDF. The merge feature supports drag-and-drop reordering. The split feature supports flexible page range syntax.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Is there a file size limit?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "We recommend keeping individual files under 50MB. Larger files may cause browser performance issues due to memory-intensive PDF processing.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "How fast is the processing?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Processing speed depends on your device performance, file size, and page count. Most operations complete within seconds using efficient streaming algorithms.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Will merged PDFs have watermarks?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "No, we do not add any watermarks, logos, or advertisements to merged PDFs. You will receive completely clean documents.",
+                },
+              },
+            ],
+          }),
+        }}
+      />
+    </>
+  );
+}
+
+function StructuredDataZH() {
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            name: "PDF 合并与拆分工具",
+            operatingSystem: "All",
+            applicationCategory: "BusinessApplication",
+            browserRequirements: "Requires HTML5 Canvas API and File API support",
+            url: "https://333654.xyz/zh/tools/pdf-merge-split",
+            description: "合并多个 PDF 或提取文档中的特定页面。纯浏览器端处理，无需上传文件。100%隐私保护，完全免费无限制使用。",
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "我的文件安全吗？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "绝对安全。所有处理都在您的浏览器中完成，使用 pdf-lib 库进行 PDF 操作。您的文件通过 Canvas API 和 File API 在本地处理，从不离开您的设备，从不上传到任何服务器。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "支持哪些操作？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "您可以合并多个 PDF 文件为一个，或从单个 PDF 中提取特定页面。合并功能支持拖拽重新排序文件。拆分功能支持灵活的页面范围语法。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "有文件大小限制吗？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "我们建议将单个文件保持在 50MB 以下。更大型的文件可能会因浏览器内存密集型的 PDF 处理而导致的性能问题。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "处理速度如何？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "处理速度取决于您的设备性能、文件大小和页面数量。大多数操作在几秒内完成，使用高效的流式算法处理 PDF。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "合并后的 PDF 会有水印吗？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "不会，我们不会在合并后的 PDF 上添加任何水印、徽标或广告。您将收到完全干净的文档。",
+                },
+              },
+            ],
+          }),
+        }}
+      />
+    </>
+  );
+}
+
 export default function PDFMergeSplitPage() {
   const t = useTranslations("tools.pdfMerge");
   const homeHref = useLocalizedHref("/");
@@ -121,6 +268,9 @@ export default function PDFMergeSplitPage() {
 
   return (
     <div className="min-h-screen bg-canvas">
+      {/* SEO Structured Data */}
+      <StructuredDataEN />
+      
       <div className="max-w-4xl mx-auto px-6 py-section">
         <Link href={homeHref} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
           <ArrowLeft className="w-4 h-4" />
