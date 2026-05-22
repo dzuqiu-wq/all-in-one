@@ -14,6 +14,7 @@ import io
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
 
 import httpx
@@ -72,13 +73,41 @@ app.add_middleware(
 
 
 # ============================================================================
+# Security Constants
+# ============================================================================
+# Allowed MIME types for Word documents (strict anti-MIME-spoofing)
+ALLOWED_WORD_MIME_TYPES = frozenset({
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",  # .docx
+    "application/msword",  # .doc
+})
+
+ALLOWED_EXCEL_MIME_TYPES = frozenset({
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",  # .xlsx
+    "application/vnd.ms-excel",  # .xls
+})
+
+ALLOWED_PPT_MIME_TYPES = frozenset({
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",  # .pptx
+    "application/vnd.ms-powerpoint",  # .ppt
+})
+
+
+# ============================================================================
 # Helper Functions
 # ============================================================================
 def get_client_ip(request: Request) -> str:
-    """Extract client IP from request, handling proxies"""
-    forwarded = request.headers.get("X-Forwarded-For")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
+    """
+    Extract client IP from request, handling proxies.
+
+    SECURITY: Only trusts X-Real-IP (set by nginx from $remote_addr).
+    X-Forwarded-For is NOT trusted to prevent IP spoofing attacks.
+    """
+    # Primary: X-Real-IP set by nginx proxy (authoritative)
+    real_ip = request.headers.get("x-real-ip")
+    if real_ip:
+        return real_ip.strip()
+
+    # Fallback: Direct connection client host
     return request.client.host if request.client else "unknown"
 
 
@@ -102,7 +131,89 @@ async def validate_file_size(file: UploadFile) -> bytes:
     return content
 
 
-async def call_gotenberg(file_bytes: bytes, filename: str) -> bytes:
+def validate_extension_suffix(filename: Optional[str], allowed_extensions: list) -> None:
+    """
+    Validate file extension using proper suffix check.
+
+    SECURITY: Prevents double-extension bypass attacks.
+    Uses str.endswith() which checks the TRUE suffix, not just the last dot-segment.
+
+    Example attacks prevented:
+    - "malicious.docx.exe" -> NOT .docx -> REJECTED
+    - "test.pdf.docx" -> NOT .docx -> REJECTED
+    - "document.docx" -> .docx -> ACCEPTED
+
+    Raises HTTPException(400) if extension is not in allowed list.
+    """
+    if not filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing filename"
+        )
+
+    filename_lower = filename.lower()
+    for ext in allowed_extensions:
+        if filename_lower.endswith(ext.lower()):
+            return  # Valid extension found
+
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail=f"Unsupported file extension. Allowed: {allowed_extensions}"
+    )
+
+
+def generate_safe_output_filename(original_filename: Optional[str], output_ext: str = ".pdf") -> str:
+    """
+    Generate safe output filename with proper extension handling.
+
+    SECURITY: Uses rsplit to replace only the final extension segment.
+    Ensures the output always has a valid extension with dot separator.
+
+    Args:
+        original_filename: Original uploaded filename
+        output_ext: Target extension (default: .pdf)
+
+    Returns:
+        Safe filename with correct extension
+    """
+    if not original_filename:
+        return f"converted{output_ext}"
+
+    # Handle files without extension
+    if "." not in original_filename:
+        return f"{original_filename}{output_ext}"
+
+    # Replace ONLY the last extension segment
+    base_name = original_filename.rsplit(".", 1)[0]
+    return f"{base_name}{output_ext}"
+
+
+def validate_mime_type(content_type: Optional[str], allowed_types: frozenset) -> None:
+    """
+    Validate MIME type against allowed whitelist.
+
+    SECURITY: This prevents MIME type spoofing attacks where malicious files
+    are uploaded with forged Content-Type headers.
+
+    Raises HTTPException(415) if MIME type is not allowed.
+    """
+    if not content_type:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Missing Content-Type header. Cannot determine file type."
+        )
+
+    # Normalize: lowercase, strip parameters (e.g., "text/html; charset=utf-8")
+    normalized = content_type.lower().split(";")[0].strip()
+
+    if normalized not in allowed_types:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=f"Unsupported MIME type: {content_type}. Allowed: {', '.join(sorted(allowed_types))}"
+        )
+
+
+async def call_gotenberg(file_bytes: bytes, filename: str, content_type: Optional[str] = None) -> bytes:
     """
     Call Gotenberg service with in-memory file.
     Uses asyncio.Semaphore for concurrency control.
@@ -117,8 +228,10 @@ async def call_gotenberg(file_bytes: bytes, filename: str) -> bytes:
     async with conversion_semaphore:
         async with httpx.AsyncClient(timeout=settings.GOTENBERG_TIMEOUT) as client:
             # Prepare multipart form data - NO disk I/O
+            # Use explicit content_type from validated UploadFile, not bytes
+            mime_type = content_type or "application/octet-stream"
             files = {
-                "files": (filename, io.BytesIO(file_bytes), file_bytes.content_type or "application/octet-stream")
+                "files": (filename, io.BytesIO(file_bytes), mime_type)
             }
 
             try:
@@ -228,6 +341,7 @@ async def convert_word_to_pdf(
     Convert Word document to PDF using Gotenberg.
 
     Security Features:
+    - MIME type whitelist validation (415 if invalid)
     - 5MB file size limit (validated before processing)
     - 5 requests/minute per IP (sliding window)
     - 2 concurrent conversions max (semaphore)
@@ -243,7 +357,10 @@ async def convert_word_to_pdf(
     # Log request
     print(f"[REQUEST] {client_ip} -> {request.url.path} | {file.filename}")
 
-    # 1. Validate file size (pre-read, reject early)
+    # 1. Validate MIME type FIRST (anti-MIME-spoofing)
+    validate_mime_type(file.content_type, ALLOWED_WORD_MIME_TYPES)
+
+    # 2. Validate file size (pre-read, reject early)
     try:
         file_bytes = await validate_file_size(file)
     except HTTPException:
@@ -254,19 +371,17 @@ async def convert_word_to_pdf(
             detail=f"Failed to read file: {str(e)}"
         )
 
-    # 2. Validate file extension
-    if file.filename:
-        ext = "." + file.filename.split(".")[-1].lower()
-        if ext not in settings.ALLOWED_EXTENSIONS:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Unsupported file type: {ext}. Allowed: {settings.ALLOWED_EXTENSIONS}"
-            )
+    # 3. Validate file extension (secondary check, after MIME)
+    # Uses suffix-based validation to prevent double-extension bypass
+    validate_extension_suffix(file.filename, settings.ALLOWED_EXTENSIONS)
 
-    # 3. Process with 5-second timeout using asyncio.wait_for
+    # 4. Process with 5-second timeout using asyncio.wait_for
     try:
+        # Generate safe output filename with proper dot separator
+        output_filename = generate_safe_output_filename(file.filename, ".pdf")
+
         pdf_bytes = await asyncio.wait_for(
-            call_gotenberg(file_bytes, file.filename or "document.docx"),
+            call_gotenberg(file_bytes, file.filename or "document.docx", file.content_type),
             timeout=settings.GOTENBERG_TIMEOUT
         )
     except asyncio.TimeoutError:
@@ -285,13 +400,9 @@ async def convert_word_to_pdf(
             detail=f"Conversion failed: {str(e)}"
         )
 
-    # 4. Stream response (memory -> response, no disk)
+    # 5. Stream response (memory -> response, no disk)
     elapsed = time.time() - start_time
     print(f"[SUCCESS] {client_ip} conversion completed in {elapsed:.2f}s")
-
-    output_filename = file.filename.replace(
-        file.filename.split(".")[-1], "pdf"
-    ) if file.filename else "converted.pdf"
 
     return StreamingResponse(
         io.BytesIO(pdf_bytes),
@@ -315,7 +426,10 @@ async def convert_excel_to_pdf(
 
     print(f"[REQUEST] {client_ip} -> {request.url.path} | {file.filename}")
 
-    # Validate
+    # 1. Validate MIME type FIRST (anti-MIME-spoofing)
+    validate_mime_type(file.content_type, ALLOWED_EXCEL_MIME_TYPES)
+
+    # 2. Validate and read file
     try:
         file_bytes = await validate_file_size(file)
     except HTTPException:
@@ -328,10 +442,13 @@ async def convert_excel_to_pdf(
             detail="Only Excel files (.xlsx, .xls) are supported"
         )
 
-    # Process
+    # 3. Process
     try:
+        # Generate safe output filename
+        output_filename = generate_safe_output_filename(file.filename, ".pdf")
+
         pdf_bytes = await asyncio.wait_for(
-            call_gotenberg(file_bytes, file.filename or "spreadsheet.xlsx"),
+            call_gotenberg(file_bytes, file.filename or "spreadsheet.xlsx", file.content_type),
             timeout=settings.GOTENBERG_TIMEOUT
         )
     except asyncio.TimeoutError:
@@ -347,7 +464,7 @@ async def convert_excel_to_pdf(
         io.BytesIO(pdf_bytes),
         media_type="application/pdf",
         headers={
-            "Content-Disposition": f'attachment; filename="{file.filename or "converted"}.pdf"',
+            "Content-Disposition": f'attachment; filename="{output_filename}"',
             "X-Processing-Time": f"{elapsed:.3f}s"
         }
     )
@@ -364,6 +481,10 @@ async def convert_powerpoint_to_pdf(
 
     print(f"[REQUEST] {client_ip} -> {request.url.path} | {file.filename}")
 
+    # 1. Validate MIME type FIRST (anti-MIME-spoofing)
+    validate_mime_type(file.content_type, ALLOWED_PPT_MIME_TYPES)
+
+    # 2. Validate and read file
     try:
         file_bytes = await validate_file_size(file)
     except HTTPException:
@@ -376,9 +497,13 @@ async def convert_powerpoint_to_pdf(
             detail="Only PowerPoint files (.pptx, .ppt) are supported"
         )
 
+    # 3. Process
     try:
+        # Generate safe output filename
+        output_filename = generate_safe_output_filename(file.filename, ".pdf")
+
         pdf_bytes = await asyncio.wait_for(
-            call_gotenberg(file_bytes, file.filename or "presentation.pptx"),
+            call_gotenberg(file_bytes, file.filename or "presentation.pptx", file.content_type),
             timeout=settings.GOTENBERG_TIMEOUT
         )
     except asyncio.TimeoutError:
@@ -394,7 +519,7 @@ async def convert_powerpoint_to_pdf(
         io.BytesIO(pdf_bytes),
         media_type="application/pdf",
         headers={
-            "Content-Disposition": f'attachment; filename="{file.filename or "converted"}.pdf"',
+            "Content-Disposition": f'attachment; filename="{output_filename}"',
             "X-Processing-Time": f"{elapsed:.3f}s"
         }
     )

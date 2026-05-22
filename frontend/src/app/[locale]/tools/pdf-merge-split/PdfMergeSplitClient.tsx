@@ -172,6 +172,7 @@ export default function PDFMergeSplitPage() {
   const [files, setFiles] = useState<PDFFile[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<Blob | null>(null);
+  const [splitError, setSplitError] = useState<string | null>(null);
   const [splitRanges, setSplitRanges] = useState("1");
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -231,28 +232,75 @@ export default function PDFMergeSplitPage() {
   const handleSplit = async () => {
     if (files.length !== 1) return;
     setIsProcessing(true);
+    setSplitError(null); // Clear previous errors
+
     try {
       const f = files[0];
       const buf = await f.file.arrayBuffer();
       const doc = await PDFDocument.load(buf, { ignoreEncryption: true });
       const total = doc.getPageCount();
       const pages: number[] = [];
+
+      // Parse page ranges with proper NaN validation
       for (const p of splitRanges.split(",").map(s => s.trim())) {
         if (p.includes("-")) {
-          const [s, e] = p.split("-").map(n => parseInt(n));
-          for (let i = s; i <= Math.min(e, total); i++) pages.push(i - 1);
+          const parts = p.split("-");
+          if (parts.length !== 2) {
+            throw new Error(`Invalid range format: "${p}". Use format like "1-5".`);
+          }
+
+          const start = parseInt(parts[0]);
+          const end = parseInt(parts[1]);
+
+          // CRITICAL: Explicit NaN check
+          if (isNaN(start) || isNaN(end)) {
+            throw new Error(`Invalid page number in range "${p}". Please enter valid page numbers.`);
+          }
+
+          // Validate range bounds
+          if (start < 1 || end < 1 || start > total || end > total) {
+            throw new Error(`Page range "${p}" is out of bounds. Document has ${total} pages. Valid range: 1-${total}.`);
+          }
+
+          if (start > end) {
+            throw new Error(`Invalid range "${p}": start page must be less than or equal to end page.`);
+          }
+
+          for (let i = start; i <= Math.min(end, total); i++) {
+            pages.push(i - 1);
+          }
         } else {
           const n = parseInt(p);
-          if (n >= 1 && n <= total) pages.push(n - 1);
+
+          // CRITICAL: Explicit NaN check - reject invalid input
+          if (isNaN(n)) {
+            throw new Error(`Invalid page number "${p}". Please enter a valid page number (1-${total}).`);
+          }
+
+          // Validate bounds
+          if (n < 1 || n > total) {
+            throw new Error(`Page ${n} is out of bounds. Document has ${total} pages.`);
+          }
+
+          pages.push(n - 1);
         }
       }
+
+      if (pages.length === 0) {
+        throw new Error("No valid pages specified. Please enter page numbers within the document range.");
+      }
+
       const unique = [...new Set(pages)].sort((a, b) => a - b);
       const newDoc = await PDFDocument.create();
       const copied = await newDoc.copyPages(doc, unique);
       copied.forEach((p) => newDoc.addPage(p));
       const bytes = await newDoc.save();
       setResult(new Blob([bytes], { type: "application/pdf" }));
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+      setSplitError(e instanceof Error ? e.message : "Failed to split PDF. Please check your page range.");
+      setResult(null);
+    }
     setIsProcessing(false);
   };
 
@@ -386,10 +434,18 @@ export default function PDFMergeSplitPage() {
                 <input
                   type="text"
                   value={splitRanges}
-                  onChange={(e) => setSplitRanges(e.target.value)}
+                  onChange={(e) => { setSplitRanges(e.target.value); setSplitError(null); }}
                   placeholder={t("pageRangePlaceholder")}
-                  className="w-full px-4 py-2.5 bg-canvas border border-hairline rounded-md text-ink font-mono focus:border-primary focus:outline-none"
+                  className={`w-full px-4 py-2.5 bg-canvas border rounded-md text-ink font-mono focus:outline-none ${
+                    splitError ? "border-error focus:border-error" : "border-hairline focus:border-primary"
+                  }`}
                 />
+                {/* Error Display */}
+                {splitError && (
+                  <div className="mt-3 p-3 bg-error/10 border border-error/20 rounded-md">
+                    <p className="text-body-sm text-error font-medium">{splitError}</p>
+                  </div>
+                )}
                 <p className="mt-2 text-body-sm text-muted">
                   {t("totalPages")}: {files[0]?.pageCount || 0}
                 </p>
