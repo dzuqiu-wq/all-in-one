@@ -96,6 +96,13 @@ jobs:
           script: |
             set -euo pipefail
 
+            # Non-interactive SSH sessions do NOT source ~/.bashrc or ~/.profile,
+            # so PATH may be limited to /usr/bin:/bin and miss /usr/local/bin —
+            # which is exactly where the docker-compose v1 binary lives on most
+            # distributions. Export a robust PATH up front so both `docker` and
+            # `docker-compose` resolve regardless of where they are installed.
+            export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:$PATH"
+
             cd "${{ secrets.VPS_PROJECT_PATH }}"
 
             echo "==> Sync code from origin/main"
@@ -106,11 +113,28 @@ jobs:
             git reset --hard origin/main
 
             echo "==> Resolve docker compose command"
-            if command -v docker-compose >/dev/null 2>&1; then
-              DC="docker-compose"
-            else
+            # Prefer the modern `docker compose` plugin, then fall back to the
+            # legacy `docker-compose` v1 binary. Both are probed with absolute
+            # `command -v` checks so a stripped PATH cannot mask them — and
+            # if BOTH are missing we exit loudly with an actionable error
+            # instead of silently exec-ing nothing.
+            if docker compose version >/dev/null 2>&1; then
               DC="docker compose"
+            elif command -v docker-compose >/dev/null 2>&1; then
+              DC="docker-compose"
+            elif [ -x /usr/local/bin/docker-compose ]; then
+              DC="/usr/local/bin/docker-compose"
+            elif [ -x /usr/bin/docker-compose ]; then
+              DC="/usr/bin/docker-compose"
+            else
+              echo "::error::Neither 'docker compose' plugin nor 'docker-compose' binary is available on the VPS."
+              echo "Install one of:"
+              echo "  • Docker Engine + Compose plugin: https://docs.docker.com/engine/install/"
+              echo "  • Standalone docker-compose: https://github.com/docker/compose/releases"
+              echo "Verified PATH at this point: $PATH"
+              exit 1
             fi
+            echo "    using: $DC ($($DC version --short 2>/dev/null || $DC --version))"
 
             COMPOSE_FILE="docker-compose.prod.yml"
 
