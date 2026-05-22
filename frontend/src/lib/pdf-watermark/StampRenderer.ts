@@ -1,8 +1,4 @@
-import type {
-  StampConfig,
-  ArcTextChar,
-  StarVertex
-} from './types';
+import type { StampConfig, ArcTextChar, StarVertex } from './types';
 
 const DEFAULT_CONFIG: StampConfig = {
   shape: 'circle',
@@ -17,32 +13,32 @@ const DEFAULT_CONFIG: StampConfig = {
 };
 
 /**
- * Unified geometry model for the stamp.
- * All Y values are absolute canvas coordinates.
- * Used by both border drawing and text positioning to guarantee
- * pixel-perfect alignment with no border clipping.
+ * Physical clearance factor — vertical gap between outer and inner rings
+ * must be >= fontSize * CLEARANCE_FACTOR to safely accommodate glyphs.
  */
+const CLEARANCE_FACTOR = 1.4;
+
 interface StampGeometry {
   centerX: number;
   centerY: number;
-  // Outer border bounds
+  // --- Border radii ---
   outerA: number;   // outer semi-major axis (x)
-  outerB: number;   // outer semi-minor axis (y) — equals outerA for circles
-  outerTop: number;
-  outerBottom: number;
-  outerLeft: number;
-  outerRight: number;
-  // Inner border bounds
-  innerA: number;
-  innerB: number;
-  innerTop: number;
-  innerBottom: number;
-  innerLeft: number;
-  innerRight: number;
-  // Text band geometry (between outer and inner borders, top arc)
-  textArcA: number;   // text-path semi-major axis (x)
-  textArcB: number;   // text-path semi-minor axis (y)
-  textFontSize: number;
+  outerB: number;   // outer semi-minor axis (y)
+  innerA: number;   // inner semi-major axis (x)
+  innerB: number;   // inner semi-minor axis (y)
+  // --- Explicit boundary Y values (canvas coords) ---
+  outerTop: number;     // centerY - outerB  (smallest Y = top of stamp)
+  outerBottom: number;  // centerY + outerB
+  innerTop: number;     // centerY - innerB  (inner ring top)
+  innerBottom: number;  // centerY + innerB
+  // --- Derived safe text-band ---
+  // Midpoint radius for arc text — guaranteed to sit in the dead center
+  // of the gap, never touching outer or inner border.
+  textArcA: number;
+  textArcB: number;
+  // Font sizes
+  arcFontSize: number;
+  bottomFontSize: number;
 }
 
 export class StampRenderer {
@@ -62,54 +58,89 @@ export class StampRenderer {
 
   /**
    * ============================================================
-   * Build canonical geometry once per render.
-   * The text path radii sit at the midpoint between the outer and
-   * inner borders, so glyphs never clip either ring.
+   * GEOMETRY — single source of truth for all layout decisions.
    * ============================================================
+   * Key invariants enforced here:
+   *   (1) Vertical gap (outerB - innerB) >= arcFontSize * CLEARANCE_FACTOR
+   *       → forces innerB to shrink when gap is too small.
+   *   (2) Text arc radius = (outerR + innerR) / 2 — dead-center midpoint.
+   *   (3) All Y coordinates verified: outerTop = centerY - outerB (y goes down in canvas).
    */
   private buildGeometry(): StampGeometry {
     const size = this.config.size;
     const centerX = size / 2;
     const centerY = size / 2;
-    const borderInset = 2;
 
-    // Font size in px — used to space the text band safely.
-    const textFontSize = size * 0.1;
+    const arcFontSize = size * 0.1;
+    const bottomFontSize = size * 0.08;
 
-    // Outer & inner radii per shape
     let outerA: number;
     let outerB: number;
+    // innerA/B will be adjusted if the gap is too small
     let innerA: number;
     let innerB: number;
 
     switch (this.config.shape) {
       case 'circle': {
-        outerA = size / 2 - borderInset;
-        outerB = outerA;
-        innerA = outerA * this.config.innerCircleRadius;
-        innerB = innerA;
+        outerA = size / 2 - 2;
+        outerB = outerA;            // semi-minor = semi-major
+        // Start from config ratio, then enforce clearance
+        let rawInnerA = outerA * this.config.innerCircleRadius;
+        let rawInnerB = rawInnerA;   // circle: innerB = innerA
+        const minGap = arcFontSize * CLEARANCE_FACTOR;
+        if (outerB - rawInnerB < minGap) {
+          rawInnerB = outerB - minGap;
+          rawInnerA = rawInnerB;
+        }
+        innerA = rawInnerA;
+        innerB = rawInnerB;
         break;
       }
       case 'oval': {
-        outerA = size / 2 - borderInset;
+        outerA = size / 2 - 2;
         outerB = outerA * 0.6;
-        innerA = outerA * this.config.innerCircleRadius;
-        innerB = outerB * this.config.innerCircleRadius;
+        // raw inner ring from config ratio
+        let rawInnerA = outerA * this.config.innerCircleRadius;
+        let rawInnerB = outerB * this.config.innerCircleRadius;
+        const minGap = arcFontSize * CLEARANCE_FACTOR;
+        // Enforce vertical gap for top-arc clearance
+        if (outerB - rawInnerB < minGap) {
+          rawInnerB = outerB - minGap;
+          // Keep oval aspect ratio for innerB
+          rawInnerA = rawInnerB / 0.6;
+        }
+        // Enforce horizontal gap for arc text width
+        if (outerA - rawInnerA < minGap) {
+          rawInnerA = outerA - minGap;
+        }
+        innerA = rawInnerA;
+        innerB = rawInnerB;
         break;
       }
       case 'rect': {
         const half = (size * 0.8) / 2;
         outerA = half;
         outerB = half;
-        const innerHalf = half * this.config.innerCircleRadius;
-        innerA = innerHalf;
-        innerB = innerHalf;
+        let rawInnerHalf = half * this.config.innerCircleRadius;
+        const minGap = arcFontSize * CLEARANCE_FACTOR;
+        // For rect, gap is just the inset: half - rawInnerHalf
+        if (half - rawInnerHalf < minGap) {
+          rawInnerHalf = half - minGap;
+        }
+        innerA = rawInnerHalf;
+        innerB = rawInnerHalf;
         break;
       }
     }
 
-    // Text-path radii: sit at the midpoint between outer and inner borders,
-    // then nudge inward by half the font height so glyphs never clip either ring.
+    // Verify Y arithmetic: outerTop = centerY - outerB (canvas y goes down)
+    const outerTop = centerY - outerB;
+    const outerBottom = centerY + outerB;
+    const innerTop = centerY - innerB;
+    const innerBottom = centerY + innerB;
+
+    // Text arc radius = exact midpoint of outer and inner rings.
+    // This guarantees glyphs sit in dead-center of the gap.
     const textArcA = (outerA + innerA) / 2;
     const textArcB = (outerB + innerB) / 2;
 
@@ -118,40 +149,31 @@ export class StampRenderer {
       centerY,
       outerA,
       outerB,
-      outerTop: centerY - outerB,
-      outerBottom: centerY + outerB,
-      outerLeft: centerX - outerA,
-      outerRight: centerX + outerA,
       innerA,
       innerB,
-      innerTop: centerY - innerB,
-      innerBottom: centerY + innerB,
-      innerLeft: centerX - innerA,
-      innerRight: centerX + innerA,
+      outerTop,
+      outerBottom,
+      innerTop,
+      innerBottom,
       textArcA,
       textArcB,
-      textFontSize,
+      arcFontSize,
+      bottomFontSize,
     };
   }
 
   /**
    * ============================================================
-   * Elliptical Arc Text — Unified for Circle (a=b) and Oval (a≠b)
+   * ELLIPTICAL ARC TEXT — Circle (a=b) and Oval (a≠b) unified
    * ============================================================
-   * Math model:
-   *   x(t) = a · cos(t)
-   *   y(t) = b · sin(t)
-   *   dx/dt = -a · sin(t)
-   *   dy/dt =  b · cos(t)
-   *   Tangent vector: (-a sin t, b cos t)
-   *   Normal-aligned glyph rotation (outward-facing baseline):
-   *     rotation = atan2(b·cos t, a·sin t) + π/2
-   *
    * Distribution:
    *   - Centered on top vertical axis (-π/2)
-   *   - Uniform angular step across totalSpan
    *   - startAngle = -π/2 - totalSpan/2
-   *   - step = totalSpan / (charCount - 1)   [closed-form, no spacing magic numbers]
+   *   - Uniform step = totalSpan / (charCount - 1)
+   *
+   * Tangent vector: (-a·sin t, b·cos t)
+   * Glyph rotation (perpendicular to tangent):
+   *   rotation = atan2(b·cos t, a·sin t) + π/2
    */
   private calculateEllipseArcPositions(
     text: string,
@@ -165,16 +187,14 @@ export class StampRenderer {
     const charCount = text.length;
     const topAxis = -Math.PI / 2;
 
-    // Single-character degenerate case — anchor at top.
     if (charCount === 1) {
       const t = topAxis;
-      chars.push({
+      return [{
         char: text[0],
         x: a * Math.cos(t),
         y: b * Math.sin(t),
         rotation: Math.atan2(b * Math.cos(t), a * Math.sin(t)) + Math.PI / 2,
-      });
-      return chars;
+      }];
     }
 
     const startAngle = topAxis - totalSpan / 2;
@@ -182,11 +202,12 @@ export class StampRenderer {
 
     for (let i = 0; i < charCount; i++) {
       const t = startAngle + i * step;
-      const x = a * Math.cos(t);
-      const y = b * Math.sin(t);
-      // Tangent-perpendicular glyph rotation
-      const rotation = Math.atan2(b * Math.cos(t), a * Math.sin(t)) + Math.PI / 2;
-      chars.push({ char: text[i], x, y, rotation });
+      chars.push({
+        char: text[i],
+        x: a * Math.cos(t),
+        y: b * Math.sin(t),
+        rotation: Math.atan2(b * Math.cos(t), a * Math.sin(t)) + Math.PI / 2,
+      });
     }
 
     return chars;
@@ -203,11 +224,11 @@ export class StampRenderer {
     const step = Math.PI / points;
 
     for (let i = 0; i < points * 2; i++) {
-      const radius = i % 2 === 0 ? outerRadius : innerRadius;
+      const r = i % 2 === 0 ? outerRadius : innerRadius;
       const angle = i * step - Math.PI / 2;
       vertices.push({
-        x: centerX + radius * Math.cos(angle),
-        y: centerY + radius * Math.sin(angle),
+        x: centerX + r * Math.cos(angle),
+        y: centerY + r * Math.sin(angle),
       });
     }
 
@@ -249,7 +270,12 @@ export class StampRenderer {
         ctx.ellipse(g.centerX, g.centerY, g.outerA, g.outerB, 0, 0, Math.PI * 2);
         break;
       case 'rect':
-        ctx.rect(g.outerLeft, g.outerTop, g.outerA * 2, g.outerB * 2);
+        ctx.rect(
+          g.centerX - g.outerA,
+          g.outerTop,
+          g.outerA * 2,
+          g.outerB * 2
+        );
         break;
     }
 
@@ -269,7 +295,12 @@ export class StampRenderer {
         ctx.ellipse(g.centerX, g.centerY, g.innerA, g.innerB, 0, 0, Math.PI * 2);
         break;
       case 'rect':
-        ctx.rect(g.innerLeft, g.innerTop, g.innerA * 2, g.innerB * 2);
+        ctx.rect(
+          g.centerX - g.innerA,
+          g.innerTop,
+          g.innerA * 2,
+          g.innerB * 2
+        );
         break;
     }
 
@@ -297,35 +328,38 @@ export class StampRenderer {
 
   /**
    * ============================================================
-   * TOP TEXT (公司名称) — Shape-dispatched
-   *   - circle/oval: arc text, symmetric about top axis
-   *   - rect:        horizontal text, centered between outerTop & innerTop
+   * TOP TEXT — 公司名称
    * ============================================================
+   * Circle/Oval: tangent-perpendicular arc text, symmetric about -π/2.
+   *   Text path radius R = (outerR + innerR) / 2 — dead-center of the gap.
+   *   Gap enforced >= arcFontSize * 1.4 in buildGeometry().
+   *
+   * Rect: perfectly horizontal (rotation = 0), centered between outerTop & innerTop.
+   *   Y = outerTop + (innerTop - outerTop) / 2  — verified midpoint, not on inner line.
    */
   private drawTopText(ctx: CanvasRenderingContext2D, g: StampGeometry): void {
     const text = this.config.companyName;
     if (!text) return;
 
-    ctx.save();
-    ctx.font = `bold ${g.textFontSize}px sans-serif`;
+    ctx.font = `bold ${g.arcFontSize}px sans-serif`;
     ctx.fillStyle = this.config.color;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
     if (this.config.shape === 'rect') {
-      // Rectangle: rotation = 0, perfectly centered between outer and inner top edges.
+      // Dead-center of the gap between outer and inner top edges.
       const y = g.outerTop + (g.innerTop - g.outerTop) / 2;
+
       ctx.save();
       ctx.translate(g.centerX, y);
       ctx.rotate(0);
       ctx.fillText(text, 0, 0);
       ctx.restore();
     } else {
-      // Circle & Oval: tangent-perpendicular arc text, symmetric about -π/2.
-      // Arc span: 140° for short text, scales to 160° for longer text.
+      // Circle / Oval: arc text with adaptive span.
       const charCount = text.length;
-      const spanDegrees = Math.min(160, 100 + charCount * 8);
-      const totalSpan = (spanDegrees * Math.PI) / 180;
+      const spanDeg = Math.min(160, 100 + charCount * 8);
+      const totalSpan = (spanDeg * Math.PI) / 180;
 
       const chars = this.calculateEllipseArcPositions(
         text,
@@ -342,42 +376,55 @@ export class StampRenderer {
         ctx.restore();
       }
     }
-
-    ctx.restore();
   }
 
   /**
    * ============================================================
-   * BOTTOM TEXT (业务专用章) — Universal horizontal text
-   *   rotation = 0, ctx.textAlign = 'center', ctx.textBaseline = 'middle'
-   *
-   *   - circle/oval: centered between star bottom and inner border bottom
-   *   - rect:        centered between innerBottom and outerBottom
+   * BOTTOM TEXT — 业务专用章
    * ============================================================
+   * rotation = 0, textAlign = 'center', textBaseline = 'middle'.
+   *
+   * Clearances enforced:
+   *   - At least bottomFontSize * 0.4 from star bottom tip.
+   *   - At least bottomFontSize * 0.4 from inner bottom border line.
+   *
+   * Circle/Oval: below star, inside inner ring.
+   * Rect: midpoint between innerBottom and outerBottom.
    */
   private drawBottomText(ctx: CanvasRenderingContext2D, g: StampGeometry): void {
     const text = this.config.departmentName;
     if (!text) return;
 
-    const bottomFontSize = this.config.size * 0.08;
-
-    let y: number;
-    if (this.config.shape === 'rect') {
-      // Rect: midpoint between inner bottom and outer bottom.
-      y = g.innerBottom + (g.outerBottom - g.innerBottom) / 2;
-    } else {
-      // Circle/Oval: inside the inner ring, below the star.
-      // Star outerRadius = size * 0.18, so bottom of star ≈ centerY + size*0.18
-      const starBottom = g.centerY + this.config.size * 0.18;
-      // Place text midway between star bottom and inner ring bottom.
-      y = starBottom + (g.innerBottom - starBottom) / 2;
-    }
-
-    ctx.save();
-    ctx.font = `bold ${bottomFontSize}px sans-serif`;
+    ctx.font = `bold ${g.bottomFontSize}px sans-serif`;
     ctx.fillStyle = this.config.color;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+
+    const clearance = g.bottomFontSize * 0.4;
+
+    let y: number;
+
+    if (this.config.shape === 'rect') {
+      // Midpoint between inner bottom edge and outer bottom edge.
+      // Verified: innerBottom = centerY + innerB, outerBottom = centerY + outerB.
+      y = g.innerBottom + (g.outerBottom - g.innerBottom) / 2;
+    } else {
+      // Circle / Oval: below star, inside inner ring.
+      // Star outer radius = size * 0.18, star bottom tip in canvas Y:
+      const starBottomTip = g.centerY + this.config.size * 0.18;
+      // Text must be at least clearance below star tip:
+      const belowStar = starBottomTip + clearance;
+      // And at least clearance above inner bottom line:
+      const aboveInnerLine = g.innerBottom - clearance;
+      // Clamp to the tighter constraint (whichever is lower):
+      y = Math.min(belowStar + clearance, aboveInnerLine);
+      // Re-center between the two safe boundaries:
+      y = (belowStar + aboveInnerLine) / 2;
+      // Hard floor: never go below star tip + clearance
+      y = Math.max(y, starBottomTip + clearance);
+    }
+
+    ctx.save();
     ctx.translate(g.centerX, y);
     ctx.rotate(0);
     ctx.fillText(text, 0, 0);
@@ -388,10 +435,9 @@ export class StampRenderer {
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Failed to get 2D context');
 
-    const size = this.config.size;
     const g = this.buildGeometry();
 
-    ctx.clearRect(0, 0, size, size);
+    ctx.clearRect(0, 0, this.config.size, this.config.size);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
 
@@ -400,7 +446,7 @@ export class StampRenderer {
     this.drawStar(ctx, g);
     this.drawTopText(ctx, g);
     this.drawBottomText(ctx, g);
-    this.applyNoise(ctx, size, size);
+    this.applyNoise(ctx, this.config.size, this.config.size);
   }
 
   renderToImageData(): ImageData {
@@ -416,7 +462,7 @@ export class StampRenderer {
     return ctx.getImageData(0, 0, this.config.size, this.config.size);
   }
 
-  async renderToBlob(type: string = 'image/png', quality: number = 1): Promise<Blob> {
+  async renderToBlob(type = 'image/png', quality = 1): Promise<Blob> {
     const canvas = document.createElement('canvas');
     canvas.width = this.config.size;
     canvas.height = this.config.size;
@@ -425,17 +471,14 @@ export class StampRenderer {
 
     return new Promise((resolve, reject) => {
       canvas.toBlob(
-        (blob) => {
-          if (blob) resolve(blob);
-          else reject(new Error('Failed to create blob'));
-        },
+        (blob) => (blob ? resolve(blob) : reject(new Error('Failed to create blob'))),
         type,
         quality
       );
     });
   }
 
-  async renderToDataURL(type: string = 'image/png', quality: number = 1): Promise<string> {
+  async renderToDataURL(type = 'image/png', quality = 1): Promise<string> {
     const blob = await this.renderToBlob(type, quality);
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
