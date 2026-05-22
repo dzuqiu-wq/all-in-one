@@ -1,6 +1,7 @@
 import type {
   StampConfig,
   ArcTextChar,
+  RectTextChar,
   StarVertex
 } from './types';
 
@@ -31,9 +32,21 @@ export class StampRenderer {
     return { ...this.config };
   }
 
-  private calculateArcTextPositions(
+  /**
+   * ============================================================
+   * 椭圆/正圆弧形文字轨迹算法
+   * ============================================================
+   * 使用椭圆参数方程: x = a*cos(θ), y = b*sin(θ)
+   *
+   * 关键：切线修正
+   * 椭圆切线斜率 dy/dx = (b*cos(θ)) / (-a*sin(θ))
+   * 法线旋转角 rotation = atan2(b*cos(θ), -a*sin(θ)) + π/2
+   * （使字符严格垂直于椭圆弧度）
+   */
+  private calculateEllipseArcPositions(
     text: string,
-    radius: number,
+    a: number,  // 横向半轴
+    b: number,  // 纵向半轴
     startAngle: number,
     endAngle: number
   ): ArcTextChar[] {
@@ -48,12 +61,56 @@ export class StampRenderer {
 
     for (let i = 0; i < charCount; i++) {
       const ratio = (startOffset + i * spacing) / totalWidth;
-      const angle = startAngle + ratio * totalAngle;
+      const theta = startAngle + ratio * totalAngle;
       const char = text[i];
 
-      const x = radius * Math.cos(angle);
-      const y = radius * Math.sin(angle);
-      const rotation = angle - Math.PI / 2 + Math.PI;
+      // 椭圆参数方程: x = a*cos(θ), y = b*sin(θ)
+      const x = a * Math.cos(theta);
+      const y = b * Math.sin(theta);
+
+      // 关键切线修正：计算法线旋转角
+      // 椭圆一阶导数 dy/dx = (dy/dθ) / (dx/dθ) = (-b*sin(θ)) / (-a*sin(θ)) * cos(θ)?
+      // 实际上: dx/dθ = -a*sin(θ), dy/dθ = b*cos(θ)
+      // 切线方向向量: (-a*sin(θ), b*cos(θ))
+      // 法线旋转角: rotation = atan2(dx/dθ, dy/dθ) + π/2
+      // 但画布坐标系y轴向下，所以 rotation = atan2(-dx/dθ, -dy/dθ)
+      // 简化为: rotation = Math.atan2(b * Math.cos(theta), a * Math.sin(theta)) + Math.PI / 2
+      const rotation = Math.atan2(b * Math.cos(theta), a * Math.sin(theta)) + Math.PI / 2;
+
+      chars.push({ char, x, y, rotation });
+    }
+
+    return chars;
+  }
+
+  /**
+   * ============================================================
+   * 矩形顶部边框文字轨迹算法（线性边界分发）
+   * ============================================================
+   * 彻底摒弃圆周极坐标，使用线性插值
+   * 所有字符 rotation = 0（水平）
+   */
+  private calculateRectLinearPositions(
+    text: string,
+    rectWidth: number,
+    topY: number
+  ): RectTextChar[] {
+    if (!text) return [];
+
+    const chars: RectTextChar[] = [];
+    const charCount = text.length;
+    const charWidth = rectWidth / charCount;
+
+    // 沿顶部边框线性平铺，从左到右
+    for (let i = 0; i < charCount; i++) {
+      const char = text[i];
+
+      // 字符中心点：线性插值
+      const x = (i + 0.5) * charWidth;
+      const y = topY;
+
+      // 【角度归零】：矩形顶部排列时 rotation 强制为 0
+      const rotation = 0;
 
       chars.push({ char, x, y, rotation });
     }
@@ -119,13 +176,18 @@ export class StampRenderer {
       case 'circle':
         ctx.arc(centerX, centerY, size / 2 - 2, 0, Math.PI * 2);
         break;
-      case 'oval':
-        ctx.ellipse(centerX, centerY, size / 2 - 2, size / 3 - 2, 0, 0, Math.PI * 2);
+      case 'oval': {
+        // 椭圆：横向半轴 a = size/2 - 2, 纵向半轴 b = a * 0.6
+        const a = size / 2 - 2;
+        const b = a * 0.6;
+        ctx.ellipse(centerX, centerY, a, b, 0, 0, Math.PI * 2);
         break;
-      case 'rect':
+      }
+      case 'rect': {
         const rectSize = size * 0.8;
         ctx.rect(centerX - rectSize / 2, centerY - rectSize / 2, rectSize, rectSize);
         break;
+      }
     }
 
     ctx.strokeStyle = this.config.color;
@@ -147,13 +209,17 @@ export class StampRenderer {
       case 'circle':
         ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
         break;
-      case 'oval':
-        ctx.ellipse(centerX, centerY, innerRadius, innerRadius * 0.7, 0, 0, Math.PI * 2);
+      case 'oval': {
+        const a = innerRadius;
+        const b = a * 0.6;
+        ctx.ellipse(centerX, centerY, a, b, 0, 0, Math.PI * 2);
         break;
-      case 'rect':
+      }
+      case 'rect': {
         const rectSize = radius * this.config.innerCircleRadius * 1.6;
         ctx.rect(centerX - rectSize / 2, centerY - rectSize / 2, rectSize, rectSize);
         break;
+      }
     }
 
     ctx.strokeStyle = this.config.color;
@@ -183,30 +249,86 @@ export class StampRenderer {
     ctx.fill();
   }
 
+  /**
+   * ============================================================
+   * 弧形文字绘制 - 根据形状分发到正确的算法
+   * ============================================================
+   */
   private drawArcText(
     ctx: CanvasRenderingContext2D,
     centerX: number,
     centerY: number,
     radius: number
   ): void {
-    const chars = this.calculateArcTextPositions(
-      this.config.companyName,
-      radius,
-      -Math.PI * 0.8,
-      -Math.PI * 0.2
-    );
+    const text = this.config.companyName;
+    if (!text) return;
 
     ctx.font = `bold ${this.config.size * 0.1}px sans-serif`;
     ctx.fillStyle = this.config.color;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    for (const { char, x, y, rotation } of chars) {
-      ctx.save();
-      ctx.translate(centerX + x, centerY + y);
-      ctx.rotate(rotation);
-      ctx.fillText(char, 0, 0);
-      ctx.restore();
+    switch (this.config.shape) {
+      case 'circle': {
+        // 正圆：使用标准半径 a = b = radius
+        const chars = this.calculateEllipseArcPositions(
+          text,
+          radius * 0.75,  // a = 横向半轴
+          radius * 0.75,  // b = 纵向半轴（相等）
+          -Math.PI * 0.8,
+          -Math.PI * 0.2
+        );
+        for (const { char, x, y, rotation } of chars) {
+          ctx.save();
+          ctx.translate(centerX + x, centerY + y);
+          ctx.rotate(rotation);
+          ctx.fillText(char, 0, 0);
+          ctx.restore();
+        }
+        break;
+      }
+      case 'oval': {
+        // 椭圆：a ≠ b，使用真正的椭圆参数方程
+        const a = radius * 0.75;  // 横向半轴
+        const b = radius * 0.45;  // 纵向半轴（椭圆更扁平）
+        const chars = this.calculateEllipseArcPositions(
+          text,
+          a,
+          b,
+          -Math.PI * 0.8,
+          -Math.PI * 0.2
+        );
+        for (const { char, x, y, rotation } of chars) {
+          ctx.save();
+          ctx.translate(centerX + x, centerY + y);
+          ctx.rotate(rotation);
+          ctx.fillText(char, 0, 0);
+          ctx.restore();
+        }
+        break;
+      }
+      case 'rect': {
+        // 矩形：使用线性边界分发算法，彻底摒弃圆周极坐标
+        const rectSize = this.config.size * 0.8;
+        const borderPadding = 20;
+        const availableWidth = rectSize - borderPadding * 2;
+        const topY = centerY - rectSize / 2 + borderPadding;
+
+        const chars = this.calculateRectLinearPositions(
+          text,
+          availableWidth,
+          topY
+        );
+
+        for (const { char, x, y, rotation } of chars) {
+          ctx.save();
+          ctx.translate(centerX - rectSize / 2 + borderPadding + x, y);
+          ctx.rotate(rotation);
+          ctx.fillText(char, 0, 0);
+          ctx.restore();
+        }
+        break;
+      }
     }
   }
 
@@ -243,7 +365,7 @@ export class StampRenderer {
     this.drawBorder(ctx, centerX, centerY, size);
     this.drawInnerCircle(ctx, centerX, centerY, radius);
     this.drawStar(ctx, centerX, centerY, size);
-    this.drawArcText(ctx, centerX, centerY, radius * 0.75);
+    this.drawArcText(ctx, centerX, centerY, radius);
     this.drawHorizontalText(ctx, centerX, centerY, radius);
     this.applyNoise(ctx, size, size);
   }

@@ -54,12 +54,20 @@ export interface ProcessingResult {
   blob: Blob;
 }
 
-// Arc text position calculation result
+// Arc text position calculation result (for circular/elliptical paths)
 export interface ArcTextChar {
   char: string;
   x: number;
   y: number;
   rotation: number; // radians
+}
+
+// Rect text position calculation result (for linear border paths)
+export interface RectTextChar {
+  char: string;
+  x: number;  // Local X within available width (0 to availableWidth)
+  y: number;  // Fixed Y at top border
+  rotation: number;  // Always 0 for rectangular top border
 }
 
 // Five-pointed star vertex
