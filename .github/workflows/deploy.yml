@@ -94,7 +94,7 @@ jobs:
           # rather than several `script:` lines so any failure (e.g. git
           # conflict, docker error) aborts the whole rollout via `set -e`.
           script: |
-            set -euo pipefail
+            set -euxo pipefail
 
             # ERR trap: emit the failing command + line number + exit code so
             # remote failures cannot exit silently. Without this, `set -e` just
@@ -199,28 +199,88 @@ jobs:
             rm -f "$CONFIG_STDERR"
             echo "    compose config OK"
             # Restore strict mode + ERR trap for the rest of the rollout.
-            set -e
+            # (xtrace is re-enabled because the outer set is now `set -euxo pipefail`.)
+            set -ex
             trap 'rc=$?; echo "::error::Remote step failed at line ${LINENO}: command \"${BASH_COMMAND}\" exited with code ${rc}"; exit $rc' ERR
+
+            # ----------------------------------------------------------------
+            # Hard cleanup of any stale containers from previous runs.
+            # ----------------------------------------------------------------
+            # Symptom we are guarding against: a previous deploy half-rolled
+            # and left `all-in-one-toolbox-nginx` (or the other named
+            # containers) hanging around. The next `up -d` would then fail
+            # with "Conflict. The container name X is already in use" — and
+            # because the failure manifests inside `docker-compose up`, the
+            # outer Actions step gets a bare exit 1 with no detail.
+            #
+            # We forcibly remove the well-known container names before
+            # touching compose. `|| true` keeps the script alive if the
+            # container is already gone.
+            echo "==> Sweep stale containers (idempotent)"
+            for name in \
+              all-in-one-toolbox-nginx \
+              all-in-one-toolbox-frontend \
+              all-in-one-toolbox-backend \
+              all-in-one-toolbox-gotenberg \
+            ; do
+              if docker ps -a --format '{{.Names}}' | grep -Fxq "$name"; then
+                echo "    removing stale container: $name"
+                docker rm -f "$name" 2>&1 || true
+              fi
+            done
+
+            # Also tear down whatever the compose project thinks is running
+            # (this also detaches any leftover networks/volumes claimed by
+            # the dev compose file, preventing port-binding ghosts).
+            echo "==> Tear down previous compose project (down --remove-orphans)"
+            set +e
+            $DC -f "$COMPOSE_FILE" down --remove-orphans 2>&1
+            DOWN_RC=$?
+            set -e
+            if [ "$DOWN_RC" -ne 0 ]; then
+              echo "::warning::'$DC down' exited $DOWN_RC — continuing because this is best-effort cleanup"
+            fi
 
             if [ "${SKIP_BUILD:-false}" = "true" ]; then
               echo "==> Rolling without rebuild (SKIP_BUILD=true)"
-              # Surface every container/network/volume action via xtrace.
-              set -x
-              $DC -f "$COMPOSE_FILE" up -d --remove-orphans 2>&1
-              set +x
+              # IMPORTANT: use `if ! … ; then` instead of bare invocation so we
+              # can capture the exit code AND keep stderr in the Actions log,
+              # even with the surrounding set -e + ERR trap. The 2>&1 merge
+              # guarantees Docker's native error text is not lost to a pipe.
+              if ! $DC -f "$COMPOSE_FILE" up -d --remove-orphans 2>&1; then
+                rc=$?
+                echo "::error::'$DC up -d' failed (exit $rc) — printing container state for context"
+                $DC -f "$COMPOSE_FILE" ps --all 2>&1 || true
+                docker ps -a --filter "name=all-in-one-toolbox" 2>&1 || true
+                exit $rc
+              fi
             else
               echo "==> Rebuilding production images"
               # The build step is by far the most likely failure point on a
               # fresh VPS: missing base image, disk full, network outage to the
-              # registry, broken Dockerfile. Force xtrace + merge stderr so the
-              # Actions log captures the actual docker error verbatim.
-              set -x
-              $DC -f "$COMPOSE_FILE" build --pull 2>&1
-              set +x
+              # registry, broken Dockerfile. Wrap in `if !` so the docker error
+              # is captured verbatim and not swallowed by the strict shell.
+              if ! $DC -f "$COMPOSE_FILE" build --pull --progress=plain 2>&1; then
+                rc=$?
+                echo "::error::'$DC build --pull' failed (exit $rc) — printing diagnostic context"
+                echo "----- df -h -----"
+                df -h 2>&1 || true
+                echo "----- free -h -----"
+                free -h 2>&1 || true
+                echo "----- docker image ls (top 20) -----"
+                docker image ls 2>&1 | head -20 || true
+                exit $rc
+              fi
               echo "==> Rolling stack"
-              set -x
-              $DC -f "$COMPOSE_FILE" up -d --remove-orphans 2>&1
-              set +x
+              if ! $DC -f "$COMPOSE_FILE" up -d --remove-orphans 2>&1; then
+                rc=$?
+                echo "::error::'$DC up -d' failed (exit $rc) — printing container state"
+                $DC -f "$COMPOSE_FILE" ps --all 2>&1 || true
+                docker ps -a --filter "name=all-in-one-toolbox" 2>&1 || true
+                echo "----- recent docker logs (last 50 lines, all services) -----"
+                $DC -f "$COMPOSE_FILE" logs --tail 50 2>&1 || true
+                exit $rc
+              fi
             fi
 
             echo "==> Wait for nginx healthcheck (up to 90 s)"
