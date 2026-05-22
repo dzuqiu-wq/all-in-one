@@ -106,7 +106,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
             <a
-              href="https://github.com"
+              href="https://github.com/dzuqiu-wq/all-in-one"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden sm:inline-block text-body-sm font-medium text-body hover:text-ink transition-colors no-underline"

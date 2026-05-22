@@ -50,7 +50,7 @@ all-in-one-toolbox/
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/all-in-one-toolbox.git
+git clone https://github.com/dzuqiu-wq/all-in-one
 cd all-in-one-toolbox
 
 # 2. Run deployment script
@@ -339,7 +339,7 @@ echo "  3. Run ./deploy.sh"
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/all-in-one-toolbox.git
+git clone https://github.com/dzuqiu-wq/all-in-one
 cd all-in-one-toolbox
 
 # Create .env file

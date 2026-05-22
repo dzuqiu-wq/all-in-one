@@ -186,7 +186,7 @@ export default function Footer({ version = "0.1.0" }: FooterProps) {
                 locale={locale} 
               />
               <a
-                href="https://github.com"
+                href="https://github.com/dzuqiu-wq/all-in-one"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline"
