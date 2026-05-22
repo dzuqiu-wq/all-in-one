@@ -8,6 +8,7 @@ import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import SampleButton from "@/components/SampleButton";
+import ShareButtons from "@/components/ShareButtons";
 import { buildSampleImageFile } from "@/lib/sampleData";
 
 interface CompressionResult {
@@ -420,6 +421,21 @@ export default function ImageOptimizerPage() {
             <AdBanner slot="image-tool-mid" format="rectangle" className="mx-auto max-w-[336px]" />
           </div>
         )}
+
+        {/* Share strip */}
+        <div className="mt-8">
+          <ShareButtons
+            title={{
+              en: "Shrunk a photo 80% smaller in the browser — EXIF stripped, no upload. All-in-One Toolbox.",
+              zh: "图片在浏览器里压到原大小 20%，EXIF 自动剥，零上传。All-in-One Toolbox。",
+            }}
+            eyebrow={{
+              en: "Tell a designer friend",
+              zh: "推荐给做设计的朋友",
+            }}
+            hashtags={["ImageOptimizer", "WebP", "AllInOneToolbox"]}
+          />
+        </div>
 
         {/* FAQ */}
         <section className="mt-section pt-xl border-t border-hairline">

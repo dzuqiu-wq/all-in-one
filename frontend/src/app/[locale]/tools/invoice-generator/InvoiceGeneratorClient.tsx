@@ -15,6 +15,7 @@ import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import SampleButton from "@/components/SampleButton";
+import ShareButtons from "@/components/ShareButtons";
 import { getSampleInvoice } from "@/lib/sampleData";
 import {
   type InvoiceData,
@@ -671,6 +672,21 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
 
             <AdBanner slot="invoice-bottom" format="rectangle" className="mx-auto max-w-[336px]" />
           </div>
+        </div>
+
+        {/* Share strip */}
+        <div className="mt-8">
+          <ShareButtons
+            title={{
+              en: "Built a clean compliant invoice in 60 seconds — and exported PDF without a single upload. All-in-One Toolbox.",
+              zh: "60 秒就拼好一份合规电子发票，一行数据都没上传。All-in-One Toolbox。",
+            }}
+            eyebrow={{
+              en: "Share this with another freelancer",
+              zh: "转给另一个自由职业者朋友",
+            }}
+            hashtags={["InvoiceGenerator", "Freelance", "AllInOneToolbox"]}
+          />
         </div>
 
         {/* FAQ */}

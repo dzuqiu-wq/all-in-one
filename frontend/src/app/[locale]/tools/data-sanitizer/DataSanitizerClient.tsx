@@ -15,6 +15,7 @@ import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import SampleButton from "@/components/SampleButton";
+import ShareButtons from "@/components/ShareButtons";
 import { buildSampleSanitizerFile } from "@/lib/sampleData";
 import { EncodingDecoder } from "@/lib/data-sanitizer/EncodingDecoder";
 import { DataTransformer } from "@/lib/data-sanitizer/DataTransformer";
@@ -508,6 +509,20 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
 
         <div className="mt-8">
           <AdBanner slot="datasanitizer-bottom" format="rectangle" className="mx-auto max-w-[336px]" />
+        </div>
+
+        <div className="mt-8">
+          <ShareButtons
+            title={{
+              en: "Auto-fixed a garbled CSV (GBK → UTF-8) without leaving the browser. All-in-One Toolbox.",
+              zh: "乱码 CSV（GBK → UTF-8）一键修好，不离开浏览器。All-in-One Toolbox。",
+            }}
+            eyebrow={{
+              en: "Forward to a data analyst",
+              zh: "转发给做数据分析的朋友",
+            }}
+            hashtags={["DataSanitizer", "CSVEncoding", "AllInOneToolbox"]}
+          />
         </div>
 
         <section className="mt-section pt-xl border-t border-hairline">

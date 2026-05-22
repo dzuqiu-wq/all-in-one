@@ -15,6 +15,7 @@ import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import SampleButton from "@/components/SampleButton";
+import ShareButtons from "@/components/ShareButtons";
 import { buildSamplePdfFile } from "@/lib/sampleData";
 import { WatermarkProcessor } from "@/lib/pdf-watermark/WatermarkProcessor";
 import type {
@@ -599,6 +600,20 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
 
             <AdBanner slot="pdfwatermark-bottom" format="rectangle" className="mx-auto max-w-[336px]" />
           </div>
+        </div>
+
+        <div className="mt-8">
+          <ShareButtons
+            title={{
+              en: "Stamped a PDF with a proper electronic seal — all in the browser. All-in-One Toolbox.",
+              zh: "在浏览器内给 PDF 盖了张干净的电子章 —— 零上传。All-in-One Toolbox。",
+            }}
+            eyebrow={{
+              en: "Pass this along to your finance team",
+              zh: "把它转给你的财务同事",
+            }}
+            hashtags={["EStamp", "PDFWatermark", "AllInOneToolbox"]}
+          />
         </div>
 
         <section className="mt-section pt-xl border-t border-hairline">

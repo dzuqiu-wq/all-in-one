@@ -8,6 +8,7 @@ import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import SampleButton from "@/components/SampleButton";
+import ShareButtons from "@/components/ShareButtons";
 import { buildSampleWordPdfResult } from "@/lib/sampleData";
 
 interface ConversionResult {
@@ -444,6 +445,21 @@ export default function WordToPDFPage() {
             <AdBanner slot="wordtopdf-mid" format="rectangle" className="mx-auto max-w-[336px]" />
           </div>
         )}
+
+        {/* Share strip */}
+        <div className="mt-8">
+          <ShareButtons
+            title={{
+              en: "Just converted a .docx to PDF in 5 seconds — zero upload, memory-only pipeline. All-in-One Toolbox.",
+              zh: "刚刚 5 秒内把 .docx 转成 PDF —— 零上传、纯内存管道。All-in-One Toolbox。",
+            }}
+            eyebrow={{
+              en: "Found this conversion helpful?",
+              zh: "觉得这次转换好用？",
+            }}
+            hashtags={["WordToPDF", "AllInOneToolbox", "PrivacyTools"]}
+          />
+        </div>
 
         {/* FAQ Section */}
         <section className="mt-section pt-xl border-t border-hairline">

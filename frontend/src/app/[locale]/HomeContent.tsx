@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import AdBanner from "@/components/AdBanner";
 import SystemStatus, { type StatusEntry } from "@/components/SystemStatus";
+import ShareButtons from "@/components/ShareButtons";
 import { useLocalizedHref } from "@/i18n/useLocalizedHref";
 import {
   CATEGORIES,
@@ -256,6 +257,21 @@ export default function HomeContent() {
             </Link>
           </div>
         </div>
+      </section>
+
+      {/* ---------- Footer share strip ---------- */}
+      <section className="max-w-7xl mx-auto px-6 pb-section">
+        <ShareButtons
+          title={{
+            en: "Seven privacy-first browser tools, zero upload — All-in-One Toolbox",
+            zh: "七款隐私优先的纯浏览器工具，零上传 —— All-in-One Toolbox",
+          }}
+          eyebrow={{
+            en: "Like the toolbox? Send it forward.",
+            zh: "觉得不错？转发一手让更多人看到。",
+          }}
+          hashtags={["AllInOneToolbox", "IndieHackers", "PrivacyFirst"]}
+        />
       </section>
     </div>
   );

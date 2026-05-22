@@ -8,6 +8,7 @@ import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import SampleButton from "@/components/SampleButton";
+import ShareButtons from "@/components/ShareButtons";
 import { buildSamplePdfFile } from "@/lib/sampleData";
 
 interface PDFFile {
@@ -509,6 +510,21 @@ export default function PDFMergeSplitPage() {
             <AdBanner slot="pdf-tool-mid" format="rectangle" className="mx-auto max-w-[336px]" />
           </div>
         )}
+
+        {/* Share strip */}
+        <div className="mt-8">
+          <ShareButtons
+            title={{
+              en: "Merged & split PDFs entirely in my browser — no upload, no server. All-in-One Toolbox.",
+              zh: "在浏览器里直接合并 / 拆分 PDF —— 零上传、零服务器。All-in-One Toolbox。",
+            }}
+            eyebrow={{
+              en: "Saved you a trip to Acrobat?",
+              zh: "省下了一次 Acrobat 的钱？",
+            }}
+            hashtags={["PDFTools", "AllInOneToolbox", "BrowserPDF"]}
+          />
+        </div>
 
         {/* FAQ */}
         <section className="mt-section pt-xl border-t border-hairline">

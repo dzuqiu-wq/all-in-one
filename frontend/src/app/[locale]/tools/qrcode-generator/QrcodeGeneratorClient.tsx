@@ -8,6 +8,7 @@ import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import SampleButton from "@/components/SampleButton";
+import ShareButtons from "@/components/ShareButtons";
 import { getSampleQrPayload } from "@/lib/sampleData";
 
 // Strict hex color allowlist: #RGB or #RRGGBB only.
@@ -495,6 +496,21 @@ export default function QRCodeGeneratorPage() {
 
             <AdBanner slot="qr-tool-mid" format="rectangle" className="mx-auto max-w-[336px]" />
           </div>
+        </div>
+
+        {/* Share strip */}
+        <div className="mt-8">
+          <ShareButtons
+            title={{
+              en: "Generated a tasteful QR code in 5 seconds — ISO/IEC 18004 compliant, browser-rendered. All-in-One Toolbox.",
+              zh: "5 秒生成一张有审美的二维码，符合 ISO/IEC 18004，纯浏览器渲染。All-in-One Toolbox。",
+            }}
+            eyebrow={{
+              en: "Show this to your marketer",
+              zh: "给市场同事看看",
+            }}
+            hashtags={["QRCode", "AllInOneToolbox", "BrowserTools"]}
+          />
         </div>
 
         {/* FAQ */}
