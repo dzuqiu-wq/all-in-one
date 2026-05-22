@@ -11,6 +11,9 @@ import {
   Shield,
   Zap,
   Lock,
+  Stamp,
+  Receipt,
+  Wrench,
 } from "lucide-react";
 import AdBanner from "@/components/AdBanner";
 import { useLocalizedHref } from "@/i18n/useLocalizedHref";
@@ -45,6 +48,24 @@ const tools: Tool[] = [
     status: "available",
   },
   {
+    nameKey: "tools.pdfWatermark.name",
+    descriptionKey: "tools.pdfWatermark.description",
+    category: "document",
+    type: "client",
+    icon: Stamp,
+    href: "/tools/pdf-watermark",
+    status: "available",
+  },
+  {
+    nameKey: "tools.invoiceGenerator.name",
+    descriptionKey: "tools.invoiceGenerator.description",
+    category: "document",
+    type: "client",
+    icon: Receipt,
+    href: "/tools/invoice-generator",
+    status: "available",
+  },
+  {
     nameKey: "tools.imageOptimizer.name",
     descriptionKey: "tools.imageOptimizer.description",
     category: "utility",
@@ -60,6 +81,15 @@ const tools: Tool[] = [
     type: "client",
     icon: QrCode,
     href: "/tools/qrcode-generator",
+    status: "available",
+  },
+  {
+    nameKey: "tools.dataSanitizer.name",
+    descriptionKey: "tools.dataSanitizer.description",
+    category: "utility",
+    type: "client",
+    icon: Wrench,
+    href: "/tools/data-sanitizer",
     status: "available",
   },
 ];

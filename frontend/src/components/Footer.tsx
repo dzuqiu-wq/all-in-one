@@ -41,6 +41,14 @@ const translations = {
       en: 'PDF Tools',
       zh: 'PDF 工具箱'
     },
+    pdfWatermark: {
+      en: 'PDF Watermark & Stamp',
+      zh: 'PDF 水印与印章'
+    },
+    invoiceGenerator: {
+      en: 'Invoice Generator',
+      zh: '商务发票生成器'
+    },
     imageOptimizer: {
       en: 'Image Optimizer',
       zh: '图片无损压缩'
@@ -48,6 +56,10 @@ const translations = {
     qrGenerator: {
       en: 'QR Generator',
       zh: '矩阵二维码生成'
+    },
+    dataSanitizer: {
+      en: 'Data Sanitizer',
+      zh: '数据清洗与乱码修复'
     }
   },
   resources: {
@@ -146,25 +158,40 @@ export default function Footer({ version = "0.1.0" }: FooterProps) {
               {t(translations.product.title, locale)}
             </h4>
             <nav className="flex flex-col gap-3">
-              <FooterLink 
-                path="/tools/word-to-pdf" 
-                label={t(translations.product.wordPdf, locale)} 
-                locale={locale} 
+              <FooterLink
+                path="/tools/word-to-pdf"
+                label={t(translations.product.wordPdf, locale)}
+                locale={locale}
               />
-              <FooterLink 
-                path="/tools/pdf-merge-split" 
-                label={t(translations.product.pdfTools, locale)} 
-                locale={locale} 
+              <FooterLink
+                path="/tools/pdf-merge-split"
+                label={t(translations.product.pdfTools, locale)}
+                locale={locale}
               />
-              <FooterLink 
-                path="/tools/image-optimizer" 
-                label={t(translations.product.imageOptimizer, locale)} 
-                locale={locale} 
+              <FooterLink
+                path="/tools/pdf-watermark"
+                label={t(translations.product.pdfWatermark, locale)}
+                locale={locale}
               />
-              <FooterLink 
-                path="/tools/qrcode-generator" 
-                label={t(translations.product.qrGenerator, locale)} 
-                locale={locale} 
+              <FooterLink
+                path="/tools/invoice-generator"
+                label={t(translations.product.invoiceGenerator, locale)}
+                locale={locale}
+              />
+              <FooterLink
+                path="/tools/image-optimizer"
+                label={t(translations.product.imageOptimizer, locale)}
+                locale={locale}
+              />
+              <FooterLink
+                path="/tools/qrcode-generator"
+                label={t(translations.product.qrGenerator, locale)}
+                locale={locale}
+              />
+              <FooterLink
+                path="/tools/data-sanitizer"
+                label={t(translations.product.dataSanitizer, locale)}
+                locale={locale}
               />
             </nav>
           </div>

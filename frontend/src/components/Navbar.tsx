@@ -131,8 +131,11 @@ function getLocaleToolKey(href: string): string {
   const hrefToKey: Record<string, string> = {
     "/tools/word-to-pdf": "nav.wordPdf",
     "/tools/pdf-merge-split": "nav.pdfMerge",
+    "/tools/pdf-watermark": "nav.pdfWatermark",
+    "/tools/invoice-generator": "nav.invoiceGenerator",
     "/tools/image-optimizer": "nav.imageOptimizer",
     "/tools/qrcode-generator": "nav.qrcode",
+    "/tools/data-sanitizer": "nav.dataSanitizer",
   };
   return hrefToKey[href] || "";
 }

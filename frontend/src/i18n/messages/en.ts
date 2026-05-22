@@ -25,6 +25,14 @@ export default {
       name: 'PDF Merge & Split',
       description: 'Combine or split PDF files entirely in your browser. No upload required.',
     },
+    pdfWatermark: {
+      name: 'PDF Watermark & Stamp',
+      description: 'Add text watermarks or electronic stamps to PDFs. Pure browser processing.',
+    },
+    invoiceGenerator: {
+      name: 'Invoice Generator',
+      description: 'Generate professional business invoices with automatic calculations. Export to PDF.',
+    },
     imageOptimizer: {
       name: 'Image Optimizer',
       description: 'Compress images and convert to WebP format with zero server dependency.',
@@ -32,6 +40,10 @@ export default {
     qrcode: {
       name: 'QR Code Generator',
       description: 'Generate customizable QR codes for URLs, text, and contact information.',
+    },
+    dataSanitizer: {
+      name: 'Data Sanitizer',
+      description: 'Auto-detect and fix CSV/Excel encoding issues. Export to multiple formats.',
     },
   },
   home: {
@@ -248,6 +260,183 @@ export default {
       description: 'Convert between Unix timestamps and human-readable dates.',
       tag: 'CLIENT-SIDE PURE',
       browserLocal: 'Browser Local',
+    },
+    dataSanitizer: {
+      name: 'Data Sanitizer',
+      description: 'Auto-detect and fix CSV/Excel encoding issues. Export to multiple formats instantly.',
+      title: 'Data Sanitizer & Encoding Fixer',
+      tag: 'CLIENT-SIDE PURE',
+      back: 'Back to tools',
+
+      // Dropzone
+      dropzone: 'Drop CSV/Excel file here',
+      dropHint: 'Release to upload',
+      supportedFormats: 'Supports .csv, .xlsx, .xls formats',
+
+      // Encoding
+      encoding: 'Encoding',
+      autoDetected: 'Auto Detected',
+      manualSelect: 'Manual Select',
+      reDecode: 'Re-decode',
+      reDecoding: 'Re-decoding...',
+      confidence: 'Confidence',
+      fixedRate: 'Fix Rate',
+      originalEncoding: 'Original Encoding',
+      detectedEncoding: 'Detected Encoding',
+
+      // Preview
+      preview: 'Data Preview',
+      rows: 'rows',
+      columns: 'columns',
+      showingRows: 'Showing {shown}/{total} rows',
+
+      // Export
+      exportAs: 'Export As',
+      downloadExcel: 'Excel',
+      downloadCSV: 'CSV',
+      downloadJSON: 'JSON',
+      downloadMarkdown: 'Markdown',
+
+      // Status
+      processing: 'Processing...',
+      detectingEncoding: 'Detecting encoding...',
+      parsing: 'Parsing data...',
+      success: 'Processing complete',
+      successDetail: '{rows} rows × {cols} columns',
+      error: 'Processing failed',
+      errorTitle: 'Error',
+      errorInvalidFile: 'Please upload a CSV or Excel file',
+      errorEmptyFile: 'File is empty. Please upload a file with data.',
+      errorParseFailed: 'Failed to parse file. Try switching encoding.',
+
+      // Encoding options
+      utf8: 'UTF-8',
+      gbk: 'GBK',
+      gb2312: 'GB2312',
+      windows1252: 'Windows-1252',
+      auto: 'Auto Detect',
+
+      // FAQ
+      faqTitle: 'Common questions',
+      faq1Q: 'Why does garbled text appear?',
+      faq1A: 'Garbled text occurs when file encoding does not match the encoding used by the software opening it. For example, a UTF-8 encoded CSV file opened with Excel using GBK encoding will show garbled characters. Our tool automatically detects file encoding and converts it to display correctly.',
+      faq2Q: 'What file formats are supported?',
+      faq2A: 'We support CSV files (including various encodings like UTF-8, GBK, GB2312, etc.) and Excel files (.xlsx and .xls formats). The tool automatically recognizes file types and parses them correctly.',
+      faq3Q: 'Will exported data lose formatting?',
+      faq3A: 'Exported files preserve the original data structure and content. For Excel and CSV formats, numbers and dates are automatically recognized. For JSON and Markdown formats, data is exported as-is, making it easy to use in other documents or processes.',
+    },
+    pdfWatermark: {
+      name: 'PDF Watermark & Stamp',
+      description: 'Add text watermarks or electronic stamps to PDFs. Pure browser processing.',
+      title: 'PDF Watermark & Stamp Tool',
+      tag: 'CLIENT-SIDE PURE',
+      back: 'Back to tools',
+
+      watermarkMode: 'Watermark Mode',
+      modeText: 'Text Watermark',
+      modeStamp: 'Stamp Watermark',
+      modeHybrid: 'Hybrid (Text + Stamp)',
+
+      stampConfig: 'Stamp Settings',
+      companyName: 'Company Name',
+      departmentName: 'Department Name',
+      stampColor: 'Stamp Color',
+      noiseLevel: 'Noise Level',
+      stampShape: 'Stamp Shape',
+      circle: 'Circle',
+      oval: 'Oval',
+      rect: 'Rectangle',
+
+      textConfig: 'Text Settings',
+      watermarkText: 'Watermark Text',
+      fontSize: 'Font Size',
+
+      watermarkSettings: 'Watermark Settings',
+      opacity: 'Opacity',
+      rotation: 'Rotation',
+      tileX: 'Horizontal Spacing',
+      tileY: 'Vertical Spacing',
+
+      uploadPdf: 'Upload PDF',
+      dropzone: 'Drop PDF file here or click to browse',
+      supported: 'Supports .pdf format',
+      generate: 'Generate PDF',
+      reset: 'Reset',
+      download: 'Download',
+      processing: 'Processing...',
+
+      success: 'Processing complete!',
+      errorTitle: 'Processing failed',
+      errorInvalid: 'Please select a valid PDF file',
+      errorUnexpected: 'An unexpected error occurred',
+      processed: 'Processed size',
+
+      preview: 'Preview',
+
+      faqTitle: 'Common questions',
+      faq1Q: 'Is my file secure?',
+      faq1A: 'Absolutely secure. All processing happens in your browser, files never leave your device.',
+      faq2Q: 'What stamp styles are supported?',
+      faq2A: 'Supports circle, oval, and rectangle shapes with border, star, and text.',
+      faq3Q: 'Will watermarks cover original content?',
+      faq3A: 'Watermarks are semi-transparent and tiled, preserving content readability.',
+      faq4Q: 'What PDF files are supported?',
+      faq4A: 'Supports standard PDF files. Password-protected PDFs need to be unlocked first.',
+    },
+    invoiceGenerator: {
+      name: 'Invoice Generator',
+      description: 'Generate professional business invoices online with dynamic items and automatic calculations.',
+      title: 'Invoice Generator',
+      tag: 'CLIENT-SIDE',
+      back: 'Back to tools',
+
+      invoiceDetails: 'Invoice Details',
+      invoiceNumber: 'Invoice #',
+      currency: 'Currency',
+      issueDate: 'Issue Date',
+      dueDate: 'Due Date',
+
+      from: 'From',
+      to: 'To',
+      billTo: 'Bill To',
+      companyName: 'Company Name',
+      address: 'Address',
+      city: 'City',
+      country: 'Country',
+      email: 'Email',
+      phone: 'Phone',
+
+      clientName: 'Client Name',
+
+      items: 'Line Items',
+      addItem: 'Add Item',
+      itemDescription: 'Item description',
+      qty: 'Qty',
+      price: 'Price',
+      total: 'Total',
+
+      financialSettings: 'Financial Settings',
+      taxRate: 'Tax Rate',
+      discount: 'Discount',
+      paymentTerms: 'Payment Terms',
+      notes: 'Notes',
+
+      subtotal: 'Subtotal',
+      tax: 'Tax',
+
+      preview: 'Live Preview',
+      generatePDF: 'Generate PDF Invoice',
+      generating: 'Generating...',
+      pdfGenerated: 'PDF generated!',
+      reset: 'Reset',
+
+      errorTitle: 'Validation Errors',
+
+      faqTitle: 'Common Questions',
+      faq1Q: 'Is my data secure?',
+      faq1A: 'Absolutely secure. All invoice data is processed in your browser and never uploaded to any server. PDF generation uses local html2canvas and jspdf libraries.',
+      faq2Q: 'What currencies are supported?',
+      faq2A: 'Supports USD, EUR, GBP, CNY, and JPY. Select currency from dropdown and amounts are formatted automatically.',
     },
   },
   footer: {

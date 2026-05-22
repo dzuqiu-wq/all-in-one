@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Image as ImageIcon, QrCode, Merge } from "lucide-react";
+import { FileText, Image as ImageIcon, QrCode, Merge, Stamp, Wrench, Receipt } from "lucide-react";
 import type { ComponentType } from "react";
 import { useLocalizedHref } from "@/i18n/useLocalizedHref";
 
@@ -9,6 +9,9 @@ export const ToolIcons: Record<string, ComponentType<{ className?: string }>> = 
   Image: ImageIcon,
   QrCode,
   Merge,
+  Stamp,
+  Wrench,
+  Receipt,
 };
 
 export interface ToolItem {
@@ -46,6 +49,22 @@ export const tools: ToolItem[] = [
     description: "Combine or split PDF files entirely in your browser. No upload required.",
   },
   {
+    name: "PDF Watermark & Stamp",
+    href: "/tools/pdf-watermark",
+    iconName: "Stamp",
+    category: "document",
+    type: "client",
+    description: "Add text watermarks or electronic stamps to PDFs. Pure browser processing.",
+  },
+  {
+    name: "Invoice Generator",
+    href: "/tools/invoice-generator",
+    iconName: "Receipt",
+    category: "document",
+    type: "client",
+    description: "Generate professional business invoices with automatic calculations. Export to PDF.",
+  },
+  {
     name: "Image Optimizer",
     href: "/tools/image-optimizer",
     iconName: "Image",
@@ -60,5 +79,13 @@ export const tools: ToolItem[] = [
     category: "utility",
     type: "client",
     description: "Generate customizable QR codes for URLs, text, and contact information.",
+  },
+  {
+    name: "Data Sanitizer",
+    href: "/tools/data-sanitizer",
+    iconName: "Wrench",
+    category: "utility",
+    type: "client",
+    description: "Auto-detect and fix CSV/Excel encoding issues. Export to multiple formats.",
   },
 ];

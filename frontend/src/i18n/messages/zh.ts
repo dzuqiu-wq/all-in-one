@@ -25,6 +25,14 @@ export default {
       name: 'PDF 合并与拆分',
       description: '完全在浏览器本地合并或拆分 PDF，零文件上传。',
     },
+    pdfWatermark: {
+      name: 'PDF 水印与印章',
+      description: '为 PDF 添加文字水印或电子印章，纯浏览器处理。',
+    },
+    invoiceGenerator: {
+      name: '商务发票生成器',
+      description: '在线生成专业商务发票，支持自动计算和 PDF 导出。',
+    },
     imageOptimizer: {
       name: '图片无损压缩',
       description: '本地无损压缩图片并转换为 WebP 格式，零服务器依赖。',
@@ -32,6 +40,10 @@ export default {
     qrcode: {
       name: '二维码生成器',
       description: '快速生成支持自定义外观与颜色的赛博朋克风二维码。',
+    },
+    dataSanitizer: {
+      name: '数据清洗与乱码修复',
+      description: '自动检测并修复 CSV/Excel 乱码问题。',
     },
   },
   home: {
@@ -248,6 +260,183 @@ export default {
       description: '在 Unix 时间戳和可读日期之间转换。',
       tag: '纯客户端',
       browserLocal: '浏览器本地',
+    },
+    dataSanitizer: {
+      name: '数据清洗与乱码修复',
+      description: '自动检测并修复 CSV/Excel 乱码问题。一键导出为多种格式。',
+      title: '数据清洗与乱码修复舱',
+      tag: '纯客户端',
+      back: '返回工具列表',
+
+      // Dropzone
+      dropzone: '拖放 CSV/Excel 文件到此处',
+      dropHint: '释放以上传',
+      supportedFormats: '支持 .csv, .xlsx, .xls 格式',
+
+      // Encoding
+      encoding: '编码',
+      autoDetected: '自动检测',
+      manualSelect: '手动选择',
+      reDecode: '重新解码',
+      reDecoding: '重新解码中...',
+      confidence: '置信度',
+      fixedRate: '修复率',
+      originalEncoding: '原始编码',
+      detectedEncoding: '检测编码',
+
+      // Preview
+      preview: '数据预览',
+      rows: '条数据',
+      columns: '列',
+      showingRows: '显示 {shown}/{total} 条',
+
+      // Export
+      exportAs: '导出为',
+      downloadExcel: 'Excel',
+      downloadCSV: 'CSV',
+      downloadJSON: 'JSON',
+      downloadMarkdown: 'Markdown',
+
+      // Status
+      processing: '处理中...',
+      detectingEncoding: '检测编码...',
+      parsing: '解析数据...',
+      success: '处理完成',
+      successDetail: '共 {rows} 行 × {cols} 列',
+      error: '处理失败',
+      errorTitle: '错误',
+      errorInvalidFile: '请上传 CSV 或 Excel 文件',
+      errorEmptyFile: '文件为空，请上传包含数据的文件',
+      errorParseFailed: '文件解析失败，请尝试切换编码',
+
+      // Encoding options
+      utf8: 'UTF-8',
+      gbk: 'GBK',
+      gb2312: 'GB2312',
+      windows1252: 'Windows-1252',
+      auto: '自动检测',
+
+      // FAQ
+      faqTitle: '常见问题',
+      faq1Q: '为什么会出现乱码？',
+      faq1A: '乱码通常是由于文件的编码格式与打开它的软件使用的编码格式不匹配造成的。例如，用 UTF-8 编码保存的 CSV 文件，在使用 GBK 编码的 Excel 中打开时就会出现乱码。我们的工具会自动检测文件编码，并将其转换为正确的格式显示。',
+      faq2Q: '支持哪些文件格式？',
+      faq2A: '我们支持 CSV 文件（包括各种编码如 UTF-8、GBK、GB2312 等）以及 Excel 文件（.xlsx 和 .xls 格式）。工具会自动识别文件类型并正确解析。',
+      faq3Q: '导出的数据会丢失格式吗？',
+      faq3A: '导出的文件会保留原始数据的结构和内容。对于 Excel 和 CSV 格式，数字、日期等会自动识别并保持其类型。对于 JSON 和 Markdown 格式，数据会按原样导出，便于后续处理或嵌入到其他文档中。',
+    },
+    pdfWatermark: {
+      name: 'PDF 水印与印章',
+      description: '为 PDF 添加文字水印或电子印章。纯浏览器处理，文件绝不上传服务器。',
+      title: 'PDF 水印与印章工具',
+      tag: '纯客户端',
+      back: '返回工具列表',
+
+      watermarkMode: '水印模式',
+      modeText: '文字水印',
+      modeStamp: '印章水印',
+      modeHybrid: '混合水印（文字+印章）',
+
+      stampConfig: '印章配置',
+      companyName: '公司名称',
+      departmentName: '部门/业务名称',
+      stampColor: '印章颜色',
+      noiseLevel: '噪点强度',
+      stampShape: '印章形状',
+      circle: '圆形',
+      oval: '椭圆',
+      rect: '方形',
+
+      textConfig: '文字配置',
+      watermarkText: '水印文字',
+      fontSize: '字体大小',
+
+      watermarkSettings: '水印设置',
+      opacity: '透明度',
+      rotation: '旋转角度',
+      tileX: '水平间距',
+      tileY: '垂直间距',
+
+      uploadPdf: '上传 PDF',
+      dropzone: '将 PDF 文件拖放到此处或点击浏览',
+      supported: '支持 .pdf 格式',
+      generate: '一键合成 PDF',
+      reset: '重置',
+      download: '下载',
+      processing: '处理中...',
+
+      success: '处理完成！',
+      errorTitle: '处理失败',
+      errorInvalid: '请选择有效的 PDF 文件',
+      errorUnexpected: '发生意外错误',
+      processed: '处理后大小',
+
+      preview: '预览',
+
+      faqTitle: '常见问题',
+      faq1Q: '我的文件安全吗？',
+      faq1A: '绝对安全。所有处理都在您的浏览器中完成，文件从不离开您的设备。',
+      faq2Q: '支持哪些印章样式？',
+      faq2A: '支持圆形、椭圆形和方形三种印章样式，包含外边框、五角星和文字。',
+      faq3Q: '水印会覆盖原始内容吗？',
+      faq3A: '水印以半透明方式平铺，不会影响原始内容可读性。',
+      faq4Q: '支持哪些 PDF 文件？',
+      faq4A: '支持标准 PDF 文件。受密码保护的 PDF 请先移除密码。',
+    },
+    invoiceGenerator: {
+      name: '发票生成器',
+      description: '在线生成专业商务发票，支持动态项目和自动计算。',
+      title: '商务发票生成器',
+      tag: '纯客户端',
+      back: '返回工具列表',
+
+      invoiceDetails: '发票详情',
+      invoiceNumber: '发票号',
+      currency: '货币',
+      issueDate: '开票日期',
+      dueDate: '截止日期',
+
+      from: '开票方',
+      to: '收票方',
+      billTo: '收票方',
+      companyName: '公司名称',
+      address: '地址',
+      city: '城市',
+      country: '国家',
+      email: '邮箱',
+      phone: '电话',
+
+      clientName: '客户名称',
+
+      items: '项目明细',
+      addItem: '添加项目',
+      itemDescription: '项目描述',
+      qty: '数量',
+      price: '单价',
+      total: '合计',
+
+      financialSettings: '财务设置',
+      taxRate: '税率',
+      discount: '折扣',
+      paymentTerms: '付款条款',
+      notes: '备注',
+
+      subtotal: '小计',
+      tax: '税额',
+
+      preview: '实时预览',
+      generatePDF: '生成 PDF 账单',
+      generating: '生成中...',
+      pdfGenerated: 'PDF 已生成！',
+      reset: '重置',
+
+      errorTitle: '验证错误',
+
+      faqTitle: '常见问题',
+      faq1Q: '我的数据安全吗？',
+      faq1A: '绝对安全。所有发票数据都在您的浏览器中处理，从不上传到任何服务器。生成 PDF 时使用的是本地 html2canvas 和 jspdf 库。',
+      faq2Q: '支持哪些货币？',
+      faq2A: '支持美元、欧元、英镑、人民币和日元。使用下拉菜单选择货币，金额会自动格式化。',
     },
   },
   footer: {
