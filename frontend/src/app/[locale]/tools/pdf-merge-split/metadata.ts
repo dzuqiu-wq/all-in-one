@@ -1,12 +1,23 @@
 import { Metadata } from "next";
 
-// IMPORTANT: This file must be a server component (no "use client")
+interface Props {
+  params: Promise<{ locale: string }>;
+}
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const isZh = locale === "zh";
+  
   return {
-    title: "PDF Merge & Split Tool | All-in-One Toolbox",
-    description: "Merge multiple PDFs or extract specific pages. Pure client-side processing in browser. No file upload, 100% privacy.",
-    keywords: ["pdf merge", "pdf split", "combine pdf", "extract pdf pages", "pdf tool", "browser pdf"],
+    title: isZh 
+      ? "PDF 合并与拆分工具 | All-in-One Toolbox" 
+      : "PDF Merge & Split Tool | All-in-One Toolbox",
+    description: isZh
+      ? "合并多个 PDF 或提取文档中的特定页面。纯浏览器端处理，无需上传文件。100%隐私保护，完全免费无限制使用。"
+      : "Merge multiple PDFs or extract specific pages from documents. Pure client-side processing in browser. No file upload, 100% privacy. Free and unlimited.",
+    keywords: isZh
+      ? ["PDF合并", "PDF拆分", "合并PDF", "提取页面", "PDF工具", "浏览器PDF"]
+      : ["pdf merge", "pdf split", "combine pdf", "extract pdf pages", "pdf tool", "browser pdf"],
     alternates: {
       canonical: "https://333654.xyz/tools/pdf-merge-split",
       languages: {
@@ -16,17 +27,25 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     openGraph: {
       type: "website",
-      locale: "en_US",
-      alternateLocale: "zh_CN",
+      locale: isZh ? "zh_CN" : "en_US",
+      alternateLocale: isZh ? "en_US" : "zh_CN",
       url: "https://333654.xyz/tools/pdf-merge-split",
       siteName: "All-in-One Toolbox",
-      title: "PDF Merge & Split Tool | All-in-One Toolbox",
-      description: "Merge multiple PDFs or extract specific pages. Pure client-side processing.",
+      title: isZh 
+        ? "PDF 合并与拆分工具 | All-in-One Toolbox" 
+        : "PDF Merge & Split Tool | All-in-One Toolbox",
+      description: isZh
+        ? "合并多个 PDF 或提取文档中的特定页面。纯浏览器端处理，无需上传文件。"
+        : "Merge multiple PDFs or extract specific pages. Pure client-side processing.",
     },
     twitter: {
       card: "summary_large_image",
-      title: "PDF Merge & Split Tool | All-in-One Toolbox",
-      description: "Merge multiple PDFs or extract specific pages in browser.",
+      title: isZh 
+        ? "PDF 合并与拆分工具 | All-in-One Toolbox" 
+        : "PDF Merge & Split Tool | All-in-One Toolbox",
+      description: isZh
+        ? "合并多个 PDF 或提取文档中的特定页面"
+        : "Merge multiple PDFs or extract specific pages in browser.",
     },
   };
 }

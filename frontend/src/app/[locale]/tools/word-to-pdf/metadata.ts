@@ -1,12 +1,23 @@
 import { Metadata } from "next";
 
-// IMPORTANT: This file must be a server component (no "use client")
+interface Props {
+  params: Promise<{ locale: string }>;
+}
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const isZh = locale === "zh";
+  
   return {
-    title: "Word to PDF Converter | All-in-One Toolbox",
-    description: "Convert Word documents to PDF with server-side LibreOffice processing. 100% secure with memory-only pipeline, no disk storage.",
-    keywords: ["word to pdf", "docx to pdf", "document converter", "libreoffice", "pdf conversion", "online converter"],
+    title: isZh 
+      ? "Word 转 PDF 转换器 | All-in-One Toolbox" 
+      : "Word to PDF Converter | All-in-One Toolbox",
+    description: isZh
+      ? "使用服务端 LibreOffice 处理将 Word 文档转换为 PDF。纯内存管道处理，文件绝不上传磁盘。5秒快速超时，100%隐私安全。"
+      : "Convert Word documents to PDF with server-side LibreOffice processing. 100% secure with memory-only pipeline, no disk storage. Fast 5-second timeout.",
+    keywords: isZh
+      ? ["Word转PDF", "DOCX转PDF", "文档转换器", "PDF转换", "在线转换工具", "LibreOffice"]
+      : ["word to pdf", "docx to pdf", "document converter", "libreoffice", "pdf conversion", "online converter"],
     alternates: {
       canonical: "https://333654.xyz/tools/word-to-pdf",
       languages: {
@@ -16,17 +27,25 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     openGraph: {
       type: "website",
-      locale: "en_US",
-      alternateLocale: "zh_CN",
+      locale: isZh ? "zh_CN" : "en_US",
+      alternateLocale: isZh ? "en_US" : "zh_CN",
       url: "https://333654.xyz/tools/word-to-pdf",
       siteName: "All-in-One Toolbox",
-      title: "Word to PDF Converter | All-in-One Toolbox",
-      description: "Convert Word documents to PDF with server-side LibreOffice processing. 100% secure with memory-only pipeline.",
+      title: isZh 
+        ? "Word 转 PDF 转换器 | All-in-One Toolbox" 
+        : "Word to PDF Converter | All-in-One Toolbox",
+      description: isZh
+        ? "使用服务端 LibreOffice 处理将 Word 文档转换为 PDF。纯内存管道处理，文件绝不上传磁盘。"
+        : "Convert Word documents to PDF with server-side LibreOffice processing. 100% secure with memory-only pipeline.",
     },
     twitter: {
       card: "summary_large_image",
-      title: "Word to PDF Converter | All-in-One Toolbox",
-      description: "Convert Word documents to PDF with server-side LibreOffice processing.",
+      title: isZh 
+        ? "Word 转 PDF 转换器 | All-in-One Toolbox" 
+        : "Word to PDF Converter | All-in-One Toolbox",
+      description: isZh
+        ? "使用服务端 LibreOffice 处理将 Word 文档转换为 PDF"
+        : "Convert Word documents to PDF with server-side LibreOffice processing.",
     },
   };
 }
