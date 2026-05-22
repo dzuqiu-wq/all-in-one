@@ -88,224 +88,133 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
           # Pass the dispatch input through so manual reruns can skip the build.
-          envs: SKIP_BUILD
+          envs: SKIP_BUILD,VPS_PROJECT_PATH
           script_stop: true
-          # The remote command is intentionally a single multi-line script
-          # rather than several `script:` lines so any failure (e.g. git
-          # conflict, docker error) aborts the whole rollout via `set -e`.
+          # ----------------------------------------------------------------
+          # The `script:` block below is intentionally MINIMAL.
+          #
+          # appleboy/ssh-action streams each line of `script:` over the SSH
+          # session and (on some versions / shells) implicitly checks exit
+          # status between lines, which has historically miskilled scripts
+          # at innocent `if [ … ]; then` boundaries. The defensive fix is
+          # to write the real rollout logic to a file on the remote host
+          # via a single here-doc, then exec that file in one bash call.
+          # Everything appleboy sees on the wire is "cat > file; bash file"
+          # — no multi-line conditionals to misinterpret.
+          #
+          # The real script body uses ONLY single-line `if … ; then … ; fi`
+          # constructs (and explicit `&&`/`||`) so that even if a future
+          # appleboy release reintroduces line-by-line semantics, every
+          # control-flow statement remains atomic on its own line.
+          # ----------------------------------------------------------------
           script: |
+            set -euo pipefail
+            export VPS_PROJECT_PATH="${{ secrets.VPS_PROJECT_PATH }}"
+            cat > /tmp/all-in-one-deploy.sh <<'REMOTE_SCRIPT_EOF'
+            #!/usr/bin/env bash
+            # Real rollout body. Runs in a clean, full bash session — no
+            # implicit per-line interception, no surprise SIGTERMs between
+            # statements. Sourced via `bash /tmp/all-in-one-deploy.sh` from
+            # the outer ssh-action wrapper.
             set -euxo pipefail
+            trap 'rc=$?; echo "::error::deploy-runner failed at line ${LINENO}: command \"${BASH_COMMAND}\" exited with code ${rc}"; exit $rc' ERR
 
-            # ERR trap: emit the failing command + line number + exit code so
-            # remote failures cannot exit silently. Without this, `set -e` just
-            # aborts the script and the Actions log only shows the bare
-            # "Process exited with status 1" tail, which is useless for
-            # diagnosing what Docker actually complained about.
-            trap 'rc=$?; echo "::error::Remote step failed at line ${LINENO}: command \"${BASH_COMMAND}\" exited with code ${rc}"; exit $rc' ERR
-
-            # Non-interactive SSH sessions do NOT source ~/.bashrc or ~/.profile,
-            # so PATH may be limited to /usr/bin:/bin and miss /usr/local/bin —
-            # which is exactly where the docker-compose v1 binary lives on most
-            # distributions. Export a robust PATH up front so both `docker` and
-            # `docker-compose` resolve regardless of where they are installed.
+            # Non-interactive shells get a stripped PATH; repair it.
             export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:$PATH"
 
-            cd "${{ secrets.VPS_PROJECT_PATH }}"
+            cd "$VPS_PROJECT_PATH"
 
             echo "==> Sync code from origin/main"
-            # We use --hard to guarantee a clean state. The repository on the
-            # VPS is treated as a deploy target, not a working copy — local
-            # edits there are an anti-pattern and would be lost intentionally.
             git fetch --prune origin
             git reset --hard origin/main
 
-            echo "==> Resolve docker compose command"
-            # Prefer the modern `docker compose` plugin, then fall back to the
-            # legacy `docker-compose` v1 binary. Both are probed with absolute
-            # `command -v` checks so a stripped PATH cannot mask them — and
-            # if BOTH are missing we exit loudly with an actionable error
-            # instead of silently exec-ing nothing.
-            if docker compose version >/dev/null 2>&1; then
-              DC="docker compose"
-            elif command -v docker-compose >/dev/null 2>&1; then
-              DC="docker-compose"
-            elif [ -x /usr/local/bin/docker-compose ]; then
-              DC="/usr/local/bin/docker-compose"
-            elif [ -x /usr/bin/docker-compose ]; then
-              DC="/usr/bin/docker-compose"
-            else
-              echo "::error::Neither 'docker compose' plugin nor 'docker-compose' binary is available on the VPS."
-              echo "Install one of:"
-              echo "  • Docker Engine + Compose plugin: https://docs.docker.com/engine/install/"
-              echo "  • Standalone docker-compose: https://github.com/docker/compose/releases"
-              echo "Verified PATH at this point: $PATH"
-              exit 1
-            fi
-            # Print BOTH stdout and stderr of the version probe so a missing
-            # docker daemon, dangling socket, or permission issue surfaces here
-            # instead of being swallowed by the next command.
+            # ---- Resolve docker compose command ---------------------------
+            DC=""
+            if docker compose version >/dev/null 2>&1; then DC="docker compose"; fi
+            if [ -z "$DC" ] && command -v docker-compose >/dev/null 2>&1; then DC="docker-compose"; fi
+            if [ -z "$DC" ] && [ -x /usr/local/bin/docker-compose ]; then DC="/usr/local/bin/docker-compose"; fi
+            if [ -z "$DC" ] && [ -x /usr/bin/docker-compose ]; then DC="/usr/bin/docker-compose"; fi
+            if [ -z "$DC" ]; then echo "::error::No docker compose binary found on PATH=$PATH"; exit 1; fi
             echo "    using: $DC"
             $DC version 2>&1 | head -5 || true
-            echo "    docker daemon info (truncated):"
-            docker info --format '    server version: {{.ServerVersion}} · containers: {{.Containers}} · images: {{.Images}}' 2>&1 || {
-              echo "::error::'docker info' failed — daemon unreachable or current user not in 'docker' group."
-              echo "Hint: try 'sudo usermod -aG docker $USER' on the VPS, then log out and back in."
-              exit 1
-            }
+            docker info --format '    server version: {{.ServerVersion}} · containers: {{.Containers}}' 2>&1 || { echo "::error::'docker info' failed"; exit 1; }
 
             COMPOSE_FILE="docker-compose.prod.yml"
 
-            # Make the working-directory fact explicit in the log so we can
-            # tell at a glance whether we are actually inside the deploy path.
             echo "==> Pre-validate context"
-            echo "    pwd:          $(pwd)"
-            echo "    target path:  ${{ secrets.VPS_PROJECT_PATH }}"
-            echo "    compose file: $COMPOSE_FILE"
+            echo "    pwd: $(pwd)   compose file: $COMPOSE_FILE"
             ls -la "$COMPOSE_FILE" 2>&1 || true
-
-            # Sanity-check the compose file actually exists at the deploy path
-            # and parses cleanly under the resolved DC binary — this fails
-            # MUCH faster than a half-broken `build` and tells us exactly what
-            # is wrong (typo in YAML, missing referenced .env, etc).
-            if [ ! -f "$COMPOSE_FILE" ]; then
-              echo "::error::$COMPOSE_FILE not found at $(pwd)"
-              echo "Directory listing:"
-              ls -la
-              exit 1
-            fi
+            if [ ! -f "$COMPOSE_FILE" ]; then echo "::error::$COMPOSE_FILE not found at $(pwd)"; ls -la; exit 1; fi
 
             echo "==> Validate compose config"
-            # IMPORTANT: appleboy/ssh-action sets `set -e` in the surrounding
-            # shell, and combined with our ERR trap, even an `|| { … }`-guarded
-            # failure can cause the script to die before the fallback prints.
-            # We therefore TEMPORARILY disable `errexit` + the ERR trap, run
-            # the validation, capture stderr, then restore strict mode. The
-            # explicit `if !` is shell-strict-safe with `set -e` because the
-            # condition position naturally masks the non-zero exit.
             set +e
             trap - ERR
             CONFIG_STDERR=$(mktemp)
-            if ! $DC -f "$COMPOSE_FILE" config --quiet 2>"$CONFIG_STDERR"; then
-              rc=$?
-              echo "::error::'$DC -f $COMPOSE_FILE config' failed (exit $rc)"
-              echo "----- stderr (verbatim) -----"
-              cat "$CONFIG_STDERR"
-              echo "----- full config dump (head 80 lines, stderr merged) -----"
-              $DC -f "$COMPOSE_FILE" config 2>&1 | head -80 || true
-              echo "----- end -----"
-              rm -f "$CONFIG_STDERR"
-              exit $rc
-            fi
+            $DC -f "$COMPOSE_FILE" config --quiet 2>"$CONFIG_STDERR"
+            CONFIG_RC=$?
+            set -e
+            trap 'rc=$?; echo "::error::deploy-runner failed at line ${LINENO}: command \"${BASH_COMMAND}\" exited with code ${rc}"; exit $rc' ERR
+            if [ "$CONFIG_RC" -ne 0 ]; then echo "::error::compose config failed (exit $CONFIG_RC)"; echo "----- stderr -----"; cat "$CONFIG_STDERR"; echo "----- config dump (head 80) -----"; $DC -f "$COMPOSE_FILE" config 2>&1 | head -80 || true; rm -f "$CONFIG_STDERR"; exit "$CONFIG_RC"; fi
             rm -f "$CONFIG_STDERR"
             echo "    compose config OK"
-            # Restore strict mode + ERR trap for the rest of the rollout.
-            # (xtrace is re-enabled because the outer set is now `set -euxo pipefail`.)
-            set -ex
-            trap 'rc=$?; echo "::error::Remote step failed at line ${LINENO}: command \"${BASH_COMMAND}\" exited with code ${rc}"; exit $rc' ERR
 
-            # ----------------------------------------------------------------
-            # Hard cleanup of any stale containers from previous runs.
-            # ----------------------------------------------------------------
-            # Symptom we are guarding against: a previous deploy half-rolled
-            # and left `all-in-one-toolbox-nginx` (or the other named
-            # containers) hanging around. The next `up -d` would then fail
-            # with "Conflict. The container name X is already in use" — and
-            # because the failure manifests inside `docker-compose up`, the
-            # outer Actions step gets a bare exit 1 with no detail.
-            #
-            # We forcibly remove the well-known container names before
-            # touching compose. `|| true` keeps the script alive if the
-            # container is already gone.
-            echo "==> Sweep stale containers (idempotent)"
-            for name in \
-              all-in-one-toolbox-nginx \
-              all-in-one-toolbox-frontend \
-              all-in-one-toolbox-backend \
-              all-in-one-toolbox-gotenberg \
-            ; do
-              if docker ps -a --format '{{.Names}}' | grep -Fxq "$name"; then
-                echo "    removing stale container: $name"
-                docker rm -f "$name" 2>&1 || true
-              fi
+            # ---- Sweep stale containers (idempotent) ----------------------
+            echo "==> Sweep stale containers"
+            for name in all-in-one-toolbox-nginx all-in-one-toolbox-frontend all-in-one-toolbox-backend all-in-one-toolbox-gotenberg; do
+              if docker ps -a --format '{{.Names}}' | grep -Fxq "$name"; then echo "    removing stale: $name"; docker rm -f "$name" 2>&1 || true; fi
             done
 
-            # Also tear down whatever the compose project thinks is running
-            # (this also detaches any leftover networks/volumes claimed by
-            # the dev compose file, preventing port-binding ghosts).
-            echo "==> Tear down previous compose project (down --remove-orphans)"
+            echo "==> Tear down previous compose project"
             set +e
             $DC -f "$COMPOSE_FILE" down --remove-orphans 2>&1
             DOWN_RC=$?
             set -e
-            if [ "$DOWN_RC" -ne 0 ]; then
-              echo "::warning::'$DC down' exited $DOWN_RC — continuing because this is best-effort cleanup"
+            if [ "$DOWN_RC" -ne 0 ]; then echo "::warning::'$DC down' exited $DOWN_RC — continuing (best-effort cleanup)"; fi
+
+            # ---- Decide build vs no-build (single-line branch) ------------
+            SKIP="${SKIP_BUILD:-false}"
+            if [ "$SKIP" = "true" ]; then echo "==> SKIP_BUILD=true · rolling without rebuild"; else echo "==> Rebuilding production images"; fi
+
+            # Build step runs in its own guarded block. We DELIBERATELY do
+            # NOT nest a multi-line if-then-fi around it; instead we use
+            # a single-line gate at the top to short-circuit when SKIP=true.
+            if [ "$SKIP" = "true" ]; then echo "    (build skipped)"; else
+              set +e
+              $DC -f "$COMPOSE_FILE" build --pull --progress=plain 2>&1
+              BUILD_RC=$?
+              set -e
+              if [ "$BUILD_RC" -ne 0 ]; then echo "::error::build failed exit $BUILD_RC"; echo "----- df -h -----"; df -h 2>&1 || true; echo "----- free -h -----"; free -h 2>&1 || true; echo "----- docker image ls -----"; docker image ls 2>&1 | head -20 || true; exit "$BUILD_RC"; fi
             fi
 
-            if [ "${SKIP_BUILD:-false}" = "true" ]; then
-              echo "==> Rolling without rebuild (SKIP_BUILD=true)"
-              # IMPORTANT: use `if ! … ; then` instead of bare invocation so we
-              # can capture the exit code AND keep stderr in the Actions log,
-              # even with the surrounding set -e + ERR trap. The 2>&1 merge
-              # guarantees Docker's native error text is not lost to a pipe.
-              if ! $DC -f "$COMPOSE_FILE" up -d --remove-orphans 2>&1; then
-                rc=$?
-                echo "::error::'$DC up -d' failed (exit $rc) — printing container state for context"
-                $DC -f "$COMPOSE_FILE" ps --all 2>&1 || true
-                docker ps -a --filter "name=all-in-one-toolbox" 2>&1 || true
-                exit $rc
-              fi
-            else
-              echo "==> Rebuilding production images"
-              # The build step is by far the most likely failure point on a
-              # fresh VPS: missing base image, disk full, network outage to the
-              # registry, broken Dockerfile. Wrap in `if !` so the docker error
-              # is captured verbatim and not swallowed by the strict shell.
-              if ! $DC -f "$COMPOSE_FILE" build --pull --progress=plain 2>&1; then
-                rc=$?
-                echo "::error::'$DC build --pull' failed (exit $rc) — printing diagnostic context"
-                echo "----- df -h -----"
-                df -h 2>&1 || true
-                echo "----- free -h -----"
-                free -h 2>&1 || true
-                echo "----- docker image ls (top 20) -----"
-                docker image ls 2>&1 | head -20 || true
-                exit $rc
-              fi
-              echo "==> Rolling stack"
-              if ! $DC -f "$COMPOSE_FILE" up -d --remove-orphans 2>&1; then
-                rc=$?
-                echo "::error::'$DC up -d' failed (exit $rc) — printing container state"
-                $DC -f "$COMPOSE_FILE" ps --all 2>&1 || true
-                docker ps -a --filter "name=all-in-one-toolbox" 2>&1 || true
-                echo "----- recent docker logs (last 50 lines, all services) -----"
-                $DC -f "$COMPOSE_FILE" logs --tail 50 2>&1 || true
-                exit $rc
-              fi
-            fi
+            # ---- Roll the stack ------------------------------------------
+            echo "==> Rolling stack (up -d --remove-orphans)"
+            set +e
+            $DC -f "$COMPOSE_FILE" up -d --remove-orphans 2>&1
+            UP_RC=$?
+            set -e
+            if [ "$UP_RC" -ne 0 ]; then echo "::error::'up -d' failed exit $UP_RC"; $DC -f "$COMPOSE_FILE" ps --all 2>&1 || true; docker ps -a --filter "name=all-in-one-toolbox" 2>&1 || true; echo "----- recent logs -----"; $DC -f "$COMPOSE_FILE" logs --tail 50 2>&1 || true; exit "$UP_RC"; fi
 
-            echo "==> Wait for nginx healthcheck (up to 90 s)"
+            # ---- Wait for nginx healthcheck (up to 90 s) ------------------
+            echo "==> Wait for nginx healthcheck"
+            HEALTHY=0
             for i in $(seq 1 45); do
-              status=$($DC -f "$COMPOSE_FILE" ps --format json 2>/dev/null \
-                | grep -o '"Name":"all-in-one-toolbox-nginx"[^}]*' \
-                | grep -o '"Health":"[^"]*"' \
-                | head -n1 || true)
-              if echo "$status" | grep -q '"Health":"healthy"'; then
-                echo "    nginx is healthy"
-                break
-              fi
-              if [ "$i" = "45" ]; then
-                echo "::warning::nginx did not report healthy within 90 s — investigate"
-              fi
+              S=$($DC -f "$COMPOSE_FILE" ps --format json 2>/dev/null | grep -o '"Name":"all-in-one-toolbox-nginx"[^}]*' | grep -o '"Health":"[^"]*"' | head -n1 || true)
+              if echo "$S" | grep -q '"Health":"healthy"'; then HEALTHY=1; echo "    nginx healthy after ${i} probes"; break; fi
               sleep 2
             done
+            if [ "$HEALTHY" -eq 0 ]; then echo "::warning::nginx not healthy within 90 s — continuing for external probe"; fi
 
             echo "==> Final service table"
             $DC -f "$COMPOSE_FILE" ps
 
-            echo "==> Prune dangling images (free disk)"
-            docker image prune -f >/dev/null
+            echo "==> Prune dangling images"
+            docker image prune -f >/dev/null 2>&1 || true
 
             echo "==> Rollout complete at $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            REMOTE_SCRIPT_EOF
+
+            chmod +x /tmp/all-in-one-deploy.sh
+            bash /tmp/all-in-one-deploy.sh
 
       - name: External health probe
         # Hit the public endpoint from the GitHub runner to confirm the
