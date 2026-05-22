@@ -90,7 +90,8 @@ export class StampRenderer {
     const bottomFontSize = size * 0.078;
 
     // Minimum vertical whitespace required for the text band.
-    const gap = arcFontSize * 1.5;
+    // 1.8× font height ensures glyphs sit cleanly between rings with breathing room.
+    const gap = arcFontSize * 1.8;
 
     // Outer ring semi-axes
     const outerA = size / 2 - 4;
@@ -157,8 +158,11 @@ export class StampRenderer {
   // ================================================================
   //
   // Ellipse parametric: x = a·cos(t), y = b·sin(t)
-  // Tangent vector:     (-a·sin(t), b·cos(t))
-  // Normal rotation:    atan2(b·cos(t), a·sin(t)) + π/2
+  // Clockwise tangent vector: (-a·sin(t), b·cos(t))
+  //   → dy = b·cos(t), dx = -a·sin(t)
+  // Normal rotation (glyph perpendicular to tangent, heads outward):
+  //   rotation = atan2(dy, dx) = atan2(b·cos(t), -a·sin(t))
+  //   NO +π/2: atan2 already returns the correct normal angle.
   //
   // Distribution:
   //   - Centered on top vertical axis (-π/2)
@@ -182,7 +186,8 @@ export class StampRenderer {
         char: text[0],
         x: a * Math.cos(t),
         y: b * Math.sin(t),
-        rotation: Math.atan2(b * Math.cos(t), a * Math.sin(t)) + Math.PI / 2,
+        // Clockwise tangent normal: atan2(dy, dx) with dy=b·cos(t), dx=-a·sin(t)
+        rotation: Math.atan2(b * Math.cos(t), -a * Math.sin(t)),
       }];
     }
 
@@ -196,7 +201,7 @@ export class StampRenderer {
         char: text[i],
         x: a * Math.cos(t),
         y: b * Math.sin(t),
-        rotation: Math.atan2(b * Math.cos(t), a * Math.sin(t)) + Math.PI / 2,
+        rotation: Math.atan2(b * Math.cos(t), -a * Math.sin(t)),
       });
     }
 
