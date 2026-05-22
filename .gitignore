@@ -61,3 +61,4 @@ decision.json
 !frontend/
 # TypeScript incremental build cache
 *.tsbuildinfo
+*.md
