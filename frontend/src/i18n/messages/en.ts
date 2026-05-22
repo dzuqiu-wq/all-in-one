@@ -134,6 +134,8 @@ export default {
       faq3A: 'Maximum 50MB per file. Larger files may cause browser performance issues.',
       faq4Q: 'How fast is the processing?',
       faq4A: 'Processing speed depends on your device performance and file size. Most operations complete within seconds.',
+      faq5Q: 'Will merged PDFs have watermarks?',
+      faq5A: 'No, we do not add any watermarks or ads to merged PDFs. You will get completely clean documents.',
     },
     imageOptimizer: {
       name: 'Image Optimizer',
@@ -166,6 +168,8 @@ export default {
       faq3A: 'Higher quality values preserve more detail but result in larger files. 80-85% is usually the best balance of quality and size.',
       faq4Q: 'Can I use this on mobile?',
       faq4A: 'Yes, works on all modern browsers. Chrome or Safari recommended for best performance.',
+      faq5Q: 'How do I choose the best quality value?',
+      faq5A: 'For most uses, 80-85% is the optimal balance. Above 90% is hard to see differences but files get larger, below 70% causes visible noise.',
     },
     qrcode: {
       name: 'QR Code Generator',
