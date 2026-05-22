@@ -10,6 +10,29 @@ export default {
     contributeOnGithub: '在 GitHub 上贡献',
     readyToBoost: '准备好提升工作效率了吗？',
     startUsingTools: '立即开始使用我们的工具，或贡献代码让它变得更好。',
+    tryIt: '立即体验',
+  },
+  nav: {
+    documents: '文档工具',
+    utilities: '效率通用',
+    about: '关于我们',
+    docs: '开发文档',
+    wordPdf: {
+      name: 'Word ↔ PDF 转换',
+      description: '使用服务端 LibreOffice 引擎将 Word 文档精准转换为 PDF。',
+    },
+    pdfMerge: {
+      name: 'PDF 合并与拆分',
+      description: '完全在浏览器本地合并或拆分 PDF，零文件上传。',
+    },
+    imageOptimizer: {
+      name: '图片无损压缩',
+      description: '本地无损压缩图片并转换为 WebP 格式，零服务器依赖。',
+    },
+    qrcode: {
+      name: '二维码生成器',
+      description: '快速生成支持自定义外观与颜色的赛博朋克风二维码。',
+    },
   },
   home: {
     brand: '全能工具箱',

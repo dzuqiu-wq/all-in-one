@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
 import { ToolIcons, tools } from "./ToolConfig";
@@ -10,7 +11,11 @@ import { useLocalizedHref } from "@/i18n/useLocalizedHref";
 
 export default function Navbar() {
   const t = useTranslations();
+  const pathname = usePathname();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Determine current locale from pathname
+  const isZh = pathname.startsWith("/zh");
 
   const homeHref = useLocalizedHref("/");
   const aboutHref = useLocalizedHref("/about");
@@ -55,23 +60,25 @@ export default function Navbar() {
                   <div className="absolute top-full mt-2 left-0 w-80 bg-canvas border border-hairline rounded-lg shadow-lg z-50 overflow-hidden">
                     <div className="p-3">
                       <div className="px-3 py-1.5 caption-upper text-muted-soft">
-                        Documents
+                        {t("nav.documents")}
                       </div>
                       {documentTools.map((tool) => (
                         <NavToolLink
                           key={tool.name}
                           tool={tool}
+                          localeKey={getLocaleToolKey(tool.href)}
                           onSelect={() => setIsDropdownOpen(false)}
                         />
                       ))}
 
                       <div className="px-3 py-1.5 mt-3 caption-upper text-muted-soft border-t border-hairline-soft pt-3">
-                        Utilities
+                        {t("nav.utilities")}
                       </div>
                       {utilityTools.map((tool) => (
                         <NavToolLink
                           key={tool.name}
                           tool={tool}
+                          localeKey={getLocaleToolKey(tool.href)}
                           onSelect={() => setIsDropdownOpen(false)}
                         />
                       ))}
@@ -85,13 +92,13 @@ export default function Navbar() {
               href={aboutHref}
               className="px-3 py-2 text-body-sm font-medium text-body hover:text-ink transition-colors no-underline"
             >
-              About
+              {t("nav.about")}
             </Link>
             <Link
               href={docsHref}
               className="px-3 py-2 text-body-sm font-medium text-body hover:text-ink transition-colors no-underline"
             >
-              Docs
+              {t("nav.docs")}
             </Link>
           </nav>
 
@@ -110,7 +117,7 @@ export default function Navbar() {
               href={ctaHref}
               className="px-5 py-2.5 bg-primary text-on-primary text-body-sm font-medium rounded-md hover:bg-primary-active transition-colors no-underline"
             >
-              Try it
+              {t("common.tryIt")}
             </Link>
           </div>
         </div>
@@ -119,15 +126,31 @@ export default function Navbar() {
   );
 }
 
-function NavToolLink({
-  tool,
-  onSelect,
-}: {
+function getLocaleToolKey(href: string): string {
+  // Map tool href to translation key
+  const hrefToKey: Record<string, string> = {
+    "/tools/word-to-pdf": "nav.wordPdf",
+    "/tools/pdf-merge-split": "nav.pdfMerge",
+    "/tools/image-optimizer": "nav.imageOptimizer",
+    "/tools/qrcode-generator": "nav.qrcode",
+  };
+  return hrefToKey[href] || "";
+}
+
+interface NavToolLinkProps {
   tool: (typeof tools)[number];
+  localeKey: string;
   onSelect: () => void;
-}) {
+}
+
+function NavToolLink({ tool, localeKey, onSelect }: NavToolLinkProps) {
+  const t = useTranslations();
   const href = useLocalizedHref(tool.href);
   const Icon = ToolIcons[tool.iconName];
+
+  // Get localized name and description
+  const localizedName = localeKey ? t(`${localeKey}.name`) : tool.name;
+  const localizedDesc = localeKey ? t(`${localeKey}.description`) : tool.description;
 
   return (
     <Link
@@ -137,8 +160,8 @@ function NavToolLink({
     >
       <Icon className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
       <div className="flex-1">
-        <div className="text-body-sm font-medium">{tool.name}</div>
-        <div className="text-xs text-muted mt-0.5">{tool.description}</div>
+        <div className="text-body-sm font-medium">{localizedName}</div>
+        <div className="text-xs text-muted mt-0.5">{localizedDesc}</div>
       </div>
     </Link>
   );

@@ -10,6 +10,29 @@ export default {
     contributeOnGithub: 'Contribute on GitHub',
     readyToBoost: 'Ready to boost your workflow?',
     startUsingTools: 'Start using our tools now, or contribute to make them even better.',
+    tryIt: 'Try it',
+  },
+  nav: {
+    documents: 'DOCUMENTS',
+    utilities: 'UTILITIES',
+    about: 'About',
+    docs: 'Docs',
+    wordPdf: {
+      name: 'Word → PDF',
+      description: 'Convert Word documents to PDF with server-side LibreOffice processing.',
+    },
+    pdfMerge: {
+      name: 'PDF Merge & Split',
+      description: 'Combine or split PDF files entirely in your browser. No upload required.',
+    },
+    imageOptimizer: {
+      name: 'Image Optimizer',
+      description: 'Compress images and convert to WebP format with zero server dependency.',
+    },
+    qrcode: {
+      name: 'QR Code Generator',
+      description: 'Generate customizable QR codes for URLs, text, and contact information.',
+    },
   },
   home: {
     brand: 'All-in-One Toolbox',
