@@ -104,7 +104,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <Navbar />
           <main className="flex-1">{children}</main>
-          <Footer version="0.1.0" />
+          <Footer />
         </NextIntlClientProvider>
       </body>
     </html>

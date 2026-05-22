@@ -5,10 +5,6 @@ import { usePathname } from "next/navigation";
 import { Mail } from "lucide-react";
 import { CONTACT, SOCIAL } from "@/lib/constants";
 
-interface FooterProps {
-  version?: string;
-}
-
 interface FooterLinkProps {
   path: string;
   label: string;
@@ -129,7 +125,7 @@ function t(dict: { en: string; zh: string } | string, locale: string): string {
   return locale === 'zh' ? dict.zh : dict.en;
 }
 
-export default function Footer({ version = "0.1.0" }: FooterProps) {
+export default function Footer() {
   const pathname = usePathname() || "/";
   const currentYear = new Date().getFullYear();
   
@@ -141,7 +137,7 @@ export default function Footer({ version = "0.1.0" }: FooterProps) {
       <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Brand */}
-          <div className="md:col-span-1">
+          <div className="md:col-span-1 flex flex-col">
             <div className="flex items-center gap-2 mb-4">
               <span className="spike-mark text-on-dark" />
               <span className="font-sans text-title-md font-medium text-on-dark">
@@ -153,12 +149,11 @@ export default function Footer({ version = "0.1.0" }: FooterProps) {
             </p>
             <a
               href={`mailto:${CONTACT.general}`}
-              className="mt-4 inline-flex items-center gap-2 text-body-sm text-on-dark hover:text-primary transition-colors no-underline font-mono"
+              className="mt-5 inline-flex items-center gap-2 text-body-sm text-on-dark hover:text-primary transition-colors no-underline font-mono w-fit"
             >
               <Mail className="w-3.5 h-3.5" strokeWidth={1.75} />
               {CONTACT.general}
             </a>
-            <div className="mt-6 text-xs font-mono text-on-dark-soft">v{version}</div>
           </div>
 
           {/* Product */}
