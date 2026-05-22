@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import { homeMetadata } from "@/i18n/metadata";
+import { getToolMetadata } from "@/i18n/metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return homeMetadata;
+  return getToolMetadata("qrcode-generator");
 }
