@@ -1,472 +1,57 @@
-"use client";
+// Server component - provides metadata and wraps client functionality
+import { Metadata } from "next";
+import WordToPdfClient from "./WordToPdfClient";
 
-import { useState, useRef, useCallback } from "react";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { Upload, Download, FileText, AlertCircle, CheckCircle, ArrowLeft } from "lucide-react";
-import PseudoProcessor from "@/components/PseudoProcessor";
-import AdBanner from "@/components/AdBanner";
-import { useLocalizedHref } from "@/i18n/useLocalizedHref";
-
-interface ConversionResult {
-  fileName: string;
-  processingTime: string;
-  originalSize: number;
-  pdfSize: number;
-  blob: Blob;
+interface Props {
+  params: Promise<{ locale: string }>;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-// Structured data for SEO
-function StructuredDataEN() {
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            name: "Word to PDF Converter",
-            operatingSystem: "All",
-            applicationCategory: "BusinessApplication",
-            browserRequirements: "Requires HTML5 Canvas API and File API support",
-            url: "https://333654.xyz/tools/word-to-pdf",
-            description: "Convert Word documents (.docx, .doc) to PDF format using server-side LibreOffice processing. Features 5-second timeout, memory-only pipeline, and no file storage.",
-          }),
-        }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: [
-              {
-                "@type": "Question",
-                name: "How does the conversion work?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Our server uses Gotenberg, a powerful document conversion service powered by LibreOffice. When you upload a Word document, it streams directly to memory, gets processed by LibreOffice, and streams back as PDF. Your file never touches disk — this is a true memory-only pipeline architecture.",
-                },
-              },
-              {
-                "@type": "Question",
-                name: "What is the 5-second timeout?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Our server enforces a strict 5-second timeout for all conversions to ensure fair resource sharing and prevent long-running tasks from blocking other users. If you hit the limit, try a smaller document or simpler formatting.",
-                },
-              },
-              {
-                "@type": "Question",
-                name: "Why is the file size limit 5MB?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Combined with the 5-second timeout, the 5MB limit ensures fast conversions and fair resource sharing. For larger documents, consider splitting them first or using desktop software.",
-                },
-              },
-              {
-                "@type": "Question",
-                name: "Is my document secure during conversion?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Yes, security is our top priority. We implement a zero-footprint policy: files are processed entirely in server memory using stream-based pipelines and never written to disk.",
-                },
-              },
-              {
-                "@type": "Question",
-                name: "What formats are supported?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "We support .docx (Office Open XML, the standard since 2007) and legacy .doc format. For best results, use .docx with standard fonts. Macros are stripped during conversion since PDF does not support them.",
-                },
-              },
-              {
-                "@type": "Question",
-                name: "How does rate limiting work?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Each IP address is limited to 5 conversions per minute using a sliding window algorithm. If you hit the limit, you will receive a 429 response with a Retry-After header indicating when you can try again.",
-                },
-              },
-            ],
-          }),
-        }}
-      />
-    </>
-  );
-}
-
-function StructuredDataZH() {
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            name: "Word 转 PDF 转换器",
-            operatingSystem: "All",
-            applicationCategory: "BusinessApplication",
-            browserRequirements: "Requires HTML5 Canvas API and File API support",
-            url: "https://333654.xyz/zh/tools/word-to-pdf",
-            description: "使用服务端 LibreOffice 处理将 Word 文档转换为 PDF。纯内存管道处理，文件绝不上传磁盘。5秒快速超时，100%隐私安全。",
-          }),
-        }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: [
-              {
-                "@type": "Question",
-                name: "转换是如何工作的？",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "我们的服务器使用 Gotenberg，一个由强大的 LibreOffice 驱动的文档转换服务提供支持。当您上传 Word 文档时，它会直接流式传输到内存中，由 LibreOffice 处理后流式返回为 PDF——您的文件永不触碰磁盘。这是一个真正的纯内存管道架构。",
-                },
-              },
-              {
-                "@type": "Question",
-                name: "什么是 5 秒超时限制？",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "我们的服务器对所有转换强制执行严格的 5 秒超时限制。这个超时设置确保所有用户都能获得可预测的性能。如果您遇到超时错误，建议尝试更小的文档或更简单的格式。",
-                },
-              },
-              {
-                "@type": "Question",
-                name: "为什么文件大小限制为 5MB？",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "结合 5 秒超时限制，5MB 的文件大小限制确保了快速转换和资源公平共享。这个限制是经过仔细权衡的：它足够大以处理大多数日常文档，又足够小以保证在 5 秒内完成处理。",
-                },
-              },
-              {
-                "@type": "Question",
-                name: "转换过程中我的文档安全吗？",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "是的，安全性是我们的首要任务。我们实施零占用（Zero-Footprint）策略：文件完全在服务器内存中使用流式管道处理，从不写入磁盘。所有转换操作都在隔离的内存空间中进行，转换完成后内存缓冲区会立即释放。",
-                },
-              },
-              {
-                "@type": "Question",
-                name: "支持哪些 Word 格式？",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "我们支持两种主要的 Word 格式：.docx（Office Open XML 格式，自 Microsoft Office 2007 起成为标准格式）和传统的 .doc 格式。为获得最佳转换效果，建议使用 .docx 格式配合标准字体。",
-                },
-              },
-              {
-                "@type": "Question",
-                name: "速率限制是如何工作的？",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "每个 IP 地址使用滑动窗口算法限制为每分钟 5 次转换。当您达到限制时，服务器会返回 429 状态码，并在响应头中包含 Retry-After 字段，指示您需要等待多长时间才能再次尝试。",
-                },
-              },
-            ],
-          }),
-        }}
-      />
-    </>
-  );
-}
-
-export default function WordToPDFPage() {
-  const t = useTranslations("tools.wordPdf");
-  const homeHref = useLocalizedHref("/");
-  const [file, setFile] = useState<File | null>(null);
-  const [state, setState] = useState<"idle" | "processing" | "success" | "error">("idle");
-  const [result, setResult] = useState<ConversionResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const loadingTexts = [
-    t("loading1"),
-    t("loading2"),
-    t("loading3"),
-    t("loading4"),
-  ];
-
-  const handleFileSelect = useCallback((selectedFile: File) => {
-    const validExt = selectedFile.name.match(/\.(docx|doc)$/i);
-    if (!validExt) {
-      setError(t("errorInvalid"));
-      return;
-    }
-
-    if (selectedFile.size > 5 * 1024 * 1024) {
-      setError(t("errorSize"));
-      return;
-    }
-
-    setFile(selectedFile);
-    setResult(null);
-    setError(null);
-  }, [t]);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    const f = e.dataTransfer.files[0];
-    if (f) handleFileSelect(f);
-  }, [handleFileSelect]);
-
-  const formatBytes = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const isZh = locale === "zh";
+  
+  return {
+    title: isZh 
+      ? "Word 转 PDF 转换器 | All-in-One Toolbox" 
+      : "Word to PDF Converter | All-in-One Toolbox",
+    description: isZh
+      ? "使用服务端 LibreOffice 处理将 Word 文档转换为 PDF。纯内存管道处理，文件绝不上传磁盘。5秒快速超时，100%隐私安全。"
+      : "Convert Word documents to PDF with server-side LibreOffice processing. 100% secure with memory-only pipeline, no disk storage. Fast 5-second timeout.",
+    keywords: isZh
+      ? ["Word转PDF", "DOCX转PDF", "文档转换器", "PDF转换", "在线转换工具", "LibreOffice"]
+      : ["word to pdf", "docx to pdf", "document converter", "libreoffice", "pdf conversion", "online converter"],
+    alternates: {
+      canonical: "https://333654.xyz/tools/word-to-pdf",
+      languages: {
+        "en-US": "https://333654.xyz/tools/word-to-pdf",
+        "zh-CN": "https://333654.xyz/zh/tools/word-to-pdf",
+      },
+    },
+    openGraph: {
+      type: "website",
+      locale: isZh ? "zh_CN" : "en_US",
+      alternateLocale: isZh ? "en_US" : "zh_CN",
+      url: "https://333654.xyz/tools/word-to-pdf",
+      siteName: "All-in-One Toolbox",
+      title: isZh 
+        ? "Word 转 PDF 转换器 | All-in-One Toolbox" 
+        : "Word to PDF Converter | All-in-One Toolbox",
+      description: isZh
+        ? "使用服务端 LibreOffice 处理将 Word 文档转换为 PDF。纯内存管道处理，文件绝不上传磁盘。"
+        : "Convert Word documents to PDF with server-side LibreOffice processing. 100% secure with memory-only pipeline.",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: isZh 
+        ? "Word 转 PDF 转换器 | All-in-One Toolbox" 
+        : "Word to PDF Converter | All-in-One Toolbox",
+      description: isZh
+        ? "使用服务端 LibreOffice 处理将 Word 文档转换为 PDF"
+        : "Convert Word documents to PDF with server-side LibreOffice processing.",
+    },
   };
+}
 
-  const handleConvert = useCallback(async () => {
-    if (!file) return;
-
-    setState("processing");
-    setError(null);
-
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch(`${API_BASE_URL}/api/v1/convert/word-to-pdf`, {
-        method: "POST",
-        body: formData,
-        signal: AbortSignal.timeout(7000),
-      });
-
-      if (response.status === 413) throw new Error(t("error413"));
-      if (response.status === 429) {
-        const data = await response.json();
-        throw new Error(`${t("error429")} ${data.retry_after_seconds || 60}s`);
-      }
-      if (response.status === 504) throw new Error(t("error504"));
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.detail || `${t("errorGeneric")}: ${response.status}`);
-      }
-
-      const processingTime = response.headers.get("X-Processing-Time") || "0";
-      const pdfBlob = await response.blob();
-
-      setResult({
-        fileName: file.name.replace(/\.(docx|doc)$/i, ".pdf"),
-        processingTime: `${(parseFloat(processingTime) * 1000).toFixed(0)}ms`,
-        originalSize: file.size,
-        pdfSize: pdfBlob.size,
-        blob: pdfBlob,
-      });
-
-      setState("success");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("errorUnexpected"));
-      setState("error");
-    }
-  }, [file, t]);
-
-  const handleDownload = useCallback(() => {
-    if (!result?.blob) return;
-    const url = URL.createObjectURL(result.blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = result.fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, [result]);
-
-  const handleReset = useCallback(() => {
-    setFile(null);
-    setState("idle");
-    setResult(null);
-    setError(null);
-  }, []);
-
-  return (
-    <div className="min-h-screen bg-canvas">
-      {/* SEO Structured Data - English */}
-      <StructuredDataEN />
-      
-      <PseudoProcessor
-        isProcessing={false}
-        onComplete={() => {}}
-        loadingTexts={loadingTexts}
-      />
-
-      <div className="max-w-4xl mx-auto px-6 py-section">
-        {/* Back Link */}
-        <Link href={homeHref} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
-          <ArrowLeft className="w-4 h-4" />
-          {t("back")}
-        </Link>
-
-        {/* Hero */}
-        <div className="mb-12">
-          <div className="caption-upper text-muted mb-4">{t("tag")}</div>
-          <h1 className="text-display-lg font-serif text-ink mb-4" style={{ fontSize: "clamp(36px, 5vw, 48px)" }}>
-            {t("title")}
-          </h1>
-          <p className="text-title-md text-body max-w-2xl leading-relaxed">
-            {t("description")}
-          </p>
-        </div>
-
-        {/* Top Ad */}
-        <div className="mb-8">
-          <AdBanner slot="wordtopdf-top" format="auto" />
-        </div>
-
-        {/* Upload Zone */}
-        <div
-          onDrop={handleDrop}
-          onDragOver={(e) => e.preventDefault()}
-          onClick={() => fileInputRef.current?.click()}
-          className={`surface-card border-2 border-dashed rounded-xl p-xxl text-center cursor-pointer transition-all duration-300 ${
-            file ? "border-primary bg-surface-cream-strong" : "border-hairline hover:border-primary hover:bg-surface-cream-strong"
-          }`}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".docx,.doc"
-            onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
-            className="hidden"
-          />
-          <FileText className="w-12 h-12 mx-auto mb-4 text-primary" strokeWidth={1.5} />
-          <h4 className="text-title-md font-sans text-ink mb-2">
-            {file ? file.name : t("dropzone")}
-          </h4>
-          <p className="text-body-sm text-muted">
-            {file ? formatBytes(file.size) : t("supported")}
-          </p>
-        </div>
-
-        {/* Action Button */}
-        {file && state === "idle" && (
-          <div className="mt-6 flex gap-3">
-            <button
-              onClick={handleConvert}
-              className="flex-1 py-3 bg-primary text-on-primary text-body-sm font-medium rounded-md hover:bg-primary-active transition-colors flex items-center justify-center gap-2"
-            >
-              <Upload className="w-4 h-4" />
-              {t("convert")}
-            </button>
-            <button
-              onClick={handleReset}
-              className="px-6 py-3 bg-canvas border border-hairline text-ink text-body-sm font-medium rounded-md hover:bg-surface-card transition-colors"
-            >
-              {t("reset")}
-            </button>
-          </div>
-        )}
-
-        {/* Processing State */}
-        {state === "processing" && (
-          <div className="mt-6 surface-card rounded-lg p-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              <span className="text-body-sm font-medium text-ink">{t("processing")}</span>
-            </div>
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && (
-          <div className="mt-6 surface-card border border-error/30 rounded-lg p-lg">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-error flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <h5 className="font-sans font-medium text-ink mb-1">{t("errorTitle")}</h5>
-                <p className="text-body-sm text-body">{error}</p>
-                <button
-                  onClick={handleReset}
-                  className="mt-4 px-4 py-2 bg-canvas border border-hairline text-body-sm rounded-md hover:bg-surface-card transition-colors"
-                >
-                  {t("tryAgain")}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Success State */}
-        {result && (
-          <div className="mt-8 space-y-6">
-            <div className="surface-card rounded-xl p-xl">
-              <div className="flex items-center gap-3 mb-6">
-                <CheckCircle className="w-6 h-6 text-success" />
-                <h4 className="text-title-md font-sans text-ink">{t("success")}</h4>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <div>
-                  <div className="caption-upper text-muted-soft mb-1">{t("original")}</div>
-                  <div className="text-title-md font-sans text-ink">{formatBytes(result.originalSize)}</div>
-                </div>
-                <div>
-                  <div className="caption-upper text-muted-soft mb-1">{t("pdfSize")}</div>
-                  <div className="text-title-md font-sans text-ink">{formatBytes(result.pdfSize)}</div>
-                </div>
-                <div>
-                  <div className="caption-upper text-muted-soft mb-1">{t("time")}</div>
-                  <div className="text-title-md font-sans text-primary">{result.processingTime}</div>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={handleDownload}
-                  className="flex-1 py-3 bg-primary text-on-primary text-body-sm font-medium rounded-md hover:bg-primary-active transition-colors flex items-center justify-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  {t("download")} {result.fileName}
-                </button>
-                <button
-                  onClick={handleReset}
-                  className="px-6 py-3 bg-canvas border border-hairline text-ink text-body-sm font-medium rounded-md hover:bg-surface-card transition-colors"
-                >
-                  {t("convertAnother")}
-                </button>
-              </div>
-            </div>
-
-            {/* Mid Ad */}
-            <AdBanner slot="wordtopdf-mid" format="rectangle" className="mx-auto max-w-[336px]" />
-          </div>
-        )}
-
-        {/* FAQ Section */}
-        <section className="mt-section pt-xl border-t border-hairline">
-          <h2 className="text-display-md font-serif text-ink mb-8">
-            {t("faqTitle")}
-          </h2>
-          <div className="space-y-6">
-            {[
-              { q: t("faq1Q"), a: t("faq1A") },
-              { q: t("faq2Q"), a: t("faq2A") },
-              { q: t("faq3Q"), a: t("faq3A") },
-              { q: t("faq4Q"), a: t("faq4A") },
-              { q: t("faq5Q"), a: t("faq5A") },
-              { q: t("faq6Q"), a: t("faq6A") },
-            ].map((item, idx) => (
-              <details key={idx} className="group surface-card rounded-lg p-lg">
-                <summary className="cursor-pointer text-title-sm font-sans font-medium text-ink hover:text-primary transition-colors">
-                  {item.q}
-                </summary>
-                <p className="mt-3 text-body-md text-body leading-relaxed">{item.a}</p>
-              </details>
-            ))}
-          </div>
-        </section>
-      </div>
-    </div>
-  );
+export default function WordToPdfPage() {
+  return <WordToPdfClient />;
 }

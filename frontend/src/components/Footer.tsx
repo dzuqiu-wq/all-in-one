@@ -217,10 +217,10 @@ export default function Footer({ version = "0.1.0" }: FooterProps) {
                 label={t(translations.legal.termsOfService, locale)} 
                 locale={locale} 
               />
-              <FooterLink 
-                path="/cookies" 
-                label={t(translations.legal.cookiePolicy, locale)} 
-                locale={locale} 
+              <FooterLink
+                path="/cookie"
+                label={t(translations.legal.cookiePolicy, locale)}
+                locale={locale}
               />
               <FooterLink 
                 path="/about" 
