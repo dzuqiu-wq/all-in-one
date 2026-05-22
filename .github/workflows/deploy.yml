@@ -87,134 +87,25 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
-          # Pass the dispatch input through so manual reruns can skip the build.
           envs: SKIP_BUILD,VPS_PROJECT_PATH
           script_stop: true
           # ----------------------------------------------------------------
-          # The `script:` block below is intentionally MINIMAL.
+          # The remote `script:` block is intentionally minimal: three
+          # commands, no control flow, no multi-line if/then/fi.
           #
-          # appleboy/ssh-action streams each line of `script:` over the SSH
-          # session and (on some versions / shells) implicitly checks exit
-          # status between lines, which has historically miskilled scripts
-          # at innocent `if [ … ]; then` boundaries. The defensive fix is
-          # to write the real rollout logic to a file on the remote host
-          # via a single here-doc, then exec that file in one bash call.
-          # Everything appleboy sees on the wire is "cat > file; bash file"
-          # — no multi-line conditionals to misinterpret.
-          #
-          # The real script body uses ONLY single-line `if … ; then … ; fi`
-          # constructs (and explicit `&&`/`||`) so that even if a future
-          # appleboy release reintroduces line-by-line semantics, every
-          # control-flow statement remains atomic on its own line.
+          # appleboy/ssh-action splits the `script:` block on newlines and
+          # injects implicit exit-status checks between lines, which
+          # historically miskills scripts at innocuous `if [ … ]; then`
+          # boundaries (the so-called "false = true" trap). We dodge the
+          # entire class of problems by shipping the real rollout logic as
+          # a committed bash file (.github/scripts/deploy-vps.sh) and
+          # letting this workflow only do the three SSH-safe primitives:
+          # cd, git reset, exec the script.
           # ----------------------------------------------------------------
           script: |
-            set -euo pipefail
-            export VPS_PROJECT_PATH="${{ secrets.VPS_PROJECT_PATH }}"
-            cat > /tmp/all-in-one-deploy.sh <<'REMOTE_SCRIPT_EOF'
-            #!/usr/bin/env bash
-            # Real rollout body. Runs in a clean, full bash session — no
-            # implicit per-line interception, no surprise SIGTERMs between
-            # statements. Sourced via `bash /tmp/all-in-one-deploy.sh` from
-            # the outer ssh-action wrapper.
-            set -euxo pipefail
-            trap 'rc=$?; echo "::error::deploy-runner failed at line ${LINENO}: command \"${BASH_COMMAND}\" exited with code ${rc}"; exit $rc' ERR
-
-            # Non-interactive shells get a stripped PATH; repair it.
-            export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:$PATH"
-
-            cd "$VPS_PROJECT_PATH"
-
-            echo "==> Sync code from origin/main"
-            git fetch --prune origin
-            git reset --hard origin/main
-
-            # ---- Resolve docker compose command ---------------------------
-            DC=""
-            if docker compose version >/dev/null 2>&1; then DC="docker compose"; fi
-            if [ -z "$DC" ] && command -v docker-compose >/dev/null 2>&1; then DC="docker-compose"; fi
-            if [ -z "$DC" ] && [ -x /usr/local/bin/docker-compose ]; then DC="/usr/local/bin/docker-compose"; fi
-            if [ -z "$DC" ] && [ -x /usr/bin/docker-compose ]; then DC="/usr/bin/docker-compose"; fi
-            if [ -z "$DC" ]; then echo "::error::No docker compose binary found on PATH=$PATH"; exit 1; fi
-            echo "    using: $DC"
-            $DC version 2>&1 | head -5 || true
-            docker info --format '    server version: {{.ServerVersion}} · containers: {{.Containers}}' 2>&1 || { echo "::error::'docker info' failed"; exit 1; }
-
-            COMPOSE_FILE="docker-compose.prod.yml"
-
-            echo "==> Pre-validate context"
-            echo "    pwd: $(pwd)   compose file: $COMPOSE_FILE"
-            ls -la "$COMPOSE_FILE" 2>&1 || true
-            if [ ! -f "$COMPOSE_FILE" ]; then echo "::error::$COMPOSE_FILE not found at $(pwd)"; ls -la; exit 1; fi
-
-            echo "==> Validate compose config"
-            set +e
-            trap - ERR
-            CONFIG_STDERR=$(mktemp)
-            $DC -f "$COMPOSE_FILE" config --quiet 2>"$CONFIG_STDERR"
-            CONFIG_RC=$?
-            set -e
-            trap 'rc=$?; echo "::error::deploy-runner failed at line ${LINENO}: command \"${BASH_COMMAND}\" exited with code ${rc}"; exit $rc' ERR
-            if [ "$CONFIG_RC" -ne 0 ]; then echo "::error::compose config failed (exit $CONFIG_RC)"; echo "----- stderr -----"; cat "$CONFIG_STDERR"; echo "----- config dump (head 80) -----"; $DC -f "$COMPOSE_FILE" config 2>&1 | head -80 || true; rm -f "$CONFIG_STDERR"; exit "$CONFIG_RC"; fi
-            rm -f "$CONFIG_STDERR"
-            echo "    compose config OK"
-
-            # ---- Sweep stale containers (idempotent) ----------------------
-            echo "==> Sweep stale containers"
-            for name in all-in-one-toolbox-nginx all-in-one-toolbox-frontend all-in-one-toolbox-backend all-in-one-toolbox-gotenberg; do
-              if docker ps -a --format '{{.Names}}' | grep -Fxq "$name"; then echo "    removing stale: $name"; docker rm -f "$name" 2>&1 || true; fi
-            done
-
-            echo "==> Tear down previous compose project"
-            set +e
-            $DC -f "$COMPOSE_FILE" down --remove-orphans 2>&1
-            DOWN_RC=$?
-            set -e
-            if [ "$DOWN_RC" -ne 0 ]; then echo "::warning::'$DC down' exited $DOWN_RC — continuing (best-effort cleanup)"; fi
-
-            # ---- Decide build vs no-build (single-line branch) ------------
-            SKIP="${SKIP_BUILD:-false}"
-            if [ "$SKIP" = "true" ]; then echo "==> SKIP_BUILD=true · rolling without rebuild"; else echo "==> Rebuilding production images"; fi
-
-            # Build step runs in its own guarded block. We DELIBERATELY do
-            # NOT nest a multi-line if-then-fi around it; instead we use
-            # a single-line gate at the top to short-circuit when SKIP=true.
-            if [ "$SKIP" = "true" ]; then echo "    (build skipped)"; else
-              set +e
-              $DC -f "$COMPOSE_FILE" build --pull --progress=plain 2>&1
-              BUILD_RC=$?
-              set -e
-              if [ "$BUILD_RC" -ne 0 ]; then echo "::error::build failed exit $BUILD_RC"; echo "----- df -h -----"; df -h 2>&1 || true; echo "----- free -h -----"; free -h 2>&1 || true; echo "----- docker image ls -----"; docker image ls 2>&1 | head -20 || true; exit "$BUILD_RC"; fi
-            fi
-
-            # ---- Roll the stack ------------------------------------------
-            echo "==> Rolling stack (up -d --remove-orphans)"
-            set +e
-            $DC -f "$COMPOSE_FILE" up -d --remove-orphans 2>&1
-            UP_RC=$?
-            set -e
-            if [ "$UP_RC" -ne 0 ]; then echo "::error::'up -d' failed exit $UP_RC"; $DC -f "$COMPOSE_FILE" ps --all 2>&1 || true; docker ps -a --filter "name=all-in-one-toolbox" 2>&1 || true; echo "----- recent logs -----"; $DC -f "$COMPOSE_FILE" logs --tail 50 2>&1 || true; exit "$UP_RC"; fi
-
-            # ---- Wait for nginx healthcheck (up to 90 s) ------------------
-            echo "==> Wait for nginx healthcheck"
-            HEALTHY=0
-            for i in $(seq 1 45); do
-              S=$($DC -f "$COMPOSE_FILE" ps --format json 2>/dev/null | grep -o '"Name":"all-in-one-toolbox-nginx"[^}]*' | grep -o '"Health":"[^"]*"' | head -n1 || true)
-              if echo "$S" | grep -q '"Health":"healthy"'; then HEALTHY=1; echo "    nginx healthy after ${i} probes"; break; fi
-              sleep 2
-            done
-            if [ "$HEALTHY" -eq 0 ]; then echo "::warning::nginx not healthy within 90 s — continuing for external probe"; fi
-
-            echo "==> Final service table"
-            $DC -f "$COMPOSE_FILE" ps
-
-            echo "==> Prune dangling images"
-            docker image prune -f >/dev/null 2>&1 || true
-
-            echo "==> Rollout complete at $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-            REMOTE_SCRIPT_EOF
-
-            chmod +x /tmp/all-in-one-deploy.sh
-            bash /tmp/all-in-one-deploy.sh
+            cd ${{ secrets.VPS_PROJECT_PATH }}
+            git fetch origin main && git reset --hard origin/main
+            bash .github/scripts/deploy-vps.sh
 
       - name: External health probe
         # Hit the public endpoint from the GitHub runner to confirm the

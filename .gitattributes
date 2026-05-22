@@ -1,0 +1,16 @@
+# Normalise line endings for files that are interpreted on Linux servers.
+# Without this, a Windows clone may commit CRLF endings that crash bash
+# on the VPS with "bad interpreter: /bin/bash^M".
+
+# Shell scripts must always be LF — bash will not run a CRLF-tagged shebang.
+*.sh             text eol=lf
+.github/**/*.sh  text eol=lf
+
+# GitHub Actions / Docker / nginx config files are also Linux-consumed.
+*.yml            text eol=lf
+*.yaml           text eol=lf
+Dockerfile       text eol=lf
+*.conf           text eol=lf
+
+# Everything else: let Git auto-detect text vs binary.
+*                text=auto
