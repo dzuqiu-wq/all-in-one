@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 
 # Install dependencies
-RUN npm install
+RUN npm config set registry https://registry.npmjs.org/ && npm install
 
 # Development image
 FROM base AS development
