@@ -62,3 +62,6 @@ decision.json
 # TypeScript incremental build cache
 *.tsbuildinfo
 *.md
+
+# Allow markdown docs that live under .github/ (deployment runbooks, issue templates, etc.)
+!.github/**/*.md

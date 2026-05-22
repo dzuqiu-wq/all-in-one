@@ -1,0 +1,181 @@
+# Continuous Deployment — on a successful CI run against main, SSH into
+# the VPS, pull the freshly merged code, rebuild the production Docker
+# images, and roll the stack with zero-downtime semantics.
+#
+# Required GitHub Secrets (Settings → Secrets and variables → Actions):
+#
+#   VPS_HOST           — public IP or hostname of the production VPS
+#   VPS_USER           — SSH user (recommended: a non-root user in the docker group)
+#   VPS_SSH_KEY        — full private key text (OpenSSH format, no passphrase)
+#   VPS_PORT           — SSH port (optional, defaults to 22)
+#   VPS_PROJECT_PATH   — absolute path on the VPS where the repo is cloned
+#                        (e.g. /home/deploy/all-in-one-toolbox)
+#
+# Optional secret:
+#   HEALTH_CHECK_URL   — full URL the workflow probes after rollout
+#                        (defaults to http://${VPS_HOST}/health)
+#
+# See .github/DEPLOYMENT.md for the one-time setup instructions.
+
+name: Deploy to VPS
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+    inputs:
+      skip_build:
+        description: "Skip image rebuild and reuse existing images"
+        type: boolean
+        required: false
+        default: false
+
+# Only one deploy may run at a time against the production environment;
+# back-to-back pushes will queue rather than race for the SSH socket.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  # ==========================================================================
+  # Reuse CI as a gate — the deploy job will not start unless CI succeeds.
+  # ==========================================================================
+  ci:
+    name: Pre-deploy CI
+    uses: ./.github/workflows/ci.yml
+
+  # ==========================================================================
+  # Deploy — SSH into the VPS, pull, rebuild, roll, health-check.
+  # ==========================================================================
+  deploy:
+    name: Roll production
+    needs: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production
+      url: https://333654.xyz
+
+    steps:
+      - name: Checkout repo (for reference only)
+        uses: actions/checkout@v4
+
+      - name: Validate required secrets are configured
+        # Fail loudly and EARLY if anyone forgot to wire up the secrets.
+        # Otherwise appleboy/ssh-action would emit a less helpful error.
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_PROJECT_PATH: ${{ secrets.VPS_PROJECT_PATH }}
+        run: |
+          missing=()
+          [ -z "$VPS_HOST" ]         && missing+=("VPS_HOST")
+          [ -z "$VPS_USER" ]         && missing+=("VPS_USER")
+          [ -z "$VPS_SSH_KEY" ]      && missing+=("VPS_SSH_KEY")
+          [ -z "$VPS_PROJECT_PATH" ] && missing+=("VPS_PROJECT_PATH")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing required GitHub Secrets: ${missing[*]}"
+            echo "See .github/DEPLOYMENT.md for the setup checklist."
+            exit 1
+          fi
+
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          # Pass the dispatch input through so manual reruns can skip the build.
+          envs: SKIP_BUILD
+          script_stop: true
+          # The remote command is intentionally a single multi-line script
+          # rather than several `script:` lines so any failure (e.g. git
+          # conflict, docker error) aborts the whole rollout via `set -e`.
+          script: |
+            set -euo pipefail
+
+            cd "${{ secrets.VPS_PROJECT_PATH }}"
+
+            echo "==> Sync code from origin/main"
+            # We use --hard to guarantee a clean state. The repository on the
+            # VPS is treated as a deploy target, not a working copy — local
+            # edits there are an anti-pattern and would be lost intentionally.
+            git fetch --prune origin
+            git reset --hard origin/main
+
+            echo "==> Resolve docker compose command"
+            if command -v docker-compose >/dev/null 2>&1; then
+              DC="docker-compose"
+            else
+              DC="docker compose"
+            fi
+
+            COMPOSE_FILE="docker-compose.prod.yml"
+
+            if [ "${SKIP_BUILD:-false}" = "true" ]; then
+              echo "==> Rolling without rebuild (SKIP_BUILD=true)"
+              $DC -f "$COMPOSE_FILE" up -d --remove-orphans
+            else
+              echo "==> Rebuilding production images"
+              $DC -f "$COMPOSE_FILE" build --pull
+              echo "==> Rolling stack"
+              $DC -f "$COMPOSE_FILE" up -d --remove-orphans
+            fi
+
+            echo "==> Wait for nginx healthcheck (up to 90 s)"
+            for i in $(seq 1 45); do
+              status=$($DC -f "$COMPOSE_FILE" ps --format json 2>/dev/null \
+                | grep -o '"Name":"all-in-one-toolbox-nginx"[^}]*' \
+                | grep -o '"Health":"[^"]*"' \
+                | head -n1 || true)
+              if echo "$status" | grep -q '"Health":"healthy"'; then
+                echo "    nginx is healthy"
+                break
+              fi
+              if [ "$i" = "45" ]; then
+                echo "::warning::nginx did not report healthy within 90 s — investigate"
+              fi
+              sleep 2
+            done
+
+            echo "==> Final service table"
+            $DC -f "$COMPOSE_FILE" ps
+
+            echo "==> Prune dangling images (free disk)"
+            docker image prune -f >/dev/null
+
+            echo "==> Rollout complete at $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+
+      - name: External health probe
+        # Hit the public endpoint from the GitHub runner to confirm the
+        # rollout is visible from the outside, not just inside the VPS.
+        env:
+          HEALTH_URL: ${{ secrets.HEALTH_CHECK_URL || format('http://{0}/health', secrets.VPS_HOST) }}
+        run: |
+          echo "==> Probing $HEALTH_URL"
+          for i in $(seq 1 10); do
+            if curl -fsS --max-time 5 "$HEALTH_URL" >/tmp/health.txt 2>/dev/null; then
+              echo "    OK — $(cat /tmp/health.txt | head -c 200)"
+              exit 0
+            fi
+            echo "    attempt $i failed, retrying in 3 s"
+            sleep 3
+          done
+          echo "::error::Health probe failed after 10 attempts"
+          exit 1
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Production deploy"
+            echo ""
+            echo "- **Commit:** \`${{ github.sha }}\`"
+            echo "- **Triggered by:** ${{ github.actor }}"
+            echo "- **Event:** ${{ github.event_name }}"
+            echo "- **Outcome:** ${{ job.status }}"
+            echo ""
+            echo "Public URL: https://333654.xyz"
+          } >> "$GITHUB_STEP_SUMMARY"
