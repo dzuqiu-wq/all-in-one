@@ -242,56 +242,56 @@ export default async function AboutPage({ params }: Props) {
     >
       <InfoSection heading="Indie Hacker's Philosophy">
         <p>
-          The internet is full of &ldquo;free&rdquo; tool sites that exchange your privacy for ad revenue. They invite you to upload, claim server-side processing, then quietly feed your files into profiling engines and sell the signals to ad networks.
+          The internet is full of &ldquo;free&rdquo; tool sites that quietly exchange your privacy for ad revenue. They invite you to upload, claim server-side processing, then feed your files into profiling pipelines and sell the resulting signals to ad networks.
         </p>
-        <p>We refuse that business model.</p>
+        <p>We refuse that business model. Categorically.</p>
         <InfoCallout tone="dark">
-          <strong className="text-on-dark">Our promise, in code.</strong>{" "}
-          All-in-One Toolbox is built by a tiny anonymous engineering team. The frontend is MIT-licensed and publicly auditable. We do not collect file contents, maintain user accounts, or run any behavioural tracking outside the tool surfaces. The in-page Google AdSense placements are our only revenue stream — they offset a single Gotenberg container's hosting cost and never gate tool functionality.
+          <strong className="text-on-dark">Our promise, codified.</strong>{" "}
+          All-in-One Toolbox is built by a small, anonymous engineering team. The frontend is MIT-licensed and publicly auditable on GitHub. We do not collect file contents, maintain user accounts, or run any behavioural tracking outside the tool surfaces themselves. The in-page Google AdSense placements are the entire revenue stream — they offset the modest cost of running a single Gotenberg container and never gate tool functionality.
         </InfoCallout>
         <p>
           <strong>1. Privacy is the default, not a feature.</strong>{" "}
-          We do not market &ldquo;encrypted uploads&rdquo; — we simply do not let you upload. The strongest privacy guarantee is architecturally inaccessible, not contractually promised.
+          We do not market &ldquo;encrypted uploads&rdquo; — we simply do not let you upload. The strongest privacy guarantee is one that is architecturally inaccessible, not the kind that is contractually promised.
         </p>
         <p>
-          <strong>2. Performance is a design choice, not an optimisation.</strong>{" "}
-          TTFB &lt; 200 ms, LCP &lt; 1.5 s, CLS &lt; 0.1 are hard targets. Next.js 15 App Router + RSC streaming gives us roughly 30% of the JavaScript payload of comparable tool sites.
+          <strong>2. Performance is a design choice, not a late-stage optimisation.</strong>{" "}
+          TTFB &lt; 200 ms, LCP &lt; 1.5 s, CLS &lt; 0.1 are hard, non-negotiable targets. Next.js 15 App Router with streaming RSC keeps the first-load JavaScript payload at roughly 30% of comparable tool sites.
         </p>
         <p>
-          <strong>3. Open source is an obligation, not marketing.</strong>{" "}
-          The frontend is public on GitHub under MIT. Anyone can audit whether the privacy claim holds — credibility that cannot be faked.
+          <strong>3. Open source is an obligation, not marketing copy.</strong>{" "}
+          The frontend is public on GitHub under MIT. Anyone — security researchers, compliance auditors, curious users — can verify whether the privacy claims hold byte by byte. That is credibility you cannot fake.
         </p>
         <p>
           <strong>4. Tools should be small, honest, and replaceable.</strong>{" "}
-          We will never lock you into a &ldquo;subscription&rdquo;, &ldquo;credits&rdquo;, or &ldquo;invite code&rdquo; system. If a desktop tool one day does the same work faster, please go — we will be glad.
+          We will never lock you into a &ldquo;subscription&rdquo;, &ldquo;credit&rdquo;, or &ldquo;invite-code&rdquo; system. If a desktop tool one day does the same work faster, please go use it — we will be glad.
         </p>
       </InfoSection>
 
       <InfoSection heading="Data Non-Storage Attestation">
         <p>
-          &ldquo;We do not store your data&rdquo; is easy to say. Below is how we made it architecturally true. Every claim here is verifiable by any auditor, security researcher, or curious user.
+          &ldquo;We do not store your data&rdquo; is an easy promise to make. What follows is how we made that promise architecturally true rather than merely contractual. Every claim below is verifiable by any auditor, security researcher, or curious user — directly from your own browser DevTools.
         </p>
-        <InfoSubsection heading="First principle: remove storage from the architecture">
+        <InfoSubsection heading="First principle: remove storage from the architecture itself">
           <p>
-            Six of our seven tools never communicate with any server. That means even if you wanted to &ldquo;upload&rdquo;, there is no destination — pdf-lib, Canvas, and Web Workers digest your file inside the browser, and the result returns to your downloads folder as a Blob URL.
+            Six of our seven tools never communicate with any server. There is no upload destination to attack, intercept, or subpoena — pdf-lib, the Canvas API, and Web Workers handle every byte inside your browser, and the result is returned to your downloads folder as a transient Blob URL.
           </p>
           <p>
-            The exception is Word → PDF, which needs server-side OOXML parsing. We built a memory-only pipeline: the file streams from Nginx straight into a Python <code>BytesIO</code> buffer, never to disk; a 5 s hard timeout is enforced via <code>asyncio.wait_for</code>; once conversion completes, the buffer is dereferenced and the PDF bytes return to the browser as a <code>StreamingResponse</code>. No intermediate files, no on-disk cache.
+            The exception is Word → PDF, which requires server-side OOXML parsing. We built that path as a memory-only pipeline: the file streams from Nginx directly into a Python <code>BytesIO</code> buffer and never touches disk. A 5-second hard timeout is enforced via <code>asyncio.wait_for</code>; once the conversion completes, the buffer is dereferenced and the resulting PDF bytes flow back to the browser as a <code>StreamingResponse</code>. There is no intermediate file, no on-disk cache, and the LibreOffice subprocess is recycled after every conversion.
           </p>
         </InfoSubsection>
-        <InfoSubsection heading="Auditable claim list">
+        <InfoSubsection heading="The auditable claim list">
           <ul className="list-disc pl-6 space-y-2">
             <li>While any client-side tool runs, browser DevTools → Network shows exactly <strong>zero</strong> requests to our tool endpoints. Reproducible on PDF merge, PDF watermark, image optimiser, QR generator, data sanitizer, and invoice generator.</li>
-            <li>On the Word → PDF path, FastAPI never invokes <code>open(...)</code> or <code>tempfile.*</code>. The request body lives only in <code>BytesIO</code>. Source: <code>backend/app/main.py</code>.</li>
-            <li>The Gotenberg container is configured with <code>LIBREOFFICE_RESTART_AFTER=10</code>, restarting LibreOffice every 10 conversions — no state shared between subprocesses.</li>
-            <li>Nginx explicitly disables <code>proxy_request_buffering</code>. That single directive separates disk-touching from pure streaming.</li>
-            <li>We log <strong>nothing</strong> identifiable from the conversion path beyond an aggregate request counter required for rate limiting. No filenames, no sizes, no response contents.</li>
-            <li>The frontend ships zero third-party RUM, heatmap, or session-replay scripts. AdSense is the only non-first-party script and is injected only after cookie consent.</li>
+            <li>On the Word → PDF path, the FastAPI handler never calls <code>open(...)</code> or <code>tempfile.*</code>. The request body lives only inside <code>BytesIO</code>. Source-of-truth: <code>backend/app/main.py</code>.</li>
+            <li>The Gotenberg container is configured with <code>LIBREOFFICE_RESTART_AFTER=10</code>, so the LibreOffice subprocess is recycled every 10 conversions — no state is shared between subprocesses.</li>
+            <li>Nginx explicitly disables <code>proxy_request_buffering</code>. That single directive is the difference between a disk-touching pipeline and a true streaming pipeline.</li>
+            <li>We log <strong>nothing</strong> identifiable from the conversion path beyond an aggregate request counter required for rate limiting. No filenames, no file sizes, no response contents — and consequently no audit trail to subpoena.</li>
+            <li>The frontend ships zero third-party RUM, heatmap, or session-replay scripts. AdSense is the only non-first-party script and is injected only after explicit cookie consent.</li>
           </ul>
         </InfoSubsection>
         <InfoSubsection heading="Third-party dependencies and the responsibility boundary">
           <p>
-            We are candid that strict &ldquo;data physically never leaves your device&rdquo; means no intermediaries. The client-side tool stack satisfies that fully. The Word → PDF path does involve a VPS provider and a DNS/SSL provider — they see IP and traffic, not content. If your threat model rejects that level of intermediary, please use any of the six pure-frontend tools, or self-host the full stack with <code>docker-compose up</code>.
+            We are candid: strict &ldquo;data physically never leaves your device&rdquo; means no intermediaries whatsoever. The client-side tool stack satisfies that property fully. The Word → PDF path does involve a VPS host and a DNS/SSL provider — those parties see IP and traffic envelopes but not content. If your threat model rejects even that level of intermediary, use any of the six pure-frontend tools, or self-host the entire stack with <code>docker-compose up</code>. The image is MIT-licensed and the runtime is identical.
           </p>
         </InfoSubsection>
       </InfoSection>
@@ -306,7 +306,7 @@ export default async function AboutPage({ params }: Props) {
           entries={statusEntries}
         />
         <p>
-          The panel above is rendered directly by the frontend on each visit and does <strong>not</strong> make any backend health call. It reflects deterministic facts about the deployed architecture — which is, we think, a more honest &ldquo;live status&rdquo; than a number that could be silently overwritten on the server. Open DevTools yourself; what you see is what is shipping.
+          The panel above is rendered directly by the frontend on every page load and makes <strong>no</strong> backend health request. It reflects deterministic facts about the deployed architecture — which we believe is a more honest representation of &ldquo;live status&rdquo; than any number that could be silently overwritten on the server. Open your browser DevTools; what you see in the network panel is exactly what is shipping.
         </p>
       </InfoSection>
 
@@ -325,7 +325,7 @@ export default async function AboutPage({ params }: Props) {
       </InfoSection>
 
       <InfoSection heading="Get in Touch">
-        <p>We are small and anonymous, but every email is read carefully:</p>
+        <p>We are a small, anonymous team — but every email is read carefully:</p>
         <ul className="list-disc pl-6 space-y-2">
           <li>General inquiries: <a href={`mailto:${CONTACT.general}`}>{CONTACT.general}</a></li>
           <li>Privacy questions: <a href={`mailto:${CONTACT.privacy}`}>{CONTACT.privacy}</a></li>
@@ -334,7 +334,7 @@ export default async function AboutPage({ params }: Props) {
           <li>Bug reports or contributions: open an issue or pull request on <a href={SOCIAL.github} target="_blank" rel="noopener noreferrer">GitHub</a></li>
         </ul>
         <p className="mt-4 text-body-sm text-muted">
-          We commit to a 48-hour reply on business days — even if it is just &ldquo;received, will be a while&rdquo;.
+          We commit to a 48-hour reply window on business days — even if the response is just &ldquo;received, will get back to you soon&rdquo;, you will not be left hanging.
         </p>
       </InfoSection>
     </InfoPageLayout>

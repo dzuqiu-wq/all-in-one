@@ -296,7 +296,7 @@ export default async function DocsPage({ params }: Props) {
           entries={statusEntries}
         />
         <p>
-          The panel above is rendered directly by the frontend on each visit and does <strong>not</strong> issue any backend health call. It reflects deterministic facts about the deployed architecture — which, for a project that promises &ldquo;zero server storage&rdquo;, is a more honest live-status surface than a server-reported number could be.
+          The panel above is rendered directly by the frontend on every visit; it issues <strong>no</strong> backend health call. It reflects deterministic facts about the deployed architecture — which we consider a more honest &ldquo;live status&rdquo; surface than a server-reported number could ever be, given that this project is built around a zero-server-storage guarantee.
         </p>
       </InfoSection>
 
