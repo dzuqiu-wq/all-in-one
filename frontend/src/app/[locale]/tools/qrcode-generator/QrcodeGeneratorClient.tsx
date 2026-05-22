@@ -8,6 +8,14 @@ import { Download, RefreshCw, Copy, Check, QrCode, ArrowLeft, Palette } from "lu
 import AdBanner from "@/components/AdBanner";
 import { useLocalizedHref } from "@/i18n/useLocalizedHref";
 
+// Strict hex color allowlist: #RGB or #RRGGBB only.
+// Any other character class (e.g. "<", "javascript:", quotes) is rejected so
+// the color value can never act as a vector for stored / reflected XSS.
+const HEX_COLOR_REGEX = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+
+const DEFAULT_FG = "#181715";
+const DEFAULT_BG = "#faf9f5";
+
 interface ColorPreset {
   name: string;
   fg: string;
@@ -173,11 +181,70 @@ export default function QRCodeGeneratorPage() {
   const t = useTranslations("tools.qrcode");
   const homeHref = useLocalizedHref("/");
   const [text, setText] = useState("");
-  const [fg, setFg] = useState("#181715");
-  const [bg, setBg] = useState("#faf9f5");
+  const [fg, setFg] = useState(DEFAULT_FG);
+  const [bg, setBg] = useState(DEFAULT_BG);
+  // Separate display state for the text inputs so partial typing never
+  // contaminates the actual color state used by the QR renderer.
+  const [fgInput, setFgInput] = useState(DEFAULT_FG);
+  const [bgInput, setBgInput] = useState(DEFAULT_BG);
+  const [fgError, setFgError] = useState<string | null>(null);
+  const [bgError, setBgError] = useState<string | null>(null);
   const [size, setSize] = useState(256);
   const [level, setLevel] = useState<"L" | "M" | "Q" | "H">("M");
   const [copied, setCopied] = useState(false);
+
+  // Strict validator: commits a value to the live color state only if it
+  // matches the hex allowlist. Invalid input keeps the rendered color
+  // pinned to the last known-good value and surfaces an error.
+  const applyColor = useCallback(
+    (
+      raw: string,
+      setColor: (v: string) => void,
+      setInput: (v: string) => void,
+      setError: (e: string | null) => void,
+      fallback: string,
+    ) => {
+      setInput(raw);
+      if (HEX_COLOR_REGEX.test(raw)) {
+        setColor(raw);
+        setError(null);
+      } else {
+        // Invalid input is treated as a hard reject: live color snaps back to
+        // the safe fallback and the user gets an inline error message.
+        setColor(fallback);
+        setError("Invalid hex color. Use #RGB or #RRGGBB only.");
+      }
+    },
+    [],
+  );
+
+  const handleFgChange = useCallback(
+    (raw: string) => applyColor(raw, setFg, setFgInput, setFgError, DEFAULT_FG),
+    [applyColor],
+  );
+  const handleBgChange = useCallback(
+    (raw: string) => applyColor(raw, setBg, setBgInput, setBgError, DEFAULT_BG),
+    [applyColor],
+  );
+
+  const applyPreset = useCallback((preset: ColorPreset) => {
+    setFg(preset.fg);
+    setBg(preset.bg);
+    setFgInput(preset.fg);
+    setBgInput(preset.bg);
+    setFgError(null);
+    setBgError(null);
+  }, []);
+
+  const resetAll = useCallback(() => {
+    setText("");
+    setFg(DEFAULT_FG);
+    setBg(DEFAULT_BG);
+    setFgInput(DEFAULT_FG);
+    setBgInput(DEFAULT_BG);
+    setFgError(null);
+    setBgError(null);
+  }, []);
 
   const handleDownload = useCallback(() => {
     const qrCanvas = document.querySelector("#qr-canvas canvas") as HTMLCanvasElement;
@@ -313,16 +380,40 @@ export default function QRCodeGeneratorPage() {
               <div>
                 <label className="caption-upper text-muted-soft block mb-3">{t("foreground")}</label>
                 <div className="flex items-center gap-2">
-                  <input type="color" value={fg} onChange={(e) => setFg(e.target.value)} className="w-10 h-10 rounded cursor-pointer border border-hairline" />
-                  <input type="text" value={fg} onChange={(e) => setFg(e.target.value)} className="flex-1 px-3 py-2 surface-card border border-hairline rounded-md font-mono text-body-sm uppercase" />
+                  <input type="color" value={fg} onChange={(e) => handleFgChange(e.target.value)} className="w-10 h-10 rounded cursor-pointer border border-hairline" />
+                  <input
+                    type="text"
+                    value={fgInput}
+                    onChange={(e) => handleFgChange(e.target.value)}
+                    maxLength={7}
+                    spellCheck={false}
+                    autoComplete="off"
+                    aria-invalid={fgError !== null}
+                    className={`flex-1 px-3 py-2 surface-card border rounded-md font-mono text-body-sm uppercase ${fgError ? "border-error focus:border-error" : "border-hairline focus:border-primary"}`}
+                  />
                 </div>
+                {fgError && (
+                  <p className="mt-1 text-xs text-error font-medium">{fgError}</p>
+                )}
               </div>
               <div>
                 <label className="caption-upper text-muted-soft block mb-3">{t("background")}</label>
                 <div className="flex items-center gap-2">
-                  <input type="color" value={bg} onChange={(e) => setBg(e.target.value)} className="w-10 h-10 rounded cursor-pointer border border-hairline" />
-                  <input type="text" value={bg} onChange={(e) => setBg(e.target.value)} className="flex-1 px-3 py-2 surface-card border border-hairline rounded-md font-mono text-body-sm uppercase" />
+                  <input type="color" value={bg} onChange={(e) => handleBgChange(e.target.value)} className="w-10 h-10 rounded cursor-pointer border border-hairline" />
+                  <input
+                    type="text"
+                    value={bgInput}
+                    onChange={(e) => handleBgChange(e.target.value)}
+                    maxLength={7}
+                    spellCheck={false}
+                    autoComplete="off"
+                    aria-invalid={bgError !== null}
+                    className={`flex-1 px-3 py-2 surface-card border rounded-md font-mono text-body-sm uppercase ${bgError ? "border-error focus:border-error" : "border-hairline focus:border-primary"}`}
+                  />
                 </div>
+                {bgError && (
+                  <p className="mt-1 text-xs text-error font-medium">{bgError}</p>
+                )}
               </div>
             </div>
 
@@ -335,7 +426,7 @@ export default function QRCodeGeneratorPage() {
                 {PRESETS.map((p) => (
                   <button
                     key={p.name}
-                    onClick={() => { setFg(p.fg); setBg(p.bg); }}
+                    onClick={() => applyPreset(p)}
                     title={p.name}
                     className="p-2 rounded-md border border-hairline hover:border-primary transition-all"
                   >
@@ -365,7 +456,7 @@ export default function QRCodeGeneratorPage() {
                     {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
                   </button>
                   <button
-                    onClick={() => { setText(""); setFg("#181715"); setBg("#faf9f5"); }}
+                    onClick={resetAll}
                     className="p-2 text-muted hover:text-ink transition-colors"
                     title={t("reset")}
                   >

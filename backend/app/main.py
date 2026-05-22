@@ -35,21 +35,31 @@ from app.config import (
 # ============================================================================
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application lifespan events"""
+    """
+    Application lifespan events.
+
+    Initializes a long-lived httpx.AsyncClient on startup so every Gotenberg
+    call reuses the same TCP/keepalive connection pool instead of paying the
+    TCP + TLS handshake cost per request. The client is closed on shutdown.
+    """
     print(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
     print(f"Rate Limit: {settings.RATE_LIMIT_MAX_REQUESTS} req/min per IP")
     print(f"Max Concurrent: {settings.MAX_CONCURRENT_CONVERSIONS} conversions")
     print(f"Max File Size: {settings.MAX_FILE_SIZE_BYTES / 1024 / 1024:.1f}MB")
     print(f"Gotenberg URL: {settings.GOTENBERG_URL}")
 
+    # Shared httpx connection pool (lifespan-scoped, not per-request)
+    app.state.http_client = httpx.AsyncClient(timeout=settings.GOTENBERG_TIMEOUT)
+
     # Start background cleanup task
     cleanup_task = asyncio.create_task(start_cleanup_task())
 
-    yield
-
-    # Shutdown
-    cleanup_task.cancel()
-    print("Shutting down...")
+    try:
+        yield
+    finally:
+        cleanup_task.cancel()
+        await app.state.http_client.aclose()
+        print("Shutting down...")
 
 
 # ============================================================================
@@ -90,6 +100,14 @@ ALLOWED_PPT_MIME_TYPES = frozenset({
     "application/vnd.openxmlformats-officedocument.presentationml.presentation",  # .pptx
     "application/vnd.ms-powerpoint",  # .ppt
 })
+
+# Word family magic bytes (binary signatures)
+# .docx -> Zip container header  "PK\x03\x04"
+# .doc  -> OLE2 Compound File    "\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1"
+WORD_MAGIC_BYTES: tuple = (
+    b"\x50\x4B\x03\x04",
+    b"\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1",
+)
 
 
 # ============================================================================
@@ -213,50 +231,74 @@ def validate_mime_type(content_type: Optional[str], allowed_types: frozenset) ->
         )
 
 
-async def call_gotenberg(file_bytes: bytes, filename: str, content_type: Optional[str] = None) -> bytes:
+def validate_magic_bytes(file_bytes: bytes) -> None:
     """
-    Call Gotenberg service with in-memory file.
-    Uses asyncio.Semaphore for concurrency control.
-    Implements 5-second hard timeout.
+    Deep binary signature check for Word family uploads.
 
-    Returns:
-        PDF bytes from Gotenberg
+    SECURITY: MIME and extension checks rely on client-supplied headers and
+    filenames, both of which are forgeable. This function inspects the actual
+    leading bytes of the payload so that an attacker who renames `payload.exe`
+    to `payload.docx` and forges Content-Type still gets rejected here.
 
-    Raises:
-        HTTPException on timeout or error
+    Accepted signatures:
+      * .docx -> b"\\x50\\x4B\\x03\\x04"                (Zip / OOXML)
+      * .doc  -> b"\\xD0\\xCF\\x11\\xE0\\xA1\\xB1\\x1A\\xE1" (OLE2 compound)
+
+    Raises HTTPException(400) when the leading bytes do not match.
+    """
+    if not any(file_bytes.startswith(sig) for sig in WORD_MAGIC_BYTES):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "Invalid file signature. Uploaded content is not a real Word "
+                "document (expected .docx Zip header or .doc OLE header)."
+            ),
+        )
+
+
+async def call_gotenberg(
+    client: httpx.AsyncClient,
+    file_bytes: bytes,
+    filename: str,
+    content_type: Optional[str] = None,
+) -> bytes:
+    """
+    Call Gotenberg service with in-memory file using the shared httpx pool.
+
+    The `client` is the lifespan-managed `app.state.http_client` so we reuse
+    keepalive connections instead of constructing/tearing down a TCP socket
+    per request. Concurrency stays bounded by `conversion_semaphore`.
     """
     async with conversion_semaphore:
-        async with httpx.AsyncClient(timeout=settings.GOTENBERG_TIMEOUT) as client:
-            # Prepare multipart form data - NO disk I/O
-            # Use explicit content_type from validated UploadFile, not bytes
-            mime_type = content_type or "application/octet-stream"
-            files = {
-                "files": (filename, io.BytesIO(file_bytes), mime_type)
-            }
+        # Prepare multipart form data - NO disk I/O
+        mime_type = content_type or "application/octet-stream"
+        files = {
+            "files": (filename, io.BytesIO(file_bytes), mime_type)
+        }
 
-            try:
-                response = await client.post(
-                    f"{settings.GOTENBERG_URL}/forms/libreoffice/convert",
-                    files=files
-                )
-                response.raise_for_status()
-                return response.content
+        try:
+            response = await client.post(
+                f"{settings.GOTENBERG_URL}/forms/libreoffice/convert",
+                files=files,
+            )
+            response.raise_for_status()
+            return response.content
 
-            except httpx.TimeoutException:
-                raise HTTPException(
-                    status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-                    detail="Conversion timeout: Gotenberg service took too long (>5s). Please try again."
-                )
-            except httpx.HTTPStatusError as e:
-                raise HTTPException(
-                    status_code=status.HTTP_502_BAD_GATEWAY,
-                    detail=f"Gotenberg service error: {e.response.status_code}"
-                )
-            except httpx.RequestError as e:
-                raise HTTPException(
-                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                    detail=f"Gotenberg connection failed: {str(e)}"
-                )
+        except httpx.TimeoutException:
+            raise HTTPException(
+                status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+                detail="Conversion timeout: Gotenberg service took too long (>5s). Please try again."
+            )
+        except httpx.HTTPStatusError as e:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"Gotenberg service error: {e.response.status_code}"
+            )
+        except httpx.RequestError as e:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"Gotenberg connection failed: {str(e)}"
+            )
 
 
 # ============================================================================
@@ -276,16 +318,19 @@ async def health_check():
 
 
 @app.get("/health/gotenberg")
-async def gotenberg_health():
-    """Check Gotenberg service connectivity"""
+async def gotenberg_health(request: Request):
+    """Check Gotenberg service connectivity via the shared httpx pool."""
+    client: httpx.AsyncClient = request.app.state.http_client
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.get(f"{settings.GOTENBERG_URL}/health")
-            return {
-                "status": "connected",
-                "gotenberg": "healthy",
-                "response_time_ms": response.elapsed.total_seconds() * 1000
-            }
+        response = await client.get(
+            f"{settings.GOTENBERG_URL}/health",
+            timeout=5.0,
+        )
+        return {
+            "status": "connected",
+            "gotenberg": "healthy",
+            "response_time_ms": response.elapsed.total_seconds() * 1000
+        }
     except httpx.TimeoutException:
         return JSONResponse(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,
@@ -371,17 +416,26 @@ async def convert_word_to_pdf(
             detail=f"Failed to read file: {str(e)}"
         )
 
-    # 3. Validate file extension (secondary check, after MIME)
+    # 3. Deep binary signature check (magic bytes) — defeats spoofed MIME +
+    # renamed-extension uploads that would otherwise reach Gotenberg.
+    validate_magic_bytes(file_bytes)
+
+    # 4. Validate file extension (secondary check, after MIME)
     # Uses suffix-based validation to prevent double-extension bypass
     validate_extension_suffix(file.filename, settings.ALLOWED_EXTENSIONS)
 
-    # 4. Process with 5-second timeout using asyncio.wait_for
+    # 5. Process with 5-second timeout using asyncio.wait_for
     try:
         # Generate safe output filename with proper dot separator
         output_filename = generate_safe_output_filename(file.filename, ".pdf")
 
         pdf_bytes = await asyncio.wait_for(
-            call_gotenberg(file_bytes, file.filename or "document.docx", file.content_type),
+            call_gotenberg(
+                request.app.state.http_client,
+                file_bytes,
+                file.filename or "document.docx",
+                file.content_type,
+            ),
             timeout=settings.GOTENBERG_TIMEOUT
         )
     except asyncio.TimeoutError:
@@ -448,7 +502,12 @@ async def convert_excel_to_pdf(
         output_filename = generate_safe_output_filename(file.filename, ".pdf")
 
         pdf_bytes = await asyncio.wait_for(
-            call_gotenberg(file_bytes, file.filename or "spreadsheet.xlsx", file.content_type),
+            call_gotenberg(
+                request.app.state.http_client,
+                file_bytes,
+                file.filename or "spreadsheet.xlsx",
+                file.content_type,
+            ),
             timeout=settings.GOTENBERG_TIMEOUT
         )
     except asyncio.TimeoutError:
@@ -503,7 +562,12 @@ async def convert_powerpoint_to_pdf(
         output_filename = generate_safe_output_filename(file.filename, ".pdf")
 
         pdf_bytes = await asyncio.wait_for(
-            call_gotenberg(file_bytes, file.filename or "presentation.pptx", file.content_type),
+            call_gotenberg(
+                request.app.state.http_client,
+                file_bytes,
+                file.filename or "presentation.pptx",
+                file.content_type,
+            ),
             timeout=settings.GOTENBERG_TIMEOUT
         )
     except asyncio.TimeoutError:

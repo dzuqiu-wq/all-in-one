@@ -20,12 +20,10 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
 
-    # CORS
-    CORS_ORIGINS: List[str] = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://0.0.0.0:3000",
-    ]
+    # CORS - Production hardening: only the production origin is allowed.
+    # No localhost residue; cross-origin requests from any other host (including
+    # 127.0.0.1 / 0.0.0.0 / staging URLs) are rejected by the browser.
+    CORS_ORIGINS: List[str] = ["https://333654.xyz"]
 
     # Gotenberg Service
     GOTENBERG_URL: str = "http://gotenberg:7000"

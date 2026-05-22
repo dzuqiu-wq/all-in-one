@@ -127,29 +127,28 @@ export const homeMetadata: Metadata = {
   },
 };
 
-// Tool page metadata generator
-export function getToolMetadata(slug: ToolSlug): Metadata {
+// Tool page metadata generator. Returns a Next.js-compatible Metadata object
+// for the requested tool, in the requested locale. (The Metadata type forbids
+// per-locale maps on `title` / `description` / `keywords` — those expect plain
+// strings — so locale switching happens here, not in the returned object.)
+export function getToolMetadata(slug: ToolSlug, locale: "en" | "zh" = "en"): Metadata {
   const tool = toolMeta[slug];
   const paths = {
     en: `/tools/${slug}`,
     zh: `/zh/tools/${slug}`,
   };
+  const isZh = locale === "zh";
+  const title = isZh ? tool.title.zh : tool.title.en;
+  const description = isZh ? tool.description.zh : tool.description.en;
+  const keywords = isZh ? tool.keywords.zh : tool.keywords.en;
+  const canonicalUrl = `${BASE_URL}${isZh ? paths.zh : paths.en}`;
 
   return {
-    title: {
-      default: tool.title.en,
-      "zh-CN": tool.title.zh,
-    },
-    description: {
-      default: tool.description.en,
-      "zh-CN": tool.description.zh,
-    },
-    keywords: {
-      default: tool.keywords.en,
-      "zh-CN": tool.keywords.zh,
-    },
+    title,
+    description,
+    keywords,
     alternates: {
-      canonical: `${BASE_URL}${paths.en}`,
+      canonical: canonicalUrl,
       languages: {
         "en-US": `${BASE_URL}${paths.en}`,
         "zh-CN": `${BASE_URL}${paths.zh}`,
@@ -157,17 +156,17 @@ export function getToolMetadata(slug: ToolSlug): Metadata {
     },
     openGraph: {
       type: "website",
-      locale: "en_US",
-      alternateLocale: "zh_CN",
-      url: `${BASE_URL}${paths.en}`,
+      locale: isZh ? "zh_CN" : "en_US",
+      alternateLocale: isZh ? "en_US" : "zh_CN",
+      url: canonicalUrl,
       siteName: "All-in-One Toolbox",
-      title: tool.title.en,
-      description: tool.description.en,
+      title,
+      description,
     },
     twitter: {
       card: "summary_large_image",
-      title: tool.title.en,
-      description: tool.description.en,
+      title,
+      description,
     },
   };
 }

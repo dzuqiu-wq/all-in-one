@@ -180,7 +180,10 @@ export default function PDFMergeSplitPage() {
   const parsePDF = async (file: File): Promise<PDFFile> => {
     const buf = await file.arrayBuffer();
     const doc = await PDFDocument.load(buf, { ignoreEncryption: true });
-    const header = new TextDecoder().decode(new Uint8Array(buf, 0, 8));
+    // Slice to a fresh ArrayBuffer so the Uint8Array has an exact-typed buffer
+    // regardless of which TypeScript / lib.dom version is in scope.
+    const headerBuf = buf.slice(0, 8);
+    const header = new TextDecoder().decode(new Uint8Array(headerBuf));
     const ver = header.match(/\d\.\d/);
     return {
       id: `${Date.now()}-${Math.random()}`,
@@ -224,7 +227,10 @@ export default function PDFMergeSplitPage() {
         pages.forEach((p) => merged.addPage(p));
       }
       const bytes = await merged.save();
-      setResult(new Blob([bytes], { type: "application/pdf" }));
+      // pdf-lib types `save()` as Uint8Array<ArrayBufferLike>; Blob accepts
+      // BlobPart, so we cast through it explicitly to keep TS 5.7+'s stricter
+      // typed-array generics happy.
+      setResult(new Blob([bytes as BlobPart], { type: "application/pdf" }));
     } catch (e) { console.error(e); }
     setIsProcessing(false);
   };
@@ -295,7 +301,7 @@ export default function PDFMergeSplitPage() {
       const copied = await newDoc.copyPages(doc, unique);
       copied.forEach((p) => newDoc.addPage(p));
       const bytes = await newDoc.save();
-      setResult(new Blob([bytes], { type: "application/pdf" }));
+      setResult(new Blob([bytes as BlobPart], { type: "application/pdf" }));
     } catch (e) {
       console.error(e);
       setSplitError(e instanceof Error ? e.message : "Failed to split PDF. Please check your page range.");
