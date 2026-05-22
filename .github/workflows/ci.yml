@@ -8,8 +8,14 @@
 name: CI
 
 on:
+  # On `main`, CI runs ONLY as part of the deploy pipeline (deploy.yml calls
+  # this workflow via `uses: ./.github/workflows/ci.yml`). A second standalone
+  # run on the same `main` push would be cancelled by deploy.yml's concurrency
+  # group and pollute the branch page with a "cancelled" badge — so we
+  # deliberately do not register `push` on main.
   push:
-    branches: ["main"]
+    branches-ignore:
+      - "main"
   pull_request:
     branches: ["main"]
   workflow_dispatch:
