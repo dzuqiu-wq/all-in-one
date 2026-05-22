@@ -155,22 +155,52 @@ jobs:
 
             COMPOSE_FILE="docker-compose.prod.yml"
 
+            # Make the working-directory fact explicit in the log so we can
+            # tell at a glance whether we are actually inside the deploy path.
+            echo "==> Pre-validate context"
+            echo "    pwd:          $(pwd)"
+            echo "    target path:  ${{ secrets.VPS_PROJECT_PATH }}"
+            echo "    compose file: $COMPOSE_FILE"
+            ls -la "$COMPOSE_FILE" 2>&1 || true
+
             # Sanity-check the compose file actually exists at the deploy path
             # and parses cleanly under the resolved DC binary — this fails
             # MUCH faster than a half-broken `build` and tells us exactly what
             # is wrong (typo in YAML, missing referenced .env, etc).
             if [ ! -f "$COMPOSE_FILE" ]; then
               echo "::error::$COMPOSE_FILE not found at $(pwd)"
+              echo "Directory listing:"
               ls -la
               exit 1
             fi
+
             echo "==> Validate compose config"
-            $DC -f "$COMPOSE_FILE" config --quiet 2>&1 || {
+            # IMPORTANT: appleboy/ssh-action sets `set -e` in the surrounding
+            # shell, and combined with our ERR trap, even an `|| { … }`-guarded
+            # failure can cause the script to die before the fallback prints.
+            # We therefore TEMPORARILY disable `errexit` + the ERR trap, run
+            # the validation, capture stderr, then restore strict mode. The
+            # explicit `if !` is shell-strict-safe with `set -e` because the
+            # condition position naturally masks the non-zero exit.
+            set +e
+            trap - ERR
+            CONFIG_STDERR=$(mktemp)
+            if ! $DC -f "$COMPOSE_FILE" config --quiet 2>"$CONFIG_STDERR"; then
               rc=$?
-              echo "::error::'$DC config' failed (exit $rc) — printing full output:"
-              $DC -f "$COMPOSE_FILE" config 2>&1 | head -40 || true
+              echo "::error::'$DC -f $COMPOSE_FILE config' failed (exit $rc)"
+              echo "----- stderr (verbatim) -----"
+              cat "$CONFIG_STDERR"
+              echo "----- full config dump (head 80 lines, stderr merged) -----"
+              $DC -f "$COMPOSE_FILE" config 2>&1 | head -80 || true
+              echo "----- end -----"
+              rm -f "$CONFIG_STDERR"
               exit $rc
-            }
+            fi
+            rm -f "$CONFIG_STDERR"
+            echo "    compose config OK"
+            # Restore strict mode + ERR trap for the rest of the rollout.
+            set -e
+            trap 'rc=$?; echo "::error::Remote step failed at line ${LINENO}: command \"${BASH_COMMAND}\" exited with code ${rc}"; exit $rc' ERR
 
             if [ "${SKIP_BUILD:-false}" = "true" ]; then
               echo "==> Rolling without rebuild (SKIP_BUILD=true)"
