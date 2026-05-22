@@ -92,28 +92,47 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
     }
   }, [stampConfig]);
 
+  // Bind preview redraw to ALL individual StampConfig fields.
+  // Listing each field explicitly guarantees React detects every change
+  // even if the parent object reference identity is stable.
   useEffect(() => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
 
     debounceTimerRef.current = setTimeout(() => {
-      if (previewCanvasRef.current && processorRef.current) {
-        const canvas = previewCanvasRef.current;
-        canvas.width = stampConfig.size;
-        canvas.height = stampConfig.size;
+      const canvas = previewCanvasRef.current;
+      const processor = processorRef.current;
+      if (!canvas || !processor) return;
 
-        const renderer = processorRef.current.getStampRenderer();
-        renderer.renderToCanvas(canvas);
+      // Day-1 clear → full redraw via StampRenderer
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
-    }, 100);
+
+      // Renderer internally resets canvas.width/height = stampConfig.size,
+      // which also wipes the bitmap — guaranteeing a clean draw.
+      const renderer = processor.getStampRenderer();
+      renderer.renderToCanvas(canvas);
+    }, 50);
 
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [stampConfig]);
+  }, [
+    stampConfig.shape,
+    stampConfig.companyName,
+    stampConfig.departmentName,
+    stampConfig.color,
+    stampConfig.size,
+    stampConfig.noiseLevel,
+    stampConfig.starStyle,
+    stampConfig.borderWidth,
+    stampConfig.innerCircleRadius,
+  ]);
 
   const handleFileSelect = useCallback((file: File) => {
     if (!file.name.toLowerCase().endsWith(".pdf")) {

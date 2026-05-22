@@ -359,21 +359,26 @@ export class StampRenderer {
         totalSpan
       );
 
-      // Lock font + alignment ONCE on a parent save scope.
-      // Per-glyph save/restore handles the translate/rotate matrix.
+      // Set font + center alignment ONCE immediately before the loop.
+      // Per-glyph save/restore handles the translate/rotate matrix in isolation.
       ctx.save();
       ctx.font = `bold ${g.arcFontSize}px sans-serif`;
       ctx.fillStyle = this.config.color;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
+      // STRICT MATRIX EXECUTION PIPELINE — per glyph, no exceptions:
       for (const c of chars) {
         ctx.save();
-        // 1. Translate to the absolute character coordinate on the ring.
+        // 1. Translate to the absolute character coordinate on the ring
+        //    (relative to the stamp center).
         ctx.translate(g.centerX + c.x, g.centerY + c.y);
-        // 2. Rotate the context so the glyph aligns with the local curve normal.
+        // 2. Rotate the context so the character baseline aligns
+        //    perpendicular to the local curve (outward-facing normal).
         ctx.rotate(c.rotation);
         // 3. Draw the single character at the localized origin (0, 0).
+        //    textAlign='center' + textBaseline='middle' guarantee the
+        //    glyph rotates around its exact geometric center.
         ctx.fillText(c.char, 0, 0);
         ctx.restore();
       }
