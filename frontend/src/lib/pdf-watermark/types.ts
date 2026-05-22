@@ -62,14 +62,6 @@ export interface ArcTextChar {
   rotation: number; // radians
 }
 
-// Rect text position calculation result (for linear border paths)
-export interface RectTextChar {
-  char: string;
-  x: number;  // Local X within available width (0 to availableWidth)
-  y: number;  // Fixed Y at top border
-  rotation: number;  // Always 0 for rectangular top border
-}
-
 // Five-pointed star vertex
 export interface StarVertex {
   x: number;

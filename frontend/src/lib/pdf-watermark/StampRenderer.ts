@@ -1,7 +1,6 @@
 import type {
   StampConfig,
   ArcTextChar,
-  RectTextChar,
   StarVertex
 } from './types';
 
@@ -16,6 +15,35 @@ const DEFAULT_CONFIG: StampConfig = {
   borderWidth: 3,
   innerCircleRadius: 0.85,
 };
+
+/**
+ * Unified geometry model for the stamp.
+ * All Y values are absolute canvas coordinates.
+ * Used by both border drawing and text positioning to guarantee
+ * pixel-perfect alignment with no border clipping.
+ */
+interface StampGeometry {
+  centerX: number;
+  centerY: number;
+  // Outer border bounds
+  outerA: number;   // outer semi-major axis (x)
+  outerB: number;   // outer semi-minor axis (y) — equals outerA for circles
+  outerTop: number;
+  outerBottom: number;
+  outerLeft: number;
+  outerRight: number;
+  // Inner border bounds
+  innerA: number;
+  innerB: number;
+  innerTop: number;
+  innerBottom: number;
+  innerLeft: number;
+  innerRight: number;
+  // Text band geometry (between outer and inner borders, top arc)
+  textArcA: number;   // text-path semi-major axis (x)
+  textArcB: number;   // text-path semi-minor axis (y)
+  textFontSize: number;
+}
 
 export class StampRenderer {
   private config: StampConfig;
@@ -34,85 +62,131 @@ export class StampRenderer {
 
   /**
    * ============================================================
-   * 椭圆/正圆弧形文字轨迹算法
+   * Build canonical geometry once per render.
+   * The text path radii sit at the midpoint between the outer and
+   * inner borders, so glyphs never clip either ring.
    * ============================================================
-   * 使用椭圆参数方程: x = a*cos(θ), y = b*sin(θ)
-   *
-   * 关键：切线修正
-   * 椭圆切线斜率 dy/dx = (b*cos(θ)) / (-a*sin(θ))
-   * 法线旋转角 rotation = atan2(b*cos(θ), -a*sin(θ)) + π/2
-   * （使字符严格垂直于椭圆弧度）
    */
-  private calculateEllipseArcPositions(
-    text: string,
-    a: number,  // 横向半轴
-    b: number,  // 纵向半轴
-    startAngle: number,
-    endAngle: number
-  ): ArcTextChar[] {
-    if (!text) return [];
+  private buildGeometry(): StampGeometry {
+    const size = this.config.size;
+    const centerX = size / 2;
+    const centerY = size / 2;
+    const borderInset = 2;
 
-    const chars: ArcTextChar[] = [];
-    const totalAngle = endAngle - startAngle;
-    const charCount = text.length;
-    const spacing = 0.9;
-    const totalWidth = charCount * spacing;
-    const startOffset = (1 - totalWidth) / 2;
+    // Font size in px — used to space the text band safely.
+    const textFontSize = size * 0.1;
 
-    for (let i = 0; i < charCount; i++) {
-      const ratio = (startOffset + i * spacing) / totalWidth;
-      const theta = startAngle + ratio * totalAngle;
-      const char = text[i];
+    // Outer & inner radii per shape
+    let outerA: number;
+    let outerB: number;
+    let innerA: number;
+    let innerB: number;
 
-      // 椭圆参数方程: x = a*cos(θ), y = b*sin(θ)
-      const x = a * Math.cos(theta);
-      const y = b * Math.sin(theta);
-
-      // 关键切线修正：计算法线旋转角
-      // 椭圆一阶导数 dy/dx = (dy/dθ) / (dx/dθ) = (-b*sin(θ)) / (-a*sin(θ)) * cos(θ)?
-      // 实际上: dx/dθ = -a*sin(θ), dy/dθ = b*cos(θ)
-      // 切线方向向量: (-a*sin(θ), b*cos(θ))
-      // 法线旋转角: rotation = atan2(dx/dθ, dy/dθ) + π/2
-      // 但画布坐标系y轴向下，所以 rotation = atan2(-dx/dθ, -dy/dθ)
-      // 简化为: rotation = Math.atan2(b * Math.cos(theta), a * Math.sin(theta)) + Math.PI / 2
-      const rotation = Math.atan2(b * Math.cos(theta), a * Math.sin(theta)) + Math.PI / 2;
-
-      chars.push({ char, x, y, rotation });
+    switch (this.config.shape) {
+      case 'circle': {
+        outerA = size / 2 - borderInset;
+        outerB = outerA;
+        innerA = outerA * this.config.innerCircleRadius;
+        innerB = innerA;
+        break;
+      }
+      case 'oval': {
+        outerA = size / 2 - borderInset;
+        outerB = outerA * 0.6;
+        innerA = outerA * this.config.innerCircleRadius;
+        innerB = outerB * this.config.innerCircleRadius;
+        break;
+      }
+      case 'rect': {
+        const half = (size * 0.8) / 2;
+        outerA = half;
+        outerB = half;
+        const innerHalf = half * this.config.innerCircleRadius;
+        innerA = innerHalf;
+        innerB = innerHalf;
+        break;
+      }
     }
 
-    return chars;
+    // Text-path radii: sit at the midpoint between outer and inner borders,
+    // then nudge inward by half the font height so glyphs never clip either ring.
+    const textArcA = (outerA + innerA) / 2;
+    const textArcB = (outerB + innerB) / 2;
+
+    return {
+      centerX,
+      centerY,
+      outerA,
+      outerB,
+      outerTop: centerY - outerB,
+      outerBottom: centerY + outerB,
+      outerLeft: centerX - outerA,
+      outerRight: centerX + outerA,
+      innerA,
+      innerB,
+      innerTop: centerY - innerB,
+      innerBottom: centerY + innerB,
+      innerLeft: centerX - innerA,
+      innerRight: centerX + innerA,
+      textArcA,
+      textArcB,
+      textFontSize,
+    };
   }
 
   /**
    * ============================================================
-   * 矩形顶部边框文字轨迹算法（线性边界分发）
+   * Elliptical Arc Text — Unified for Circle (a=b) and Oval (a≠b)
    * ============================================================
-   * 彻底摒弃圆周极坐标，使用线性插值
-   * 所有字符 rotation = 0（水平）
+   * Math model:
+   *   x(t) = a · cos(t)
+   *   y(t) = b · sin(t)
+   *   dx/dt = -a · sin(t)
+   *   dy/dt =  b · cos(t)
+   *   Tangent vector: (-a sin t, b cos t)
+   *   Normal-aligned glyph rotation (outward-facing baseline):
+   *     rotation = atan2(b·cos t, a·sin t) + π/2
+   *
+   * Distribution:
+   *   - Centered on top vertical axis (-π/2)
+   *   - Uniform angular step across totalSpan
+   *   - startAngle = -π/2 - totalSpan/2
+   *   - step = totalSpan / (charCount - 1)   [closed-form, no spacing magic numbers]
    */
-  private calculateRectLinearPositions(
+  private calculateEllipseArcPositions(
     text: string,
-    rectWidth: number,
-    topY: number
-  ): RectTextChar[] {
+    a: number,
+    b: number,
+    totalSpan: number
+  ): ArcTextChar[] {
     if (!text) return [];
 
-    const chars: RectTextChar[] = [];
+    const chars: ArcTextChar[] = [];
     const charCount = text.length;
-    const charWidth = rectWidth / charCount;
+    const topAxis = -Math.PI / 2;
 
-    // 沿顶部边框线性平铺，从左到右
+    // Single-character degenerate case — anchor at top.
+    if (charCount === 1) {
+      const t = topAxis;
+      chars.push({
+        char: text[0],
+        x: a * Math.cos(t),
+        y: b * Math.sin(t),
+        rotation: Math.atan2(b * Math.cos(t), a * Math.sin(t)) + Math.PI / 2,
+      });
+      return chars;
+    }
+
+    const startAngle = topAxis - totalSpan / 2;
+    const step = totalSpan / (charCount - 1);
+
     for (let i = 0; i < charCount; i++) {
-      const char = text[i];
-
-      // 字符中心点：线性插值
-      const x = (i + 0.5) * charWidth;
-      const y = topY;
-
-      // 【角度归零】：矩形顶部排列时 rotation 强制为 0
-      const rotation = 0;
-
-      chars.push({ char, x, y, rotation });
+      const t = startAngle + i * step;
+      const x = a * Math.cos(t);
+      const y = b * Math.sin(t);
+      // Tangent-perpendicular glyph rotation
+      const rotation = Math.atan2(b * Math.cos(t), a * Math.sin(t)) + Math.PI / 2;
+      chars.push({ char: text[i], x, y, rotation });
     }
 
     return chars;
@@ -164,30 +238,19 @@ export class StampRenderer {
     ctx.putImageData(imageData, 0, 0);
   }
 
-  private drawBorder(
-    ctx: CanvasRenderingContext2D,
-    centerX: number,
-    centerY: number,
-    size: number
-  ): void {
+  private drawBorder(ctx: CanvasRenderingContext2D, g: StampGeometry): void {
     ctx.beginPath();
 
     switch (this.config.shape) {
       case 'circle':
-        ctx.arc(centerX, centerY, size / 2 - 2, 0, Math.PI * 2);
+        ctx.arc(g.centerX, g.centerY, g.outerA, 0, Math.PI * 2);
         break;
-      case 'oval': {
-        // 椭圆：横向半轴 a = size/2 - 2, 纵向半轴 b = a * 0.6
-        const a = size / 2 - 2;
-        const b = a * 0.6;
-        ctx.ellipse(centerX, centerY, a, b, 0, 0, Math.PI * 2);
+      case 'oval':
+        ctx.ellipse(g.centerX, g.centerY, g.outerA, g.outerB, 0, 0, Math.PI * 2);
         break;
-      }
-      case 'rect': {
-        const rectSize = size * 0.8;
-        ctx.rect(centerX - rectSize / 2, centerY - rectSize / 2, rectSize, rectSize);
+      case 'rect':
+        ctx.rect(g.outerLeft, g.outerTop, g.outerA * 2, g.outerB * 2);
         break;
-      }
     }
 
     ctx.strokeStyle = this.config.color;
@@ -195,31 +258,19 @@ export class StampRenderer {
     ctx.stroke();
   }
 
-  private drawInnerCircle(
-    ctx: CanvasRenderingContext2D,
-    centerX: number,
-    centerY: number,
-    radius: number
-  ): void {
-    const innerRadius = radius * this.config.innerCircleRadius;
-
+  private drawInnerBorder(ctx: CanvasRenderingContext2D, g: StampGeometry): void {
     ctx.beginPath();
 
     switch (this.config.shape) {
       case 'circle':
-        ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
+        ctx.arc(g.centerX, g.centerY, g.innerA, 0, Math.PI * 2);
         break;
-      case 'oval': {
-        const a = innerRadius;
-        const b = a * 0.6;
-        ctx.ellipse(centerX, centerY, a, b, 0, 0, Math.PI * 2);
+      case 'oval':
+        ctx.ellipse(g.centerX, g.centerY, g.innerA, g.innerB, 0, 0, Math.PI * 2);
         break;
-      }
-      case 'rect': {
-        const rectSize = radius * this.config.innerCircleRadius * 1.6;
-        ctx.rect(centerX - rectSize / 2, centerY - rectSize / 2, rectSize, rectSize);
+      case 'rect':
+        ctx.rect(g.innerLeft, g.innerTop, g.innerA * 2, g.innerB * 2);
         break;
-      }
     }
 
     ctx.strokeStyle = this.config.color;
@@ -227,15 +278,10 @@ export class StampRenderer {
     ctx.stroke();
   }
 
-  private drawStar(
-    ctx: CanvasRenderingContext2D,
-    centerX: number,
-    centerY: number,
-    size: number
-  ): void {
-    const outerRadius = size * 0.18;
+  private drawStar(ctx: CanvasRenderingContext2D, g: StampGeometry): void {
+    const outerRadius = this.config.size * 0.18;
     const innerRadius = outerRadius * 0.4;
-    const vertices = this.generateStarVertices(centerX, centerY, outerRadius, innerRadius);
+    const vertices = this.generateStarVertices(g.centerX, g.centerY, outerRadius, innerRadius);
 
     ctx.beginPath();
     ctx.moveTo(vertices[0].x, vertices[0].y);
@@ -251,102 +297,91 @@ export class StampRenderer {
 
   /**
    * ============================================================
-   * 弧形文字绘制 - 根据形状分发到正确的算法
+   * TOP TEXT (公司名称) — Shape-dispatched
+   *   - circle/oval: arc text, symmetric about top axis
+   *   - rect:        horizontal text, centered between outerTop & innerTop
    * ============================================================
    */
-  private drawArcText(
-    ctx: CanvasRenderingContext2D,
-    centerX: number,
-    centerY: number,
-    radius: number
-  ): void {
+  private drawTopText(ctx: CanvasRenderingContext2D, g: StampGeometry): void {
     const text = this.config.companyName;
     if (!text) return;
 
-    ctx.font = `bold ${this.config.size * 0.1}px sans-serif`;
+    ctx.save();
+    ctx.font = `bold ${g.textFontSize}px sans-serif`;
     ctx.fillStyle = this.config.color;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    switch (this.config.shape) {
-      case 'circle': {
-        // 正圆：使用标准半径 a = b = radius
-        const chars = this.calculateEllipseArcPositions(
-          text,
-          radius * 0.75,  // a = 横向半轴
-          radius * 0.75,  // b = 纵向半轴（相等）
-          -Math.PI * 0.8,
-          -Math.PI * 0.2
-        );
-        for (const { char, x, y, rotation } of chars) {
-          ctx.save();
-          ctx.translate(centerX + x, centerY + y);
-          ctx.rotate(rotation);
-          ctx.fillText(char, 0, 0);
-          ctx.restore();
-        }
-        break;
-      }
-      case 'oval': {
-        // 椭圆：a ≠ b，使用真正的椭圆参数方程
-        const a = radius * 0.75;  // 横向半轴
-        const b = radius * 0.45;  // 纵向半轴（椭圆更扁平）
-        const chars = this.calculateEllipseArcPositions(
-          text,
-          a,
-          b,
-          -Math.PI * 0.8,
-          -Math.PI * 0.2
-        );
-        for (const { char, x, y, rotation } of chars) {
-          ctx.save();
-          ctx.translate(centerX + x, centerY + y);
-          ctx.rotate(rotation);
-          ctx.fillText(char, 0, 0);
-          ctx.restore();
-        }
-        break;
-      }
-      case 'rect': {
-        // 矩形：使用线性边界分发算法，彻底摒弃圆周极坐标
-        const rectSize = this.config.size * 0.8;
-        const borderPadding = 20;
-        const availableWidth = rectSize - borderPadding * 2;
-        const topY = centerY - rectSize / 2 + borderPadding;
+    if (this.config.shape === 'rect') {
+      // Rectangle: rotation = 0, perfectly centered between outer and inner top edges.
+      const y = g.outerTop + (g.innerTop - g.outerTop) / 2;
+      ctx.save();
+      ctx.translate(g.centerX, y);
+      ctx.rotate(0);
+      ctx.fillText(text, 0, 0);
+      ctx.restore();
+    } else {
+      // Circle & Oval: tangent-perpendicular arc text, symmetric about -π/2.
+      // Arc span: 140° for short text, scales to 160° for longer text.
+      const charCount = text.length;
+      const spanDegrees = Math.min(160, 100 + charCount * 8);
+      const totalSpan = (spanDegrees * Math.PI) / 180;
 
-        const chars = this.calculateRectLinearPositions(
-          text,
-          availableWidth,
-          topY
-        );
+      const chars = this.calculateEllipseArcPositions(
+        text,
+        g.textArcA,
+        g.textArcB,
+        totalSpan
+      );
 
-        for (const { char, x, y, rotation } of chars) {
-          ctx.save();
-          ctx.translate(centerX - rectSize / 2 + borderPadding + x, y);
-          ctx.rotate(rotation);
-          ctx.fillText(char, 0, 0);
-          ctx.restore();
-        }
-        break;
+      for (const { char, x, y, rotation } of chars) {
+        ctx.save();
+        ctx.translate(g.centerX + x, g.centerY + y);
+        ctx.rotate(rotation);
+        ctx.fillText(char, 0, 0);
+        ctx.restore();
       }
     }
+
+    ctx.restore();
   }
 
-  private drawHorizontalText(
-    ctx: CanvasRenderingContext2D,
-    centerX: number,
-    centerY: number,
-    radius: number
-  ): void {
-    if (!this.config.departmentName) return;
+  /**
+   * ============================================================
+   * BOTTOM TEXT (业务专用章) — Universal horizontal text
+   *   rotation = 0, ctx.textAlign = 'center', ctx.textBaseline = 'middle'
+   *
+   *   - circle/oval: centered between star bottom and inner border bottom
+   *   - rect:        centered between innerBottom and outerBottom
+   * ============================================================
+   */
+  private drawBottomText(ctx: CanvasRenderingContext2D, g: StampGeometry): void {
+    const text = this.config.departmentName;
+    if (!text) return;
 
-    const y = centerY + radius * 0.5;
+    const bottomFontSize = this.config.size * 0.08;
 
-    ctx.font = `bold ${this.config.size * 0.08}px sans-serif`;
+    let y: number;
+    if (this.config.shape === 'rect') {
+      // Rect: midpoint between inner bottom and outer bottom.
+      y = g.innerBottom + (g.outerBottom - g.innerBottom) / 2;
+    } else {
+      // Circle/Oval: inside the inner ring, below the star.
+      // Star outerRadius = size * 0.18, so bottom of star ≈ centerY + size*0.18
+      const starBottom = g.centerY + this.config.size * 0.18;
+      // Place text midway between star bottom and inner ring bottom.
+      y = starBottom + (g.innerBottom - starBottom) / 2;
+    }
+
+    ctx.save();
+    ctx.font = `bold ${bottomFontSize}px sans-serif`;
     ctx.fillStyle = this.config.color;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(this.config.departmentName, centerX, y);
+    ctx.translate(g.centerX, y);
+    ctx.rotate(0);
+    ctx.fillText(text, 0, 0);
+    ctx.restore();
   }
 
   renderToCanvas(canvas: HTMLCanvasElement): void {
@@ -354,19 +389,17 @@ export class StampRenderer {
     if (!ctx) throw new Error('Failed to get 2D context');
 
     const size = this.config.size;
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const radius = size / 2 - 15;
+    const g = this.buildGeometry();
 
     ctx.clearRect(0, 0, size, size);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
 
-    this.drawBorder(ctx, centerX, centerY, size);
-    this.drawInnerCircle(ctx, centerX, centerY, radius);
-    this.drawStar(ctx, centerX, centerY, size);
-    this.drawArcText(ctx, centerX, centerY, radius);
-    this.drawHorizontalText(ctx, centerX, centerY, radius);
+    this.drawBorder(ctx, g);
+    this.drawInnerBorder(ctx, g);
+    this.drawStar(ctx, g);
+    this.drawTopText(ctx, g);
+    this.drawBottomText(ctx, g);
     this.applyNoise(ctx, size, size);
   }
 
