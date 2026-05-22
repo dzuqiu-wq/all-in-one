@@ -96,6 +96,13 @@ jobs:
           script: |
             set -euo pipefail
 
+            # ERR trap: emit the failing command + line number + exit code so
+            # remote failures cannot exit silently. Without this, `set -e` just
+            # aborts the script and the Actions log only shows the bare
+            # "Process exited with status 1" tail, which is useless for
+            # diagnosing what Docker actually complained about.
+            trap 'rc=$?; echo "::error::Remote step failed at line ${LINENO}: command \"${BASH_COMMAND}\" exited with code ${rc}"; exit $rc' ERR
+
             # Non-interactive SSH sessions do NOT source ~/.bashrc or ~/.profile,
             # so PATH may be limited to /usr/bin:/bin and miss /usr/local/bin —
             # which is exactly where the docker-compose v1 binary lives on most
@@ -134,18 +141,56 @@ jobs:
               echo "Verified PATH at this point: $PATH"
               exit 1
             fi
-            echo "    using: $DC ($($DC version --short 2>/dev/null || $DC --version))"
+            # Print BOTH stdout and stderr of the version probe so a missing
+            # docker daemon, dangling socket, or permission issue surfaces here
+            # instead of being swallowed by the next command.
+            echo "    using: $DC"
+            $DC version 2>&1 | head -5 || true
+            echo "    docker daemon info (truncated):"
+            docker info --format '    server version: {{.ServerVersion}} · containers: {{.Containers}} · images: {{.Images}}' 2>&1 || {
+              echo "::error::'docker info' failed — daemon unreachable or current user not in 'docker' group."
+              echo "Hint: try 'sudo usermod -aG docker $USER' on the VPS, then log out and back in."
+              exit 1
+            }
 
             COMPOSE_FILE="docker-compose.prod.yml"
 
+            # Sanity-check the compose file actually exists at the deploy path
+            # and parses cleanly under the resolved DC binary — this fails
+            # MUCH faster than a half-broken `build` and tells us exactly what
+            # is wrong (typo in YAML, missing referenced .env, etc).
+            if [ ! -f "$COMPOSE_FILE" ]; then
+              echo "::error::$COMPOSE_FILE not found at $(pwd)"
+              ls -la
+              exit 1
+            fi
+            echo "==> Validate compose config"
+            $DC -f "$COMPOSE_FILE" config --quiet 2>&1 || {
+              rc=$?
+              echo "::error::'$DC config' failed (exit $rc) — printing full output:"
+              $DC -f "$COMPOSE_FILE" config 2>&1 | head -40 || true
+              exit $rc
+            }
+
             if [ "${SKIP_BUILD:-false}" = "true" ]; then
               echo "==> Rolling without rebuild (SKIP_BUILD=true)"
-              $DC -f "$COMPOSE_FILE" up -d --remove-orphans
+              # Surface every container/network/volume action via xtrace.
+              set -x
+              $DC -f "$COMPOSE_FILE" up -d --remove-orphans 2>&1
+              set +x
             else
               echo "==> Rebuilding production images"
-              $DC -f "$COMPOSE_FILE" build --pull
+              # The build step is by far the most likely failure point on a
+              # fresh VPS: missing base image, disk full, network outage to the
+              # registry, broken Dockerfile. Force xtrace + merge stderr so the
+              # Actions log captures the actual docker error verbatim.
+              set -x
+              $DC -f "$COMPOSE_FILE" build --pull 2>&1
+              set +x
               echo "==> Rolling stack"
-              $DC -f "$COMPOSE_FILE" up -d --remove-orphans
+              set -x
+              $DC -f "$COMPOSE_FILE" up -d --remove-orphans 2>&1
+              set +x
             fi
 
             echo "==> Wait for nginx healthcheck (up to 90 s)"
