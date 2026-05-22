@@ -158,16 +158,18 @@ export class StampRenderer {
   // ================================================================
   //
   // Ellipse parametric: x = a·cos(t), y = b·sin(t)
-  // Clockwise tangent vector: (-a·sin(t), b·cos(t))
-  //   → dy = b·cos(t), dx = -a·sin(t)
-  // Normal rotation (glyph perpendicular to tangent, heads outward):
-  //   rotation = atan2(dy, dx) = atan2(b·cos(t), -a·sin(t))
-  //   NO +π/2: atan2 already returns the correct normal angle.
+  //
+  // Definitive Invariant Normal Formula:
+  //   rotation = atan2(a·sin(t), b·cos(t)) + π/2
+  //
+  //   For a circle (a = b): atan2(sin t, cos t) + π/2 = t + π/2
+  //   → glyph heads point exactly outward (away from center), flowing
+  //     clockwise from left to right across the top arc.
   //
   // Distribution:
   //   - Centered on top vertical axis (-π/2)
   //   - startAngle = -π/2 - totalSpan/2
-  //   - step = totalSpan / (charCount - 1)
+  //   - step       = totalSpan / (charCount - 1)
 
   private calculateArcPositions(
     text: string,
@@ -186,8 +188,7 @@ export class StampRenderer {
         char: text[0],
         x: a * Math.cos(t),
         y: b * Math.sin(t),
-        // Clockwise tangent normal: atan2(dy, dx) with dy=b·cos(t), dx=-a·sin(t)
-        rotation: Math.atan2(b * Math.cos(t), -a * Math.sin(t)),
+        rotation: Math.atan2(a * Math.sin(t), b * Math.cos(t)) + Math.PI / 2,
       }];
     }
 
@@ -201,7 +202,7 @@ export class StampRenderer {
         char: text[i],
         x: a * Math.cos(t),
         y: b * Math.sin(t),
-        rotation: Math.atan2(b * Math.cos(t), -a * Math.sin(t)),
+        rotation: Math.atan2(a * Math.sin(t), b * Math.cos(t)) + Math.PI / 2,
       });
     }
 
@@ -358,17 +359,26 @@ export class StampRenderer {
         totalSpan
       );
 
-      for (const { char, x, y, rotation } of chars) {
+      // Lock font + alignment ONCE on a parent save scope.
+      // Per-glyph save/restore handles the translate/rotate matrix.
+      ctx.save();
+      ctx.font = `bold ${g.arcFontSize}px sans-serif`;
+      ctx.fillStyle = this.config.color;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      for (const c of chars) {
         ctx.save();
-        ctx.translate(g.centerX + x, g.centerY + y);
-        ctx.rotate(rotation);
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = `bold ${g.arcFontSize}px sans-serif`;
-        ctx.fillStyle = this.config.color;
-        ctx.fillText(char, 0, 0);
+        // 1. Translate to the absolute character coordinate on the ring.
+        ctx.translate(g.centerX + c.x, g.centerY + c.y);
+        // 2. Rotate the context so the glyph aligns with the local curve normal.
+        ctx.rotate(c.rotation);
+        // 3. Draw the single character at the localized origin (0, 0).
+        ctx.fillText(c.char, 0, 0);
         ctx.restore();
       }
+
+      ctx.restore();
     }
   }
 
