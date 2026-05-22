@@ -87,7 +87,13 @@ export class StampRenderer {
 
     // Font size: 9.5% of stamp size — gives good legibility at all resolutions.
     const arcFontSize = size * 0.095;
-    const bottomFontSize = size * 0.078;
+
+    // Bottom font size is shape-aware:
+    //   - rect: full size (no chord-width clipping concern)
+    //   - circle/oval: scaled down so horizontal flat text fits within the
+    //     curving inner chord at its lower Y level (prevents "业" / "章" clipping)
+    const bottomFontSize =
+      this.config.shape === 'rect' ? size * 0.078 : size * 0.065;
 
     // Minimum vertical whitespace required for the text band.
     // 1.8× font height ensures glyphs sit cleanly between rings with breathing room.
@@ -401,26 +407,21 @@ export class StampRenderer {
     if (!text) return;
 
     const { shape } = this.config;
-    const clearance = g.bottomFontSize * 0.4;   // minimum padding from border lines
     let y: number;
 
     if (shape === 'rect') {
-      // Y = innerBottom + (outerBottom - innerBottom) / 2
+      // Rect: midpoint between inner and outer bottom edges.
       y = g.innerBottom + (g.outerBottom - g.innerBottom) / 2;
 
     } else {
-      // Circle / Oval: inside the inner ring, below the star.
-      // Star outer radius = size * 0.18
-      // Star bottom tip in canvas Y:
-      const starBottom = g.centerY + g.size * 0.18;
-      // Safe lower bound: inner bottom line minus clearance
-      const safeBottom = g.innerBottom - clearance;
-      // Safe upper bound: star bottom tip plus clearance
-      const safeTop = starBottom + clearance;
-      // Re-center between the two safe boundaries
-      y = (safeTop + safeBottom) / 2;
-      // Hard floor: never overlap the star
-      y = Math.max(y, safeTop);
+      // Circle / Oval:
+      // The inner ring curves UPWARD at its bottom corners — flat horizontal
+      // text would clip "业"/"章" if placed too low. Push the text upward,
+      // right below the star tip where the chord is widest.
+      const starBottomTip = g.centerY + this.config.size * 0.18;
+      // Vertical ceiling rule: seat the baseline just below the star tip,
+      // leveraging the wider horizontal clearing at this Y level.
+      y = starBottomTip + g.bottomFontSize * 0.65;
     }
 
     ctx.save();
