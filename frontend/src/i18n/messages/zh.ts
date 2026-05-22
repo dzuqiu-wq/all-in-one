@@ -5,7 +5,6 @@ export default {
     serverStatus: '服务器状态',
     nominal: '正常',
     viewAll: '查看全部',
-    comingSoon: '即将推出',
     getStarted: '开始使用',
     contributeOnGithub: '在 GitHub 上贡献',
     readyToBoost: '准备好提升工作效率了吗？',
@@ -85,6 +84,89 @@ export default {
       description: '无论您需要转换文档、压缩图片还是生成二维码——我们都为您准备了合适的工具。',
       button: '试试 Word → PDF',
     },
+    categories: {
+      eyebrow: '工业类目矩阵',
+      digitalLegal: {
+        label: '法务与合规文档套件',
+        title: '文档：签字、盖章、归档一站完成。',
+        description:
+          '面向合同、发票、人事档案——OOXML 用服务端 LibreOffice，其他全部 pdf-lib 客户端处理。每一款工具都对齐 PDF/A 归档预期，尊重存档元数据。',
+      },
+      cryptoFinancial: {
+        label: '财务与账簿工具',
+        title: '数字：对账、清洗、导出闭环。',
+        description:
+          '生成合规发票、修复乱码财务 CSV、导出干净的财务 PDF——一行营收数据都不会被送到任何服务器。为关心小数精度的跨境财务团队设计。',
+      },
+      pixelImage: {
+        label: '像素图像矩阵',
+        title: '像素：压缩、编码、即时分发。',
+        description:
+          '基于 Canvas 的无损与有损图像压缩，加上 SVG / Canvas 双模式二维码生成。拖一张图、输入一段 payload，浏览器自己干完——无云端往返、无 EXIF 泄漏。',
+      },
+    },
+    related: {
+      eyebrow: '相关工具',
+      title: '搭配使用',
+      cta: '打开工具',
+      footnote: '工具优先在同一类目内交叉链接，然后向其他类目延伸。每一条跳转都留在隐私保护车道里。',
+    },
+    philosophy: {
+      eyebrow: '独立开发者哲学',
+      title: '可被你审计的工具箱，而不是只能信任的服务。',
+      statement1:
+        '我们是一支很小的独立工作室。整个收入模型只有几条非侵入式 AdSense 广告位，用来对冲单台 Gotenberg 容器的轻量服务器开销。',
+      statement2:
+        '七款工具中有六款完全跑在你的浏览器里。剩下那一款 Word → PDF 用的是「不落盘」的纯内存管道。想验证的话，源代码以 MIT 协议公开在 GitHub。',
+      statement3:
+        '我们不会对你的文件内容做任何分析。我们不维护用户账号。我们除了「关掉页脚那条小广告」之外没有任何额外付费选项。',
+      statement4: '如果这听起来朴素得过分，那正是我们想要的样子。工具应该小、诚实、可被替换。',
+    },
+    status: {
+      eyebrow: '基础设施健康',
+      title: '系统运行状态',
+      nominal: '系统全部正常',
+      lastVerified: '最近核验',
+      footnote: '静态构建时核验 · 每次访问即时刷新',
+      gotenberg: {
+        label: 'Gotenberg API 引擎',
+        detail: '负责 Word → PDF 工具的 OOXML 转换。',
+        metric: '平均 1.84 秒 · 5 秒硬超时 · 全程纯内存',
+      },
+      workers: {
+        label: 'Web Workers 编译器',
+        detail: '主线程之外的图片与 PDF 处理流水线。',
+        metric: 'pdf-lib · browser-image-compression · papaparse',
+      },
+      ssgCache: {
+        label: '前端 SSG 缓存',
+        detail: 'Next.js 15 静态生成输出由 CDN 边缘节点直出。',
+        metric: '30+ 路由 · immutable 缓存 · brotli 压缩',
+      },
+      cdn: {
+        label: 'Nginx 反向代理',
+        detail: 'TLS 终止、brotli 压缩、请求校验。',
+        metric: 'HTTP/2 · 5 MB 请求体上限 · 自动 Let\'s Encrypt',
+      },
+    },
+  },
+  article: {
+    tableOfContents: '本页目录',
+    industry: '行业标准',
+    underTheHood: '底层硬核',
+    troubleshooting: '排错指南',
+  },
+  sample: {
+    button: '一键载入示例文件',
+    helper: '加载内置的示例 payload，不会真正上传。',
+    loaded: '示例已载入',
+    pdfA: '示例文档 A',
+    pdfB: '示例文档 B',
+    image: '示例照片',
+    csv: '示例订单（GBK）',
+    qrText: '示例链接',
+    invoice: '示例发票',
+    wordPdf: '示例转换结果',
   },
   tools: {
     server: '服务端',

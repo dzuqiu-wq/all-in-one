@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import imageCompression from "browser-image-compression";
-import { Upload, Download, Image as ImageIcon, Zap, ArrowLeft } from "lucide-react";
+import { Download, Image as ImageIcon, Zap } from "lucide-react";
 import AdBanner from "@/components/AdBanner";
-import { useLocalizedHref } from "@/i18n/useLocalizedHref";
+import ToolBreadcrumb from "@/components/ToolBreadcrumb";
+import ToolPageFooter from "@/components/ToolPageFooter";
+import SampleButton from "@/components/SampleButton";
+import { buildSampleImageFile } from "@/lib/sampleData";
 
 interface CompressionResult {
   originalSize: number;
@@ -166,7 +168,6 @@ function StructuredDataZH() {
 
 export default function ImageOptimizerPage() {
   const t = useTranslations("tools.imageOptimizer");
-  const homeHref = useLocalizedHref("/");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -188,6 +189,11 @@ export default function ImageOptimizerPage() {
     reader.onload = (e) => setPreview(e.target?.result as string);
     reader.readAsDataURL(f);
   }, [t]);
+
+  const handleLoadSample = useCallback(async () => {
+    const sample = await buildSampleImageFile();
+    handleFileSelect(sample);
+  }, [handleFileSelect]);
 
   const extractHistogram = (img: HTMLImageElement) => {
     const canvas = document.createElement("canvas");
@@ -267,10 +273,7 @@ export default function ImageOptimizerPage() {
       <StructuredDataEN />
       
       <div className="max-w-4xl mx-auto px-6 py-section">
-        <Link href={homeHref} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
-          <ArrowLeft className="w-4 h-4" />
-          {t("back")}
-        </Link>
+        <ToolBreadcrumb slug="image-optimizer" />
 
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4">{t("tag")}</div>
@@ -306,6 +309,12 @@ export default function ImageOptimizerPage() {
           </h4>
           <p className="text-body-sm text-muted">{t("supportedFormats")}</p>
         </div>
+
+        {!preview && (
+          <div className="mt-4">
+            <SampleButton onLoad={handleLoadSample} layout="block" />
+          </div>
+        )}
 
         {/* Preview & Options */}
         {preview && (
@@ -430,6 +439,8 @@ export default function ImageOptimizerPage() {
             ))}
           </div>
         </section>
+
+        <ToolPageFooter slug="image-optimizer" />
       </div>
     </div>
   );

@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { QRCodeSVG } from "qrcode.react";
-import { Download, RefreshCw, Copy, Check, QrCode, ArrowLeft, Palette } from "lucide-react";
+import { Download, RefreshCw, Copy, Check, QrCode, Palette } from "lucide-react";
 import AdBanner from "@/components/AdBanner";
-import { useLocalizedHref } from "@/i18n/useLocalizedHref";
+import ToolBreadcrumb from "@/components/ToolBreadcrumb";
+import ToolPageFooter from "@/components/ToolPageFooter";
+import SampleButton from "@/components/SampleButton";
+import { getSampleQrPayload } from "@/lib/sampleData";
 
 // Strict hex color allowlist: #RGB or #RRGGBB only.
 // Any other character class (e.g. "<", "javascript:", quotes) is rejected so
@@ -179,7 +181,7 @@ function StructuredDataZH() {
 
 export default function QRCodeGeneratorPage() {
   const t = useTranslations("tools.qrcode");
-  const homeHref = useLocalizedHref("/");
+  const locale = useLocale();
   const [text, setText] = useState("");
   const [fg, setFg] = useState(DEFAULT_FG);
   const [bg, setBg] = useState(DEFAULT_BG);
@@ -246,6 +248,10 @@ export default function QRCodeGeneratorPage() {
     setBgError(null);
   }, []);
 
+  const handleLoadSample = useCallback(() => {
+    setText(getSampleQrPayload(locale === "zh" ? "zh" : "en"));
+  }, [locale]);
+
   const handleDownload = useCallback(() => {
     const qrCanvas = document.querySelector("#qr-canvas canvas") as HTMLCanvasElement;
     if (!qrCanvas) {
@@ -310,10 +316,7 @@ export default function QRCodeGeneratorPage() {
       <StructuredDataEN />
       
       <div className="max-w-5xl mx-auto px-6 py-section">
-        <Link href={homeHref} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
-          <ArrowLeft className="w-4 h-4" />
-          {t("back")}
-        </Link>
+        <ToolBreadcrumb slug="qrcode-generator" />
 
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4">{t("tag")}</div>
@@ -342,6 +345,11 @@ export default function QRCodeGeneratorPage() {
                 className="w-full px-4 py-3 surface-card border border-hairline rounded-md text-ink font-mono text-body-sm resize-none focus:border-primary focus:outline-none"
               />
               <div className="mt-2 text-body-sm text-muted">{text.length} {t("characters")}</div>
+              {!text && (
+                <div className="mt-3">
+                  <SampleButton onLoad={handleLoadSample} layout="inline" />
+                </div>
+              )}
             </div>
 
             <div>
@@ -507,6 +515,8 @@ export default function QRCodeGeneratorPage() {
             ))}
           </div>
         </section>
+
+        <ToolPageFooter slug="qrcode-generator" />
       </div>
     </div>
   );

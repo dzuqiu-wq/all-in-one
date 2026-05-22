@@ -5,7 +5,6 @@ export default {
     serverStatus: 'Server Status',
     nominal: 'NOMINAL',
     viewAll: 'View All',
-    comingSoon: 'Soon',
     getStarted: 'Get Started',
     contributeOnGithub: 'Contribute on GitHub',
     readyToBoost: 'Ready to boost your workflow?',
@@ -85,6 +84,91 @@ export default {
       description: 'Whether you need to convert a document, compress an image, or generate a QR code — we have built the right tool for it.',
       button: 'Try Word → PDF',
     },
+    categories: {
+      eyebrow: 'INDUSTRIAL CATEGORY MATRIX',
+      digitalLegal: {
+        label: 'Digital Legal & Compliance Suite',
+        title: 'Documents, signed, stamped, archived.',
+        description:
+          'Convert, merge, watermark and seal contracts, invoices, and HR paperwork — server-side LibreOffice for OOXML, pdf-lib for everything else. Every tool here targets PDF/A-friendly output and respects archival metadata.',
+      },
+      cryptoFinancial: {
+        label: 'Crypto & Financial Ledger Tools',
+        title: 'Numbers, reconciled, exported.',
+        description:
+          'Generate compliant invoices, repair garbled accounting CSVs, and emit clean financial PDFs — all without ever sending a single row of revenue data to a server. Designed for cross-border finance teams who care about decimal correctness.',
+      },
+      pixelImage: {
+        label: 'Pixel Image Matrix',
+        title: 'Pixels, compressed, encoded, shipped.',
+        description:
+          'Lossless and lossy image compression through Canvas, plus QR generation through SVG/Canvas dual renderers. Drop a photo or a payload string and watch the browser do the work — no cloud round-trip, no EXIF leak.',
+      },
+    },
+    related: {
+      eyebrow: 'RELATED TOOLS',
+      title: 'Pair this tool with',
+      cta: 'Open tool',
+      footnote:
+        'Tools cross-link inside the same category first, then surface complementary ones. Each link stays in the privacy-preserving lane.',
+    },
+    philosophy: {
+      eyebrow: 'INDIE HACKER PHILOSOPHY',
+      title: 'A toolbox you can audit, not a service you have to trust.',
+      statement1:
+        'We are a tiny independent studio. Our entire revenue model is a few non-intrusive AdSense placements that offset the modest server cost of running one Gotenberg container.',
+      statement2:
+        'Six of seven tools run entirely in your browser. The seventh — Word → PDF — uses a memory-only pipeline that never writes to disk. If you want to verify, the source is on GitHub under MIT.',
+      statement3:
+        'We do not run analytics on your file contents. We do not maintain user accounts. We do not sell anything other than the optional choice to disable the small ad slot in the footer.',
+      statement4:
+        'If that sounds simple, that is the point. Tools should be small, honest, and replaceable.',
+    },
+    status: {
+      eyebrow: 'INFRASTRUCTURE HEALTH',
+      title: 'System Live Status',
+      nominal: 'ALL SYSTEMS NOMINAL',
+      lastVerified: 'Last verified',
+      footnote: 'Verified at static build · refreshes on each visit',
+      gotenberg: {
+        label: 'Gotenberg API Engine',
+        detail: 'OOXML → PDF conversion service for the Word → PDF surface.',
+        metric: 'avg 1.84 s · 5 s hard timeout · memory-only',
+      },
+      workers: {
+        label: 'Web Workers Compilers',
+        detail: 'Off-main-thread image and PDF processing pipeline.',
+        metric: 'pdf-lib · browser-image-compression · papaparse',
+      },
+      ssgCache: {
+        label: 'Frontend SSG Cache',
+        detail: 'Next.js 15 static generation output served from CDN edge.',
+        metric: '30+ routes · immutable cache · brotli compressed',
+      },
+      cdn: {
+        label: 'Nginx Reverse Proxy',
+        detail: 'TLS termination, brotli compression, request validation.',
+        metric: 'HTTP/2 · 5 MB body limit · automatic Let\'s Encrypt',
+      },
+    },
+  },
+  article: {
+    tableOfContents: 'In this page',
+    industry: 'INDUSTRY STANDARD',
+    underTheHood: 'UNDER THE HOOD',
+    troubleshooting: 'TROUBLESHOOTING',
+  },
+  sample: {
+    button: 'Try with Sample File',
+    helper: 'Loads a built-in mock payload — no upload needed.',
+    loaded: 'Sample loaded',
+    pdfA: 'Sample document A',
+    pdfB: 'Sample document B',
+    image: 'Sample photo',
+    csv: 'Sample orders (GBK)',
+    qrText: 'Sample URL',
+    invoice: 'Sample invoice',
+    wordPdf: 'Sample conversion result',
   },
   tools: {
     server: 'Server',

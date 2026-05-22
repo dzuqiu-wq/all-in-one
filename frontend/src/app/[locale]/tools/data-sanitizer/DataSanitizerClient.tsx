@@ -1,22 +1,21 @@
 "use client";
 
 import { useState, useRef, useCallback, useMemo } from "react";
-import Link from "next/link";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import {
-  Upload,
   FileText,
   AlertCircle,
   CheckCircle,
-  ArrowLeft,
   RefreshCw,
   FileSpreadsheet,
   FileCode,
   FileJson,
-  Download,
 } from "lucide-react";
 import AdBanner from "@/components/AdBanner";
-import { useLocalizedHref } from "@/i18n/useLocalizedHref";
+import ToolBreadcrumb from "@/components/ToolBreadcrumb";
+import ToolPageFooter from "@/components/ToolPageFooter";
+import SampleButton from "@/components/SampleButton";
+import { buildSampleSanitizerFile } from "@/lib/sampleData";
 import { EncodingDecoder } from "@/lib/data-sanitizer/EncodingDecoder";
 import { DataTransformer } from "@/lib/data-sanitizer/DataTransformer";
 import type {
@@ -42,7 +41,9 @@ const PREVIEW_ROWS = 20;
 
 export default function DataSanitizerClient({ locale }: DataSanitizerClientProps) {
   const t = useTranslations("tools.dataSanitizer");
-  const homeHref = useLocalizedHref("/");
+  // Locale prop is reserved for future per-locale sample assets and is
+  // consumed by the next-intl provider; explicit `void` so eslint stays quiet.
+  void locale;
 
   const encodingDecoder = useMemo(() => new EncodingDecoder(), []);
   const dataTransformer = useMemo(() => new DataTransformer(encodingDecoder), [encodingDecoder]);
@@ -130,6 +131,11 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
     setIsDragOver(false);
   }, []);
 
+  const handleLoadSample = useCallback(async () => {
+    const sample = buildSampleSanitizerFile();
+    await handleFile(sample);
+  }, [handleFile]);
+
   const handleReDecode = useCallback(async () => {
     if (!file) return;
 
@@ -204,13 +210,7 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
   return (
     <div className="min-h-screen bg-canvas">
       <div className="max-w-6xl mx-auto px-6 py-section">
-        <Link
-          href={homeHref}
-          className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          {t("back")}
-        </Link>
+        <ToolBreadcrumb slug="data-sanitizer" />
 
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4">{t("tag")}</div>
@@ -289,6 +289,12 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
             </p>
           </div>
         </div>
+
+        {!file && (
+          <div className="mt-4">
+            <SampleButton onLoad={handleLoadSample} layout="block" />
+          </div>
+        )}
 
         {file && (
           <div className="mt-6 surface-card rounded-xl p-lg">
@@ -525,6 +531,8 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
             ))}
           </div>
         </section>
+
+        <ToolPageFooter slug="data-sanitizer" />
       </div>
     </div>
   );

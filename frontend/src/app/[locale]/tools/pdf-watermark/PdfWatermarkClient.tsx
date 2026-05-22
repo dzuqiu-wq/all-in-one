@@ -1,20 +1,21 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import Link from "next/link";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import {
   Upload,
   Download,
   FileText,
   AlertCircle,
   CheckCircle,
-  ArrowLeft,
   RefreshCw,
   Trash2,
 } from "lucide-react";
 import AdBanner from "@/components/AdBanner";
-import { useLocalizedHref } from "@/i18n/useLocalizedHref";
+import ToolBreadcrumb from "@/components/ToolBreadcrumb";
+import ToolPageFooter from "@/components/ToolPageFooter";
+import SampleButton from "@/components/SampleButton";
+import { buildSamplePdfFile } from "@/lib/sampleData";
 import { WatermarkProcessor } from "@/lib/pdf-watermark/WatermarkProcessor";
 import type {
   StampConfig,
@@ -61,7 +62,10 @@ const DEFAULT_TEXT_CONFIG: TextConfig = {
 
 export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) {
   const t = useTranslations("tools.pdfWatermark");
-  const homeHref = useLocalizedHref("/");
+  // Locale is consumed by next-intl provider; the prop is kept for parity
+  // with the server page wrapper and to enable future locale-specific
+  // sample assets without churning the public component contract.
+  void locale;
 
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [stampConfig, setStampConfig] = useState<StampConfig>(DEFAULT_STAMP_CONFIG);
@@ -146,6 +150,15 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
     setProgress({ status: "idle", currentPage: 0, totalPages: 0, percent: 0, message: "" });
   }, [t]);
 
+  const handleLoadSample = useCallback(async () => {
+    const sample = await buildSamplePdfFile({
+      title: "Sample contract draft",
+      variant: "a",
+      pageCount: 2,
+    });
+    handleFileSelect(sample);
+  }, [handleFileSelect]);
+
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
@@ -220,13 +233,7 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
   return (
     <div className="min-h-screen bg-canvas">
       <div className="max-w-7xl mx-auto px-6 py-section">
-        <Link
-          href={homeHref}
-          className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          {t("back")}
-        </Link>
+        <ToolBreadcrumb slug="pdf-watermark" />
 
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4">{t("tag")}</div>
@@ -488,6 +495,10 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                 {pdfFile ? formatBytes(pdfFile.size) : t("supported")}
               </p>
             </div>
+
+            {!pdfFile && (
+              <SampleButton onLoad={handleLoadSample} layout="block" />
+            )}
           </div>
 
           {/* Right Panel - Preview & Actions */}
@@ -608,6 +619,8 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
             ))}
           </div>
         </section>
+
+        <ToolPageFooter slug="pdf-watermark" />
       </div>
     </div>
   );

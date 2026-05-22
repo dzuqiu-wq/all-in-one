@@ -1,25 +1,24 @@
 "use client";
 
-import { useState, useRef, useCallback, useMemo, useEffect } from "react";
-import Link from "next/link";
-import { useTranslations, useLocale } from "next-intl";
+import { useState, useRef, useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import {
   Plus,
   Trash2,
   Download,
-  ArrowLeft,
-  FileText,
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import AdBanner from "@/components/AdBanner";
-import { useLocalizedHref } from "@/i18n/useLocalizedHref";
+import ToolBreadcrumb from "@/components/ToolBreadcrumb";
+import ToolPageFooter from "@/components/ToolPageFooter";
+import SampleButton from "@/components/SampleButton";
+import { getSampleInvoice } from "@/lib/sampleData";
 import {
   type InvoiceData,
   type InvoiceItem,
-  type InvoiceTotals,
   type Currency,
   DEFAULT_INVOICE,
   CURRENCY_SYMBOLS,
@@ -27,7 +26,6 @@ import {
 import {
   calculateInvoiceTotals,
   calculateLineTotal,
-  formatCurrency,
   formatDate,
   generateInvoiceNumber,
   validateInvoice,
@@ -41,7 +39,6 @@ const CURRENCIES: Currency[] = ['USD', 'EUR', 'GBP', 'CNY', 'JPY'];
 
 export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClientProps) {
   const t = useTranslations("tools.invoiceGenerator");
-  const homeHref = useLocalizedHref("/");
 
   const [invoice, setInvoice] = useState<InvoiceData>(() => ({
     ...DEFAULT_INVOICE,
@@ -169,16 +166,45 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
     setShowSuccess(false);
   }, []);
 
+  const handleLoadSample = useCallback(() => {
+    const sample = getSampleInvoice(locale === "zh" ? "zh" : "en");
+    setInvoice({
+      invoiceNumber: sample.invoiceNumber,
+      currency: sample.currency,
+      issueDate: sample.issueDate,
+      dueDate: sample.dueDate,
+      companyName: sample.fromCompany,
+      companyAddress: sample.fromAddress,
+      companyCity: sample.fromCity,
+      companyCountry: sample.fromCountry,
+      companyEmail: sample.fromEmail,
+      companyPhone: "",
+      clientName: sample.toCompany,
+      clientAddress: sample.toAddress,
+      clientCity: sample.toCity,
+      clientCountry: sample.toCountry,
+      clientEmail: sample.toEmail,
+      items: sample.items.map((i) => ({
+        id: crypto.randomUUID(),
+        description: i.description,
+        quantity: i.quantity,
+        unitPrice: i.unitPrice,
+      })),
+      taxRate: sample.taxRate,
+      discountAmount: sample.discount,
+      paymentTerms: sample.paymentTerms,
+      notes: sample.notes,
+    });
+    setErrors([]);
+    setShowSuccess(false);
+  }, [locale]);
+
   const symbol = CURRENCY_SYMBOLS[invoice.currency];
 
   return (
     <div className="min-h-screen bg-canvas">
       <div className="max-w-7xl mx-auto px-6 py-section">
-        {/* Back Link */}
-        <Link href={homeHref} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
-          <ArrowLeft className="w-4 h-4" />
-          {t("back")}
-        </Link>
+        <ToolBreadcrumb slug="invoice-generator" />
 
         {/* Hero */}
         <div className="mb-12">
@@ -639,6 +665,8 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
               >
                 {t("reset")}
               </button>
+
+              <SampleButton onLoad={handleLoadSample} layout="block" />
             </div>
 
             <AdBanner slot="invoice-bottom" format="rectangle" className="mx-auto max-w-[336px]" />
@@ -662,6 +690,8 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
             ))}
           </div>
         </section>
+
+        <ToolPageFooter slug="invoice-generator" />
       </div>
     </div>
   );

@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Mail } from "lucide-react";
+import { CONTACT, SOCIAL } from "@/lib/constants";
 
 interface FooterProps {
   version?: string;
@@ -75,10 +77,6 @@ const translations = {
       en: 'Changelog',
       zh: '更新日志'
     },
-    api: {
-      en: 'API',
-      zh: 'API 接口'
-    },
     github: 'GitHub'
   },
   legal: {
@@ -107,7 +105,11 @@ const translations = {
     slogan: {
       en: 'Thoughtful tools for documents, images, and everyday productivity.',
       zh: '为您打造的文档、图片及日常效率提升的极客工具箱。'
-    }
+    },
+    contactLabel: {
+      en: 'Contact us',
+      zh: '联络我们',
+    },
   },
   footer: {
     copyright: {
@@ -149,6 +151,13 @@ export default function Footer({ version = "0.1.0" }: FooterProps) {
             <p className="text-body-sm text-on-dark-soft leading-relaxed">
               {t(translations.brand.slogan, locale)}
             </p>
+            <a
+              href={`mailto:${CONTACT.general}`}
+              className="mt-4 inline-flex items-center gap-2 text-body-sm text-on-dark hover:text-primary transition-colors no-underline font-mono"
+            >
+              <Mail className="w-3.5 h-3.5" strokeWidth={1.75} />
+              {CONTACT.general}
+            </a>
             <div className="mt-6 text-xs font-mono text-on-dark-soft">v{version}</div>
           </div>
 
@@ -202,29 +211,30 @@ export default function Footer({ version = "0.1.0" }: FooterProps) {
               {t(translations.resources.title, locale)}
             </h4>
             <nav className="flex flex-col gap-3">
-              <FooterLink 
-                path="/docs" 
-                label={t(translations.resources.documentation, locale)} 
-                locale={locale} 
+              <FooterLink
+                path="/docs"
+                label={t(translations.resources.documentation, locale)}
+                locale={locale}
               />
-              <FooterLink 
-                path="/changelog" 
-                label={t(translations.resources.changelog, locale)} 
-                locale={locale} 
+              <FooterLink
+                path="/changelog"
+                label={t(translations.resources.changelog, locale)}
+                locale={locale}
               />
               <a
-                href="https://github.com/dzuqiu-wq/all-in-one"
+                href={SOCIAL.github}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline"
               >
                 {translations.resources.github}
               </a>
-              <FooterLink 
-                path="/api" 
-                label={t(translations.resources.api, locale)} 
-                locale={locale} 
-              />
+              <a
+                href={`mailto:${CONTACT.general}`}
+                className="text-body-sm text-on-dark-soft hover:text-on-dark transition-colors no-underline"
+              >
+                {t(translations.brand.contactLabel, locale)}
+              </a>
             </nav>
           </div>
 

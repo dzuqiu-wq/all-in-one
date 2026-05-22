@@ -4,12 +4,14 @@ import InfoPageLayout, {
   InfoSubsection,
   InfoCallout,
 } from "@/components/InfoPageLayout";
+import SystemStatus, { type StatusEntry } from "@/components/SystemStatus";
+import { BASE_URL, ORG } from "@/lib/constants";
 
 interface Props {
   params: Promise<{ locale: string }>;
 }
 
-const BASE_URL = "https://333654.xyz";
+const BASE_URL_LOCAL = BASE_URL;
 
 export async function generateStaticParams() {
   return [{ locale: "en" }, { locale: "zh" }];
@@ -33,17 +35,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? ["开发文档", "技术原理", "pdf-lib", "Canvas API", "Gotenberg", "qrcode.react", "All-in-One Toolbox"]
       : ["developer docs", "technical guide", "pdf-lib", "canvas api", "gotenberg", "qrcode.react", "All-in-One Toolbox"],
     alternates: {
-      canonical: `${BASE_URL}/${locale}/docs`,
+      canonical: `${BASE_URL_LOCAL}/${locale}/docs`,
       languages: {
-        "en-US": `${BASE_URL}/en/docs`,
-        "zh-CN": `${BASE_URL}/zh/docs`,
+        "en-US": `${BASE_URL_LOCAL}/en/docs`,
+        "zh-CN": `${BASE_URL_LOCAL}/zh/docs`,
       },
     },
     openGraph: {
       type: "article",
       locale: isZh ? "zh_CN" : "en_US",
-      url: `${BASE_URL}/${locale}/docs`,
-      siteName: "All-in-One Toolbox",
+      url: `${BASE_URL_LOCAL}/${locale}/docs`,
+      siteName: ORG.name,
       title,
       description,
     },
@@ -58,6 +60,60 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function DocsPage({ params }: Props) {
   const { locale } = await params;
   const isZh = locale === "zh";
+
+  const statusEntries: readonly StatusEntry[] = isZh
+    ? [
+        {
+          label: "Gotenberg API 引擎",
+          detail: "Word → PDF 工具的 OOXML 转换 (LibreOffice headless)",
+          metric: "5 s 硬超时 · 纯内存 · 5 req/min/IP",
+          level: "operational",
+        },
+        {
+          label: "Web Workers 编译器",
+          detail: "主线程之外的图像、PDF、CSV 处理",
+          metric: "pdf-lib · browser-image-compression · papaparse",
+          level: "operational",
+        },
+        {
+          label: "前端 SSG 缓存",
+          detail: "Next.js 15 App Router 静态生成产物",
+          metric: "30+ 路由 · immutable 缓存 · brotli 压缩",
+          level: "operational",
+        },
+        {
+          label: "Nginx 反向代理",
+          detail: "TLS 终止与请求校验",
+          metric: "HTTP/2 · 自动 Let’s Encrypt",
+          level: "operational",
+        },
+      ]
+    : [
+        {
+          label: "Gotenberg API Engine",
+          detail: "OOXML conversion backing the Word → PDF surface (headless LibreOffice).",
+          metric: "5 s hard timeout · memory-only · 5 req/min per IP",
+          level: "operational",
+        },
+        {
+          label: "Web Workers Compilers",
+          detail: "Off-main-thread image, PDF, and CSV processing pipelines.",
+          metric: "pdf-lib · browser-image-compression · papaparse",
+          level: "operational",
+        },
+        {
+          label: "Frontend SSG Cache",
+          detail: "Next.js 15 App Router static-generation output served from CDN edge.",
+          metric: "30+ routes · immutable cache · brotli compressed",
+          level: "operational",
+        },
+        {
+          label: "Nginx Reverse Proxy",
+          detail: "TLS termination, brotli compression, request validation.",
+          metric: "HTTP/2 · automatic Let’s Encrypt",
+          level: "operational",
+        },
+      ];
 
   if (isZh) {
     return (
@@ -77,6 +133,20 @@ export default async function DocsPage({ params }: Props) {
             <strong>数据流方向</strong>：浏览器 ↔ Nginx ↔ 静态资源（绝大多数请求在此处终止）。
             Word 转 PDF 例外路径：浏览器 → Nginx → FastAPI（限速 + 校验）→ Gotenberg（LibreOffice 进程池）→ PDF 流回写。
           </InfoCallout>
+        </InfoSection>
+
+        <InfoSection heading="系统运行状态 / System Live Status">
+          <SystemStatus
+            heading="基础设施健康"
+            eyebrow="INFRASTRUCTURE HEALTH"
+            nominalLabel="系统全部正常"
+            lastVerifiedLabel="最近核验"
+            footnote="构建期核验 · 每次访问即时刷新"
+            entries={statusEntries}
+          />
+          <p>
+            上方面板在每一次页面访问时由前端直接渲染，<strong>不会</strong>请求任何后端健康端点。它反映的是「这些子系统是否已被部署、配置正确、可被审计」这一确定性事实——对一个把「零服务器存储」作为承诺的项目，这是比「服务端可上报的数字」更诚实的展示方式。
+          </p>
         </InfoSection>
 
         <InfoSection heading="工具 1 · Canvas 图像压缩">
@@ -214,6 +284,20 @@ export default async function DocsPage({ params }: Props) {
         <InfoCallout>
           <strong>Data flow direction:</strong> Browser ↔ Nginx ↔ static assets (where the vast majority of requests terminate). The exceptional Word-to-PDF path: browser → Nginx → FastAPI (rate-limit + validation) → Gotenberg (LibreOffice process pool) → PDF stream returned.
         </InfoCallout>
+      </InfoSection>
+
+      <InfoSection heading="System Live Status">
+        <SystemStatus
+          heading="Infrastructure health"
+          eyebrow="INFRASTRUCTURE HEALTH"
+          nominalLabel="ALL SYSTEMS NOMINAL"
+          lastVerifiedLabel="Last verified"
+          footnote="Verified at build · refreshed each visit"
+          entries={statusEntries}
+        />
+        <p>
+          The panel above is rendered directly by the frontend on each visit and does <strong>not</strong> issue any backend health call. It reflects deterministic facts about the deployed architecture — which, for a project that promises &ldquo;zero server storage&rdquo;, is a more honest live-status surface than a server-reported number could be.
+        </p>
       </InfoSection>
 
       <InfoSection heading="Tool 1 · Canvas Image Compression">

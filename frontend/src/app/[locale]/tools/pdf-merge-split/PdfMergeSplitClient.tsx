@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { PDFDocument } from "pdf-lib";
-import { Download, FileText, Merge, Scissors, X, GripVertical, ArrowLeft, CheckCircle } from "lucide-react";
+import { Download, FileText, Merge, Scissors, X, GripVertical, CheckCircle } from "lucide-react";
 import AdBanner from "@/components/AdBanner";
-import { useLocalizedHref } from "@/i18n/useLocalizedHref";
+import ToolBreadcrumb from "@/components/ToolBreadcrumb";
+import ToolPageFooter from "@/components/ToolPageFooter";
+import SampleButton from "@/components/SampleButton";
+import { buildSamplePdfFile } from "@/lib/sampleData";
 
 interface PDFFile {
   id: string;
@@ -167,7 +169,6 @@ function StructuredDataZH() {
 
 export default function PDFMergeSplitPage() {
   const t = useTranslations("tools.pdfMerge");
-  const homeHref = useLocalizedHref("/");
   const [mode, setMode] = useState<Mode>("merge");
   const [files, setFiles] = useState<PDFFile[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -205,6 +206,20 @@ export default function PDFMergeSplitPage() {
     setFiles((prev) => [...prev, ...newFiles]);
     setResult(null);
   }, []);
+
+  const handleLoadSample = useCallback(async () => {
+    const samples =
+      mode === "merge"
+        ? await Promise.all([
+            buildSamplePdfFile({ title: "Sample Document A", variant: "a", pageCount: 2 }),
+            buildSamplePdfFile({ title: "Sample Document B", variant: "b", pageCount: 2 }),
+          ])
+        : [await buildSamplePdfFile({ title: "Sample Document", variant: "a", pageCount: 5 })];
+    const parsed = await Promise.all(samples.map(parsePDF));
+    setFiles((prev) => [...prev, ...parsed]);
+    setResult(null);
+    if (mode === "split") setSplitRanges("1-3");
+  }, [mode]);
 
   const moveFile = (from: number, to: number) => {
     setFiles((prev) => {
@@ -326,10 +341,7 @@ export default function PDFMergeSplitPage() {
       <StructuredDataEN />
       
       <div className="max-w-4xl mx-auto px-6 py-section">
-        <Link href={homeHref} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
-          <ArrowLeft className="w-4 h-4" />
-          {t("back")}
-        </Link>
+        <ToolBreadcrumb slug="pdf-merge-split" />
 
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4">{t("tag")}</div>
@@ -394,6 +406,12 @@ export default function PDFMergeSplitPage() {
             {mode === "merge" ? t("selectMerge") : t("selectSplit")}
           </p>
         </div>
+
+        {files.length === 0 && (
+          <div className="mt-4">
+            <SampleButton onLoad={handleLoadSample} layout="block" />
+          </div>
+        )}
 
         {/* File List */}
         {files.length > 0 && (
@@ -510,6 +528,8 @@ export default function PDFMergeSplitPage() {
             ))}
           </div>
         </section>
+
+        <ToolPageFooter slug="pdf-merge-split" />
       </div>
     </div>
   );

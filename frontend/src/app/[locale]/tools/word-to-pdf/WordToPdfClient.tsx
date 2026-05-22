@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
-import { Upload, Download, FileText, AlertCircle, CheckCircle, ArrowLeft } from "lucide-react";
+import { Upload, Download, FileText, AlertCircle, CheckCircle } from "lucide-react";
 import PseudoProcessor from "@/components/PseudoProcessor";
 import AdBanner from "@/components/AdBanner";
-import { useLocalizedHref } from "@/i18n/useLocalizedHref";
+import ToolBreadcrumb from "@/components/ToolBreadcrumb";
+import ToolPageFooter from "@/components/ToolPageFooter";
+import SampleButton from "@/components/SampleButton";
+import { buildSampleWordPdfResult } from "@/lib/sampleData";
 
 interface ConversionResult {
   fileName: string;
@@ -156,7 +158,6 @@ function StructuredData() {
 
 export default function WordToPDFPage() {
   const t = useTranslations("tools.wordPdf");
-  const homeHref = useLocalizedHref("/");
   const [file, setFile] = useState<File | null>(null);
   const [state, setState] = useState<"idle" | "processing" | "success" | "error">("idle");
   const [result, setResult] = useState<ConversionResult | null>(null);
@@ -263,6 +264,30 @@ export default function WordToPDFPage() {
     setError(null);
   }, []);
 
+  const handleLoadSample = useCallback(async () => {
+    setError(null);
+    setState("processing");
+    try {
+      const sample = await buildSampleWordPdfResult();
+      setFile(
+        new File([new Blob([new ArrayBuffer(0)])], sample.originalName, {
+          type:
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        }),
+      );
+      setResult({
+        fileName: sample.originalName.replace(/\.(docx|doc)$/i, ".pdf"),
+        processingTime: `${sample.elapsedMs} ms`,
+        originalSize: sample.originalSize,
+        pdfSize: sample.pdfBlob.size,
+        blob: sample.pdfBlob,
+      });
+      setState("success");
+    } catch {
+      setState("idle");
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-canvas">
       {/* SEO Structured Data */}
@@ -275,11 +300,8 @@ export default function WordToPDFPage() {
       />
 
       <div className="max-w-4xl mx-auto px-6 py-section">
-        {/* Back Link */}
-        <Link href={homeHref} className="inline-flex items-center gap-2 text-body-sm text-muted hover:text-ink mb-8 no-underline">
-          <ArrowLeft className="w-4 h-4" />
-          {t("back")}
-        </Link>
+        {/* Breadcrumb */}
+        <ToolBreadcrumb slug="word-to-pdf" />
 
         {/* Hero */}
         <div className="mb-12">
@@ -321,6 +343,13 @@ export default function WordToPDFPage() {
             {file ? formatBytes(file.size) : t("supported")}
           </p>
         </div>
+
+        {/* Sample data trigger */}
+        {!file && state === "idle" && (
+          <div className="mt-4">
+            <SampleButton onLoad={handleLoadSample} layout="block" />
+          </div>
+        )}
 
         {/* Action Button */}
         {file && state === "idle" && (
@@ -439,6 +468,8 @@ export default function WordToPDFPage() {
             ))}
           </div>
         </section>
+
+        <ToolPageFooter slug="word-to-pdf" />
       </div>
     </div>
   );
