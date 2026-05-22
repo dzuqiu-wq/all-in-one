@@ -13,6 +13,7 @@ on:
   pull_request:
     branches: ["main"]
   workflow_dispatch:
+  workflow_call:
 
 # Cancel duplicate runs on the same ref so a fresh push supersedes the
 # in-flight run instead of queueing behind it.
