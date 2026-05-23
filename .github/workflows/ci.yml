@@ -87,6 +87,12 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Configure Git to use Token for HTTPS Authenticated Fetches
+        # Prevents "could not read Username for 'https://github.com'" when pip
+        # cache restores dependencies or resolves git-based packages.
+        run: |
+          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
       - name: Setup Python 3.11
         uses: actions/setup-python@v5
         with:
