@@ -161,7 +161,11 @@ function MobileViewer({ session }: MobileViewerProps) {
       </div>
 
       {/* Message area — WeChat default chat background */}
-      <div className="flex-1 overflow-y-auto px-3 py-2" style={{ backgroundColor: "#EDEDED", backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d5d5d5' fill-opacity='0.4'%3E%3Cpath d='M0 0h20v20H0V0zm20 20h20v20H20V20z'/%3E%3C/g%3E%3C/svg%3E\")", backgroundSize: "40px 40px" }}>
+      <div className="flex-1 overflow-y-auto px-3 py-2" style={{
+        backgroundColor: "#EDEDED",
+        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='%23d5d5d5' fill-opacity='0.4'%3E%3Cpath d='M0 0h20v20H0V0zm20 20h20v20H20V20z'/%3E%3C/g%3E%3C/svg%3E")`,
+        backgroundSize: "40px 40px",
+      }}>
         {messages.length === 0 && (
           <p className="text-center text-[#B0B0B0] text-[13px] mt-12">暂无消息</p>
         )}
@@ -189,13 +193,13 @@ function MobileViewer({ session }: MobileViewerProps) {
               />
               {/* Bubble */}
               <div className={`relative max-w-[75%] px-3 py-2 ${isMe ? "bg-[#95EC69]" : "bg-white"}`} style={{ borderRadius: 6, fontSize: 15, lineHeight: "21px", color: "#000", wordBreak: "break-word" }}>
-                {/* Bubble arrow */}
+                {/* Bubble arrow — points toward the avatar */}
                 <div
                   className="absolute top-2.5 w-0 h-0"
                   style={
                     isMe
-                      ? { left: -5, borderTop: "5px solid transparent", borderBottom: "5px solid transparent", borderRight: "5px solid #95EC69" }
-                      : { right: -5, borderTop: "5px solid transparent", borderBottom: "5px solid transparent", borderLeft: "5px solid white" }
+                      ? { right: -5, borderTop: "5px solid transparent", borderBottom: "5px solid transparent", borderLeft: "5px solid #95EC69" }
+                      : { left: -5, borderTop: "5px solid transparent", borderBottom: "5px solid transparent", borderRight: "5px solid white" }
                   }
                 />
                 {msg.type === "text" && <p>{msg.content}</p>}
