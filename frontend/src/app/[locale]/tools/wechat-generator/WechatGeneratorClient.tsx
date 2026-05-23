@@ -592,21 +592,22 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
     }
   }, []);
 
-  // i18n-aware sample button text
-  const sampleBtnText = isZh ? "一键载入示例" : "Try with Sample File";
-
-  // FAQ items in both languages
-  const faqItems: FAQItem[] = isZh
-    ? [
-        { q: "我在这里放的内容会被上传吗？", a: "不会。每一张头像、每一张附图、每一条消息都只停留在你这个浏览器标签页里。图片附件通过 FileReader 读为 Base64 data URI，保存在 React state 中，直到你关闭页面；整条工具链不调任何后端。PNG 导出由 html2canvas 在本地完成，产物经 Blob URL 直接下载。" },
-        { q: "能用它伪造聊天用于法律或诈骗用途吗？", a: "不可以，我们强烈反对。这款生成器只面向设计稿、技术分享、产品评审、编辑配图等正当用途。伪造聊天截图用于欺骗、诈骗或骚扰，在多数司法管辖区都是违法行为；并且字体字距与表情渲染等视觉细节，在司法取证软件下也能被识别为伪造。请用它讲故事，不要用它欺骗别人。" },
-        { q: "大尺寸导出时头像看起来有点糊？", a: "html2canvas 会以 2 倍设备像素比对预览 DOM 做光栅化，但如果上传的头像本身是小尺寸位图，被放大后在 Retina 屏上自然会发软。想要锐利导出，请上传至少 256×256 像素的头像，或者直接使用 SVG。Mockup 本身的气泡、图标、状态栏都是矢量或纯 CSS，不受影响。" },
-      ]
-    : [
-        { q: "Is anything I drop in here uploaded to a server?", a: "No. Every avatar, attached image, and message line stays inside the current browser tab. Image attachments are read via FileReader into a Base64 data URI and kept in React state until you close the tab — no part of the toolchain calls out to any backend. The PNG export is rendered locally via html2canvas; the resulting blob is downloaded directly from a Blob URL." },
-        { q: "Can I use this to fake a chat for legal evidence?", a: "No, and we strongly advise against it. The generator is intended for design mockups, conference talks, editorial illustrations, internal product reviews, and similar legitimate use cases. Fabricating chat screenshots to deceive, defraud, or harass is illegal in most jurisdictions — and visual cues such as font kerning and emoji rendering also make crude forgeries detectable by forensic tooling. Use it for storytelling, not for misrepresentation." },
-        { q: "Why does the avatar look slightly blurry when exported at large sizes?", a: "html2canvas rasterises the preview DOM at 2× device pixel ratio, but raster avatars uploaded at small sizes will upscale and may look soft on retina displays. For sharp exports, upload an avatar at least 256×256 px, or supply an SVG. The mockup itself stays crisp regardless because the chrome elements (bubbles, icons, status bar) are vector or pure CSS." },
-      ];
+  // i18n-aware FAQ items (using t() for proper next-intl locale switching)
+  const sampleBtnText = t("sampleButton");
+  const faqItems: FAQItem[] = [
+    {
+      q: t("faq1Q"),
+      a: t("faq1A"),
+    },
+    {
+      q: t("faq2Q"),
+      a: t("faq2A"),
+    },
+    {
+      q: t("faq3Q"),
+      a: t("faq3A"),
+    },
+  ];
 
   if (!activeSession) return null;
 
