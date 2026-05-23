@@ -161,7 +161,7 @@ export default async function AboutPage({ params }: Props) {
           </p>
           <InfoSubsection heading="第一原则：把「存储」这件事从架构里抠掉">
             <p>
-              我们的七款工具里，六款不与任何服务器通信。这意味着哪怕你刻意「上传」也没有可上传到的目的地——浏览器内的 pdf-lib、Canvas、Web Workers 直接消化掉你的文件，结果以 Blob URL 形式回到你的下载目录。
+              我们的八款工具里，七款不与任何服务器通信。这意味着哪怕你刻意「上传」也没有可上传到的目的地——浏览器内的 pdf-lib、Canvas、Web Workers 直接消化掉你的文件，结果以 Blob URL 形式回到你的下载目录。
             </p>
             <p>
               剩下那一款——Word → PDF——需要服务端解析 OOXML。我们用 FastAPI + Gotenberg + LibreOffice 的内存隔离管道：文件从 Nginx 流式直入 Python BytesIO 缓冲，绝不落盘；5 秒硬超时由 <code>asyncio.wait_for</code> 强制保障；转换完成后 BytesIO 立即被 GC 回收，PDF 字节流以 StreamingResponse 直返浏览器，全程无中间文件、无落地缓存。
@@ -273,7 +273,7 @@ export default async function AboutPage({ params }: Props) {
         </p>
         <InfoSubsection heading="First principle: remove storage from the architecture itself">
           <p>
-            Six of our seven tools never communicate with any server. There is no upload destination to attack, intercept, or subpoena — pdf-lib, the Canvas API, and Web Workers handle every byte inside your browser, and the result is returned to your downloads folder as a transient Blob URL.
+            Six of our eight tools never communicate with any server. There is no upload destination to attack, intercept, or subpoena — pdf-lib, the Canvas API, and Web Workers handle every byte inside your browser, and the result is returned to your downloads folder as a transient Blob URL.
           </p>
           <p>
             The exception is Word → PDF, which requires server-side OOXML parsing. We built that path as a memory-only pipeline: the file streams from Nginx directly into a Python <code>BytesIO</code> buffer and never touches disk. A 5-second hard timeout is enforced via <code>asyncio.wait_for</code>; once the conversion completes, the buffer is dereferenced and the resulting PDF bytes flow back to the browser as a <code>StreamingResponse</code>. There is no intermediate file, no on-disk cache, and the LibreOffice subprocess is recycled after every conversion.

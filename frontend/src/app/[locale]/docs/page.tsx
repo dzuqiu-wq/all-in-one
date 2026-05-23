@@ -25,8 +25,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? "开发文档 | All-in-One Toolbox"
     : "Developer Documentation | All-in-One Toolbox";
   const description = isZh
-    ? "All-in-One Toolbox 的四款核心工具技术原理详解：Canvas 图像压缩、pdf-lib 浏览器内 PDF 处理、qrcode.react 二维码生成、Gotenberg 后端隔离流。"
-    : "Technical deep dive into the four core tools of All-in-One Toolbox: Canvas image compression, pdf-lib in-browser PDF processing, qrcode.react generation, and the Gotenberg backend isolation pipeline.";
+    ? "All-in-One Toolbox 的五款核心工具技术原理详解：Canvas 图像压缩、pdf-lib 浏览器内 PDF 处理、qrcode.react 二维码生成、Gotenberg 后端隔离流、微信聊天记录生成器。"
+    : "Technical deep dive into the five core tools of All-in-One Toolbox: Canvas image compression, pdf-lib in-browser PDF processing, qrcode.react generation, Gotenberg backend isolation pipeline, and WeChat chat history simulator.";
 
   return {
     title,
@@ -127,7 +127,7 @@ export default async function DocsPage({ params }: Props) {
       >
         <InfoSection heading="架构总览">
           <p>
-            All-in-One Toolbox 是典型的"客户端为主、服务端为辅"型应用。前端构建为 Next.js 15 App Router 项目，输出静态资源 + React Server Component 流式 HTML，由 Nginx 提供 gzip/brotli 压缩与 immutable 缓存策略。仅 Word 转 PDF 一条链路涉及后端 FastAPI 网关与 Gotenberg 渲染容器。
+            All-in-One Toolbox 是典型的"客户端为主、服务端为辅"型应用。前端构建为 Next.js 15 App Router 项目，输出静态资源 + React Server Component 流式 HTML，由 Nginx 提供 gzip/brotli 压缩与 immutable 缓存策略。仅 Word 转 PDF 一条链路涉及后端 FastAPI 网关与 Gotenberg 渲染容器。当前共五款工具。
           </p>
           <InfoCallout>
             <strong>数据流方向</strong>：浏览器 ↔ Nginx ↔ 静态资源（绝大多数请求在此处终止）。
@@ -242,6 +242,35 @@ export default async function DocsPage({ params }: Props) {
           </InfoSubsection>
         </InfoSection>
 
+        <InfoSection heading="工具 5 · WeChat 聊天记录生成器">
+          <p>
+            位于 <code>/tools/wechat-generator</code>。一款高保真双端微信聊天模拟器，提供 iPhone 移动端与三栏桌面端双视图切换。
+          </p>
+          <InfoSubsection heading="双端视图架构">
+            <ul className="list-disc pl-6 space-y-2">
+              <li><strong>移动端视图</strong>：模拟 iPhone 微信界面，包含顶部导航栏、「我」与「对方」双向气泡、发送/拍摄/相册功能入口；</li>
+              <li><strong>桌面端视图</strong>：采用三栏布局（联系人列表 + 对话区 + 详情面板），还原 PC 微信操作体验；</li>
+              <li>气泡颜色严格遵循微信官方配色：我方 <code>#95EC69</code>（绿色），对方 <code>#FFFFFF</code>（白色）；</li>
+              <li>时间戳、头像、状态文字均使用 CSS 精确定位，支持多消息并发展示。</li>
+            </ul>
+          </InfoSubsection>
+          <InfoSubsection heading="零服务器隐私机制">
+            <p>
+              所有数据处理完全在浏览器内完成。头像与图片附件通过 <code>FileReader</code> API 读取为 Base64 data URI，存入 React 状态管理器，<strong>不发送任何网络请求</strong>。PNG 导出使用 html2canvas 库在本地完成光栅化，产物经 Blob URL 直接触发下载。
+            </p>
+          </InfoSubsection>
+          <InfoSubsection heading="高清导出 (2× DPR)">
+            <p>
+              导出引擎自动使用 <code>window.devicePixelRatio × 2</code> 的画布缩放系数，对预览 DOM 执行光栅化，确保在 Retina/HiDPI 显示器上输出的 PNG 图片边缘锐利、无锯齿。建议上传至少 256×256 像素的头像以获得最佳导出效果。
+            </p>
+          </InfoSubsection>
+          <InfoSubsection heading="模板与示例数据">
+            <p>
+              提供一键填充的示例会话数据，包含模拟对话、预设头像与时间线事件，用于快速演示效果。支持自定义昵称、头像、时间范围与消息内容，可导出为故事板、会议纪要或产品演示素材。
+            </p>
+          </InfoSubsection>
+        </InfoSection>
+
         <InfoSection heading="性能预算">
           <ul className="list-disc pl-6 space-y-2">
             <li><strong>首屏 LCP</strong>（最大内容绘制）：&lt; 1.5 s（中位数）；</li>
@@ -279,7 +308,7 @@ export default async function DocsPage({ params }: Props) {
     >
       <InfoSection heading="Architecture Overview">
         <p>
-          All-in-One Toolbox is a classic "client-heavy, server-light" application. The frontend is built as a Next.js 15 App Router project, emitting static assets plus streaming React Server Component HTML, served behind Nginx with gzip/brotli compression and immutable cache policies. Only the Word-to-PDF surface involves a backend FastAPI gateway and a Gotenberg rendering container.
+          All-in-One Toolbox is a classic "client-heavy, server-light" application. The frontend is built as a Next.js 15 App Router project, emitting static assets plus streaming React Server Component HTML, served behind Nginx with gzip/brotli compression and immutable cache policies. Only the Word-to-PDF surface involves a backend FastAPI gateway and a Gotenberg rendering container. Five tools are currently available.
         </p>
         <InfoCallout>
           <strong>Data flow direction:</strong> Browser ↔ Nginx ↔ static assets (where the vast majority of requests terminate). The exceptional Word-to-PDF path: browser → Nginx → FastAPI (rate-limit + validation) → Gotenberg (LibreOffice process pool) → PDF stream returned.
@@ -387,6 +416,35 @@ export default async function DocsPage({ params }: Props) {
         <InfoSubsection heading="Rate Limiting &amp; Abuse Prevention">
           <p>
             Each IP is limited to 5 requests per minute, implemented with a Redis ZSET sliding window. Excess requests return <code>429 Too Many Requests</code> with a <code>Retry-After</code> header that tells the user the exact seconds to wait.
+          </p>
+        </InfoSubsection>
+      </InfoSection>
+
+      <InfoSection heading="Tool 5 · WeChat Chat History Generator">
+        <p>
+          Lives at <code>/tools/wechat-generator</code>. A high-fidelity dual-viewport WeChat chat simulator with iPhone mobile shell and three-column desktop mockup.
+        </p>
+        <InfoSubsection heading="Dual-Viewport Architecture">
+          <ul className="list-disc pl-6 space-y-2">
+            <li><strong>Mobile view</strong>: emulates iPhone WeChat interface, complete with top navigation bar, bi-directional sender bubbles (me vs. other), and Send/Camera/Gallery action entries;</li>
+            <li><strong>Desktop view</strong>: three-column layout (contact list + conversation pane + detail panel) for a faithful PC WeChat experience;</li>
+            <li>Bubble colors strictly follow the official WeChat palette: <code>#95EC69</code> for me (green), <code>#FFFFFF</code> for the other party (white);</li>
+            <li>Timestamps, avatars, and status text are positioned with pixel-perfect CSS, supporting multi-message concurrent display.</li>
+          </ul>
+        </InfoSubsection>
+        <InfoSubsection heading="Zero-Server Privacy Mechanism">
+          <p>
+            All data processing runs entirely in the browser. Avatars and image attachments are read via the <code>FileReader</code> API into a Base64 data URI, stored in the React state manager, and <strong>no network requests are sent</strong>. PNG export uses the html2canvas library for local rasterisation; the resulting blob is downloaded directly from a Blob URL.
+          </p>
+        </InfoSubsection>
+        <InfoSubsection heading="High-Definition Export (2× DPR)">
+          <p>
+            The export engine automatically uses a canvas scaling factor of <code>window.devicePixelRatio × 2</code> when rasterising the preview DOM, ensuring that output PNG images have sharp, alias-free edges on Retina/HiDPI displays. For the best results, upload avatars at least 256×256 px.
+          </p>
+        </InfoSubsection>
+        <InfoSubsection heading="Templates &amp; Sample Data">
+          <p>
+            One-click sample session data is provided, including mock conversations, preset avatars, and timeline events for quick demonstrations. Supports custom nicknames, avatars, date ranges, and message content — exportable as storyboards, meeting notes, or product demo assets.
           </p>
         </InfoSubsection>
       </InfoSection>

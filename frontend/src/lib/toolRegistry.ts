@@ -1,5 +1,5 @@
 /**
- * Canonical tool registry — the single source of truth for the seven tools
+ * Canonical tool registry — the single source of truth for the eight tools
  * in the matrix. Used by:
  *   - HomeContent (industrial category grid)
  *   - Breadcrumb (label & href resolution)

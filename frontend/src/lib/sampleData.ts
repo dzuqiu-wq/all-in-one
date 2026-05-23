@@ -1,6 +1,6 @@
 /**
  * Sample data fixtures and runtime generators for the "Try with Sample File"
- * empty-state button in each of the seven tools.
+ * empty-state button in each of the eight tools.
  *
  * Design principles:
  *

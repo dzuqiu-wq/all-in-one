@@ -122,7 +122,7 @@ export default {
       statement1:
         'We are a tiny independent studio. The entire revenue model is a handful of non-intrusive AdSense placements that offset the modest cost of running a single Gotenberg container.',
       statement2:
-        'Six of seven tools execute entirely inside your browser. The seventh — Word → PDF — runs through a memory-only sandbox that never writes to disk. The source is public on GitHub under MIT if you ever want to verify it line by line.',
+        'Seven of eight tools execute entirely inside your browser. The seventh — Word → PDF — runs through a memory-only sandbox that never writes to disk. The source is public on GitHub under MIT if you ever want to verify it line by line.',
       statement3:
         'We do not run analytics against your file contents. We do not maintain user accounts. The only thing we sell is the optional choice to silence the small ad slot in the footer.',
       statement4:

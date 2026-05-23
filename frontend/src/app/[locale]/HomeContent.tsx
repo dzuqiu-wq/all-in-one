@@ -264,7 +264,7 @@ export default function HomeContent() {
         <ShareButtons
           title={{
             en: "Seven privacy-first browser tools, zero upload — All-in-One Toolbox",
-            zh: "七款隐私优先的纯浏览器工具，零上传 —— All-in-One Toolbox",
+            zh: "八款隐私优先的纯浏览器工具，零上传 —— All-in-One Toolbox",
           }}
           eyebrow={{
             en: "Like the toolbox? Send it forward.",

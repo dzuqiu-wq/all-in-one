@@ -39,7 +39,7 @@ import { BASE_URL } from "@/lib/constants";
 //   6. The output count is asserted at build time via a comment block at
 //      the bottom of this file. Total SSG-indexed routes = 30:
 //        2 homepages
-//      + 7 tools × 2 locales = 14
+//      + 8 tools × 2 locales = 16
 //      + 6 static compliance pages × 2 locales = 12 (about, docs, privacy,
 //                                                   terms, cookie, changelog)
 //        ─────

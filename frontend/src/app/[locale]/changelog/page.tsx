@@ -102,6 +102,35 @@ export default async function ChangelogPage({ params }: Props) {
   const releases: ReleaseEntry[] = isZh
     ? [
         {
+          version: "v1.1.0",
+          date: "2026-05-23",
+          tag: "新工具上线",
+          tagTone: "primary",
+          headline: "第八款工具：高保真微信聊天记录生成器",
+          summary:
+            "新增 WeChat Chat History Generator，提供 iPhone 移动端与三栏桌面端双视图，完整模拟微信气泡、头像、时间戳与图片附件展示。所有数据处理零服务器，纯浏览器内完成。",
+          groups: [
+            {
+              title: "新增功能",
+              items: [
+                "高保真双端视图：iPhone 移动端模拟 + PC 三栏桌面端；",
+                "微信官方气泡配色：<code>#95EC69</code>（我方）与 <code>#FFFFFF</code>（对方）；",
+                "html2canvas 2× DPR 高清 PNG 导出；",
+                "FileReader Base64 本地头像与图片处理，零网络请求；",
+                "一键示例数据填充，快速生成演示内容。",
+              ],
+            },
+            {
+              title: "新增页面",
+              items: [
+                "微信聊天记录生成器（/tools/wechat-generator）中英双语完整支持；",
+                "开发文档新增工具 5 章节；",
+                "首页工具矩阵新增 WeChat Simulator 入口。",
+              ],
+            },
+          ],
+        },
+        {
           version: "v0.1.0",
           date: "2026-05-22",
           tag: "正式上线",
@@ -222,6 +251,35 @@ export default async function ChangelogPage({ params }: Props) {
         },
       ]
     : [
+        {
+          version: "v1.1.0",
+          date: "2026-05-23",
+          tag: "New tool",
+          tagTone: "primary",
+          headline: "Eighth tool: High-Fidelity WeChat Chat History Generator",
+          summary:
+            "Added WeChat Chat History Generator with iPhone mobile shell and three-column desktop mockup, faithfully simulating WeChat bubbles, avatars, timestamps, and image attachments. All data processing is zero-server — pure browser execution.",
+          groups: [
+            {
+              title: "New features",
+              items: [
+                "Dual-viewport: iPhone mobile simulation + PC three-column desktop;",
+                "Official WeChat bubble colors: <code>#95EC69</code> (me) and <code>#FFFFFF</code> (other);",
+                "html2canvas 2× DPR high-definition PNG export;",
+                "FileReader Base64 local avatar and image processing, zero network requests;",
+                "One-click sample data injection for quick demonstrations.",
+              ],
+            },
+            {
+              title: "New pages",
+              items: [
+                "WeChat Chat History Generator (/tools/wechat-generator) with full bilingual support;",
+                "Developer docs now includes Tool 5 section;",
+                "Homepage tool matrix adds WeChat Simulator entry.",
+              ],
+            },
+          ],
+        },
         {
           version: "v0.1.0",
           date: "2026-05-22",
