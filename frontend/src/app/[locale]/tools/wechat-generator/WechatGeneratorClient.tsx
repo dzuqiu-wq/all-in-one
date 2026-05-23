@@ -598,15 +598,22 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
   if (!activeSession) return null;
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
-      {/* Header Bar */}
-      <div className="bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] backdrop-blur-sm sticky top-0 z-50">
+    <div className="min-h-screen bg-[var(--bg-primary)]">
+      {/* Page Header - Full Width Title Block */}
+      <div className="max-w-[1600px] mx-auto px-6 pt-8 pb-6">
+        <h1 className="text-2xl font-semibold text-[var(--text-primary)] tracking-tight">{t("title")}</h1>
+        <p className="text-sm text-[var(--text-secondary)] mt-1">{t("tag")}</p>
+      </div>
+
+      {/* Action Bar - View Toggle + Actions */}
+      <div className="border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-[1600px] mx-auto px-6">
-          <div className="flex items-center justify-between h-14">
-            {/* Left: Page Title */}
-            <div>
-              <h1 className="text-base font-semibold text-[var(--text-primary)]">{t("title")}</h1>
-              <p className="text-xs text-[var(--text-secondary)]">{t("tag")}</p>
+          <div className="flex items-center justify-between h-12">
+            {/* Left: Breadcrumb hint */}
+            <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+              <span>{isZh ? "工具" : "Tool"}</span>
+              <ChevronRight className="w-3 h-3" />
+              <span className="text-[var(--text-primary)] font-medium">{t("title")}</span>
             </div>
 
             {/* Center: View Mode Toggle */}
@@ -654,10 +661,10 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Workspace - Dual Column Layout */}
       <div className="max-w-[1600px] mx-auto px-6 py-8">
-        <div className="flex gap-8">
-          {/* Left Panel - Session Info & Editor */}
+        <div className="flex gap-8 items-start">
+          {/* Left Panel - Control Cards */}
           <div className="w-[380px] flex-shrink-0 space-y-6">
             {/* Session Selector */}
             <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-subtle)] p-5 shadow-sm">
@@ -722,7 +729,7 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
                     <button
                       type="button"
                       onClick={handleResetAvatar}
-                      className="p-1.5 text-[#999] hover:text-[#1a1a1a] transition-colors"
+                      className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                       title={t("resetAvatar")}
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
@@ -730,7 +737,7 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
                   )}
                 </div>
                 {(avatarPreview || activeSession.avatar) && (
-                  <div className="mt-2 w-10 h-10 rounded-full overflow-hidden border border-[#EEE]">
+                  <div className="mt-2 w-10 h-10 rounded-full overflow-hidden border border-[var(--border-subtle)]">
                     <img
                       src={avatarPreview || activeSession.avatar}
                       alt="avatar"
@@ -840,8 +847,8 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
                           </label>
                           {imageContent && (
                             <div className="mt-2 flex items-center gap-2">
-                              <img src={imageContent} alt="preview" className="w-12 h-12 object-cover rounded-lg border border-[#EEE]" />
-                              <span className="text-xs text-[#07C160]">{t("attachedImage")}</span>
+                              <img src={imageContent} alt="preview" className="w-12 h-12 object-cover rounded-lg border border-[var(--border-subtle)]" />
+                              <span className="text-xs text-[var(--accent-green)]">{t("attachedImage")}</span>
                             </div>
                           )}
                         </div>
@@ -872,11 +879,11 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
                 {activeTab === "timeline" && (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-[#999]">{activeSession.messages.length} {isZh ? "条消息" : "messages"}</span>
+                      <span className="text-xs text-[var(--text-secondary)]">{activeSession.messages.length} {isZh ? "条消息" : "messages"}</span>
                       <button
                         type="button"
                         onClick={resetChat}
-                        className="text-xs text-[#999] hover:text-[#1a1a1a] transition-colors"
+                        className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                       >
                         {t("reset")}
                       </button>
@@ -884,7 +891,7 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
 
                     {activeSession.messages.length === 0 ? (
                       <div className="text-center py-6">
-                        <MessageCircle className="w-8 h-8 text-[#DDD] mx-auto mb-2" />
+                        <MessageCircle className="w-8 h-8 text-[var(--border-default)] mx-auto mb-2" />
                         <p className="text-xs text-[var(--text-secondary)]">{t("empty")}</p>
                       </div>
                     ) : (
@@ -944,11 +951,12 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
             </div>
           </div>
 
-          {/* Right Panel - Preview */}
-          <div className="flex-1 flex items-start justify-center sticky top-24">
+          {/* Right Panel - Live Preview */}
+          <div className="flex-1 min-h-[600px]">
             <div
               id="wechat-preview-wrapper"
               ref={previewWrapperRef}
+              className="sticky top-28"
             >
               <div className="relative">
                 {/* Decorative glow effect */}
