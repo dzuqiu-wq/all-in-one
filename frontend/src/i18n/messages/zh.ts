@@ -538,6 +538,7 @@ export default {
       viewMode: '视图',
       mobile: '移动端',
       pc: '桌面端',
+      activeSession: '当前会话',
 
       nickname: '对方昵称',
       nicknamePlaceholder: '比如：小明',
@@ -559,6 +560,7 @@ export default {
       attachImage: '附加图片（PNG / JPG）',
       attachedImage: '图片已附加',
       add: '加入时间轴',
+      sampleButton: '一键载入示例',
 
       timeline: '消息时间轴',
       empty: '还没有消息——在上方添加一条，或者一键载入示例。',

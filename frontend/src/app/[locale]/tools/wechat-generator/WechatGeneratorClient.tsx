@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import {
   ChevronLeft,
@@ -24,16 +24,31 @@ import {
 } from "lucide-react";
 import html2canvas from "html2canvas";
 import {
-  type ChatSession,
   type ChatMessage,
   type ViewMode,
   type MessageSender,
   type MessageType,
-  createEmptyChatSession,
   DEFAULT_AVATAR_PLACEHOLDER,
   ME_AVATAR_PLACEHOLDER,
 } from "@/lib/wechatTypes";
 import { getWechatSample } from "@/lib/sampleData";
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+interface ChatSession {
+  id: string;
+  nickname: string;
+  avatar: string;
+  messages: ChatMessage[];
+}
+
+function newId(): string {
+  return typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : `id-${Math.random().toString(36).slice(2, 10)}`;
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -48,10 +63,17 @@ function readFileAsDataUrl(file: File): Promise<string> {
   });
 }
 
-function newId(): string {
-  return typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-    ? crypto.randomUUID()
-    : `id-${Math.random().toString(36).slice(2, 10)}`;
+function createDefaultSessions(): ChatSession[] {
+  return [
+    { id: newId(), nickname: "Friend", avatar: DEFAULT_AVATAR_PLACEHOLDER, messages: [] },
+    { id: newId(), nickname: "Alex", avatar: DEFAULT_AVATAR_PLACEHOLDER, messages: [] },
+    { id: newId(), nickname: "Taylor", avatar: DEFAULT_AVATAR_PLACEHOLDER, messages: [] },
+    { id: newId(), nickname: "Jordan", avatar: DEFAULT_AVATAR_PLACEHOLDER, messages: [] },
+  ];
+}
+
+function createEmptySession(): ChatSession {
+  return { id: newId(), nickname: "", avatar: DEFAULT_AVATAR_PLACEHOLDER, messages: [] };
 }
 
 // ---------------------------------------------------------------------------
@@ -102,18 +124,15 @@ function MobileViewer({ session }: MobileViewerProps) {
       <div className="h-7 bg-black flex items-center justify-between px-4 text-white text-body-xs font-medium">
         <span className="w-12 text-left">9:41</span>
         <div className="flex items-center gap-1.5">
-          {/* Signal bars */}
           <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor">
             <rect x="0" y="8" width="2.5" height="4" rx="0.5" />
             <rect x="3.5" y="5" width="2.5" height="7" rx="0.5" />
             <rect x="7" y="2" width="2.5" height="10" rx="0.5" />
             <rect x="10.5" y="0" width="2.5" height="12" rx="0.5" />
           </svg>
-          {/* WiFi */}
           <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor">
             <path d="M8 10a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM8 0l6 7.5H2L8 0z" />
           </svg>
-          {/* Battery */}
           <svg width="20" height="12" viewBox="0 0 20 12" fill="currentColor">
             <rect x="0" y="1" width="16" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none" />
             <rect x="17" y="4" width="2" height="4" rx="0.5" fill="currentColor" />
@@ -125,7 +144,7 @@ function MobileViewer({ session }: MobileViewerProps) {
       {/* Header */}
       <div className="bg-[#EDEDED] border-b border-[#D8D8D8] h-11 flex items-center justify-between px-3">
         <ChevronLeft className="w-5 h-5 text-ink" />
-        <span className="text-title-sm font-medium text-ink">{nickname}</span>
+        <span className="text-title-sm font-medium text-ink">{nickname || "Chat"}</span>
         <MoreHorizontal className="w-5 h-5 text-ink" />
       </div>
 
@@ -152,7 +171,6 @@ function MobileViewer({ session }: MobileViewerProps) {
                       <img src={msg.content} alt="" className="max-w-[200px] rounded" />
                     )}
                   </div>
-                  {/* Tail triangle */}
                   <div
                     className="absolute right-[-6px] top-[10px] w-0 h-0"
                     style={{
@@ -179,7 +197,6 @@ function MobileViewer({ session }: MobileViewerProps) {
                     <img src={msg.content} alt="" className="max-w-[200px] rounded" />
                   )}
                 </div>
-                {/* Tail triangle */}
                 <div
                   className="absolute left-[-6px] top-[10px] w-0 h-0"
                   style={{
@@ -212,11 +229,16 @@ function MobileViewer({ session }: MobileViewerProps) {
 // ---------------------------------------------------------------------------
 
 interface PcViewerProps {
-  session: ChatSession;
+  sessions: ChatSession[];
+  activeSessionId: string;
+  onSessionSelect: (id: string) => void;
 }
 
-function PcViewer({ session }: PcViewerProps) {
-  const { nickname, avatar, messages } = session;
+function PcViewer({ sessions, activeSessionId, onSessionSelect }: PcViewerProps) {
+  const activeSession = sessions.find((s) => s.id === activeSessionId) ?? sessions[0];
+  if (!activeSession) return null;
+
+  const { nickname, avatar, messages } = activeSession;
 
   return (
     <div className="min-w-[600px] w-full aspect-[4/3] bg-[#F5F5F5] border border-gray-300 shadow-xl flex rounded-md overflow-hidden">
@@ -230,7 +252,7 @@ function PcViewer({ session }: PcViewerProps) {
         </div>
       </div>
 
-      {/* Middle Queue */}
+      {/* Middle Queue — Contact List */}
       <div className="w-48 bg-[#E6E5E5] border-r border-gray-300 flex flex-col">
         <div className="p-3 border-b border-gray-300">
           <div className="bg-white rounded-md px-3 py-1.5 flex items-center gap-2">
@@ -239,18 +261,27 @@ function PcViewer({ session }: PcViewerProps) {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
-          {/* Active session item */}
-          <div className="px-3 py-2 bg-white border-l-2 border-[#07C160]">
-            <p className="text-title-xs font-medium text-ink truncate">{nickname}</p>
-            <p className="text-body-xs text-muted truncate">Last message...</p>
-          </div>
-          {/* Placeholder items */}
-          {["Alex", "Taylor", "Jordan"].map((name) => (
-            <div key={name} className="px-3 py-2 hover:bg-[#D8D8D8] cursor-pointer">
-              <p className="text-title-xs font-medium text-ink truncate">{name}</p>
-              <p className="text-body-xs text-muted truncate">Click to chat</p>
-            </div>
-          ))}
+          {sessions.map((s) => {
+            const isActive = s.id === activeSessionId;
+            return (
+              <div
+                key={s.id}
+                onClick={() => onSessionSelect(s.id)}
+                className={`px-3 py-2 cursor-pointer transition-colors ${
+                  isActive
+                    ? "bg-white border-l-2 border-[#07C160]"
+                    : "hover:bg-[#D8D8D8] border-l-2 border-transparent"
+                }`}
+              >
+                <p className="text-title-xs font-medium text-ink truncate">{s.nickname}</p>
+                <p className="text-body-xs text-muted truncate">
+                  {s.messages.length > 0
+                    ? s.messages[s.messages.length - 1].content.slice(0, 20) + "…"
+                    : "Click to chat"}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -259,7 +290,7 @@ function PcViewer({ session }: PcViewerProps) {
         {/* Header */}
         <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-2">
           <div className="w-2 h-2 bg-[#07C160] rounded-full" />
-          <span className="text-title-sm font-medium text-ink">{nickname}</span>
+          <span className="text-title-sm font-medium text-ink">{nickname || "Chat"}</span>
         </div>
 
         {/* Messages */}
@@ -351,7 +382,11 @@ export default function WechatGeneratorClient() {
   const t = useTranslations("tools.wechatGenerator");
   const locale = useLocale();
 
-  const [session, setSession] = useState<ChatSession>(() => createEmptyChatSession());
+  // Multi-session state
+  const [sessions, setSessions] = useState<ChatSession[]>(createDefaultSessions);
+  const [activeSessionId, setActiveSessionId] = useState<string>(sessions[0].id);
+  const [viewMode, setViewMode] = useState<ViewMode>("mobile");
+
   const previewWrapperRef = useRef<HTMLDivElement>(null);
 
   // Editor state
@@ -362,53 +397,77 @@ export default function WechatGeneratorClient() {
   const [timeContent, setTimeContent] = useState("");
   const [isExporting, setIsExporting] = useState(false);
 
-  // Avatar local state (preview before committing)
+  // Avatar local state
   const [avatarPreview, setAvatarPreview] = useState<string>("");
 
-  // Actions
+  // Derive active session
+  const activeSession = useMemo(
+    () => sessions.find((s) => s.id === activeSessionId) ?? sessions[0],
+    [sessions, activeSessionId]
+  );
+
+  // Actions that operate on active session
   const addMessage = useCallback((msg: ChatMessage) => {
-    setSession((prev) => ({ ...prev, messages: [...prev.messages, msg] }));
-  }, []);
+    setSessions((prev) =>
+      prev.map((s) =>
+        s.id === activeSessionId
+          ? { ...s, messages: [...s.messages, msg] }
+          : s
+      )
+    );
+  }, [activeSessionId]);
 
   const removeMessage = useCallback((id: string) => {
-    setSession((prev) => ({
-      ...prev,
-      messages: prev.messages.filter((m) => m.id !== id),
-    }));
-  }, []);
+    setSessions((prev) =>
+      prev.map((s) =>
+        s.id === activeSessionId
+          ? { ...s, messages: s.messages.filter((m) => m.id !== id) }
+          : s
+      )
+    );
+  }, [activeSessionId]);
 
   const moveMessage = useCallback((id: string, direction: "up" | "down") => {
-    setSession((prev) => {
-      const idx = prev.messages.findIndex((m) => m.id === id);
-      if (idx === -1) return prev;
-      const newIdx = direction === "up" ? idx - 1 : idx + 1;
-      if (newIdx < 0 || newIdx >= prev.messages.length) return prev;
-      const msgs = [...prev.messages];
-      [msgs[idx], msgs[newIdx]] = [msgs[newIdx], msgs[idx]];
-      return { ...prev, messages: msgs };
-    });
-  }, []);
+    setSessions((prev) =>
+      prev.map((s) => {
+        if (s.id !== activeSessionId) return s;
+        const idx = s.messages.findIndex((m) => m.id === id);
+        if (idx === -1) return s;
+        const newIdx = direction === "up" ? idx - 1 : idx + 1;
+        if (newIdx < 0 || newIdx >= s.messages.length) return s;
+        const msgs = [...s.messages];
+        [msgs[idx], msgs[newIdx]] = [msgs[newIdx], msgs[idx]];
+        return { ...s, messages: msgs };
+      })
+    );
+  }, [activeSessionId]);
 
   const updateNickname = useCallback((nickname: string) => {
-    setSession((prev) => ({ ...prev, nickname }));
-  }, []);
+    setSessions((prev) =>
+      prev.map((s) => (s.id === activeSessionId ? { ...s, nickname } : s))
+    );
+  }, [activeSessionId]);
 
   const updateAvatar = useCallback((avatar: string) => {
-    setSession((prev) => ({ ...prev, avatar }));
+    setSessions((prev) =>
+      prev.map((s) => (s.id === activeSessionId ? { ...s, avatar } : s))
+    );
     setAvatarPreview("");
-  }, []);
-
-  const setViewMode = useCallback((viewMode: ViewMode) => {
-    setSession((prev) => ({ ...prev, viewMode }));
-  }, []);
+  }, [activeSessionId]);
 
   const resetChat = useCallback(() => {
-    setSession(createEmptyChatSession());
+    setSessions((prev) =>
+      prev.map((s) =>
+        s.id === activeSessionId
+          ? { ...s, messages: [], avatar: DEFAULT_AVATAR_PLACEHOLDER }
+          : s
+      )
+    );
     setAvatarPreview("");
     setTextContent("");
     setImageContent("");
     setTimeContent("");
-  }, []);
+  }, [activeSessionId]);
 
   const handleAddMessage = useCallback(() => {
     if (msgType === "text" && !textContent.trim()) return;
@@ -434,12 +493,14 @@ export default function WechatGeneratorClient() {
 
   const handleLoadSample = useCallback(() => {
     const sample = getWechatSample(locale === "zh" ? "zh" : "en");
-    setSession((prev) => ({
-      ...prev,
-      nickname: sample.nickname,
-      messages: sample.messages,
-    }));
-  }, [locale]);
+    setSessions((prev) =>
+      prev.map((s) =>
+        s.id === activeSessionId
+          ? { ...s, nickname: sample.nickname, messages: sample.messages }
+          : s
+      )
+    );
+  }, [locale, activeSessionId]);
 
   const handleAvatarChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -481,19 +542,27 @@ export default function WechatGeneratorClient() {
     }
   }, []);
 
+  // i18n with fallback for sampleButton
+  const sampleBtnText = t("sampleButton", { defaultValue: locale === "zh" ? "一键载入示例" : "Try with Sample File" });
+
+  if (!activeSession) return null;
+
   return (
     <div className="min-h-screen bg-canvas">
       <div className="max-w-7xl mx-auto px-6 py-section">
+        {/* Page Header */}
         <div className="mb-8">
           <div className="caption-upper text-muted mb-4">{t("tag")}</div>
           <h1 className="text-display-lg font-serif text-ink mb-4">{t("title")}</h1>
           <p className="text-title-md text-body max-w-2xl leading-relaxed">{t("description")}</p>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Left Control Panel */}
-          <div className="w-full lg:max-w-sm space-y-6 overflow-y-auto max-h-[calc(100vh-200px)] pr-2">
-            {/* General Configuration */}
+        {/* Workspace Split: Left Controls | Right Preview */}
+        <div className="grid grid-cols-12 gap-6">
+          {/* Left Column — Control Panel (col-span-12 lg:col-span-5) */}
+          <div className="col-span-12 lg:col-span-5 space-y-6 overflow-y-auto max-h-[calc(100vh-220px)] pr-2">
+
+            {/* Card 1: View Mode + Active Session Profile */}
             <div className="surface-card rounded-xl p-lg space-y-5">
               <h2 className="text-title-sm font-medium text-ink">{t("generalConfig")}</h2>
 
@@ -505,10 +574,33 @@ export default function WechatGeneratorClient() {
                     { value: "mobile", label: t("mobile") },
                     { value: "pc", label: t("pc") },
                   ]}
-                  value={session.viewMode}
+                  value={viewMode}
                   onChange={setViewMode}
                 />
               </div>
+
+              {/* Session Selector (PC mode only) */}
+              {viewMode === "pc" && (
+                <div>
+                  <label className="caption-upper text-muted-soft block mb-2">{t("activeSession")}</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {sessions.map((s) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => setActiveSessionId(s.id)}
+                        className={`px-3 py-2 rounded-md text-body-sm font-medium transition-all ${
+                          s.id === activeSessionId
+                            ? "bg-[#07C160] text-white"
+                            : "bg-canvas border border-hairline text-ink hover:border-primary"
+                        }`}
+                      >
+                        {s.nickname}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Nickname + Avatar Side-by-Side */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -517,7 +609,7 @@ export default function WechatGeneratorClient() {
                   <label className="caption-upper text-muted-soft block mb-2">{t("nickname")}</label>
                   <input
                     type="text"
-                    value={session.nickname}
+                    value={activeSession.nickname}
                     onChange={(e) => updateNickname(e.target.value)}
                     placeholder={t("nicknamePlaceholder")}
                     className="w-full px-3 py-2 surface-card border border-hairline rounded-md text-body-sm text-ink focus:border-primary focus:outline-none"
@@ -538,7 +630,7 @@ export default function WechatGeneratorClient() {
                         className="sr-only"
                       />
                     </label>
-                    {(avatarPreview || session.avatar) && (
+                    {(avatarPreview || activeSession.avatar) && (
                       <button
                         type="button"
                         onClick={handleResetAvatar}
@@ -549,10 +641,10 @@ export default function WechatGeneratorClient() {
                       </button>
                     )}
                   </div>
-                  {(avatarPreview || session.avatar) && (
+                  {(avatarPreview || activeSession.avatar) && (
                     <div className="mt-3 w-12 h-12 rounded-full overflow-hidden border border-hairline">
                       <img
-                        src={avatarPreview || session.avatar}
+                        src={avatarPreview || activeSession.avatar}
                         alt="avatar preview"
                         className="w-full h-full object-cover"
                       />
@@ -563,7 +655,7 @@ export default function WechatGeneratorClient() {
               </div>
             </div>
 
-            {/* Message Editor */}
+            {/* Card 2: Message Editor */}
             <div className="surface-card rounded-xl p-lg space-y-5">
               <h2 className="text-title-sm font-medium text-ink">{t("messageEditor")}</h2>
 
@@ -637,7 +729,7 @@ export default function WechatGeneratorClient() {
                 )}
               </div>
 
-              {/* Add Button */}
+              {/* Coral Add Button */}
               <button
                 type="button"
                 onClick={handleAddMessage}
@@ -653,25 +745,25 @@ export default function WechatGeneratorClient() {
                 className="w-full py-2.5 bg-surface-cream-strong text-primary text-body-sm font-medium rounded-md border border-primary/30 hover:bg-primary/10 transition-colors flex items-center justify-center gap-2"
               >
                 <FolderOpen className="w-4 h-4" />
-                {t("sampleButton")}
+                {sampleBtnText}
               </button>
             </div>
 
-            {/* Timeline */}
+            {/* Card 3: Timeline */}
             <div className="surface-card rounded-xl p-lg space-y-4">
               <h2 className="text-title-sm font-medium text-ink">{t("timeline")}</h2>
 
-              {session.messages.length === 0 ? (
+              {activeSession.messages.length === 0 ? (
                 <p className="text-body-sm text-muted text-center py-4">{t("empty")}</p>
               ) : (
                 <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {session.messages.map((msg, idx) => (
+                  {activeSession.messages.map((msg, idx) => (
                     <div
                       key={msg.id}
                       className="flex items-center gap-2 p-2 bg-canvas rounded-md border border-hairline"
                     >
                       <img
-                        src={msg.sender === "me" ? ME_AVATAR_PLACEHOLDER : (session.avatar || DEFAULT_AVATAR_PLACEHOLDER)}
+                        src={msg.sender === "me" ? ME_AVATAR_PLACEHOLDER : (activeSession.avatar || DEFAULT_AVATAR_PLACEHOLDER)}
                         alt=""
                         className="w-6 h-6 rounded-full object-cover flex-shrink-0"
                       />
@@ -697,7 +789,7 @@ export default function WechatGeneratorClient() {
                         <button
                           type="button"
                           onClick={() => moveMessage(msg.id, "down")}
-                          disabled={idx === session.messages.length - 1}
+                          disabled={idx === activeSession.messages.length - 1}
                           className="p-1 text-muted hover:text-ink transition-colors disabled:opacity-30"
                           title={t("moveDown")}
                         >
@@ -749,13 +841,17 @@ export default function WechatGeneratorClient() {
             </div>
           </div>
 
-          {/* Right Live Preview Area */}
-          <div className="flex-1 flex items-start justify-center">
+          {/* Right Column — Live Preview (col-span-12 lg:col-span-7) */}
+          <div className="col-span-12 lg:col-span-7 flex items-start justify-center">
             <div id="wechat-preview-wrapper" ref={previewWrapperRef}>
-              {session.viewMode === "mobile" ? (
-                <MobileViewer session={session} />
+              {viewMode === "mobile" ? (
+                <MobileViewer session={activeSession} />
               ) : (
-                <PcViewer session={session} />
+                <PcViewer
+                  sessions={sessions}
+                  activeSessionId={activeSessionId}
+                  onSessionSelect={setActiveSessionId}
+                />
               )}
             </div>
           </div>

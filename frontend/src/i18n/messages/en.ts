@@ -540,6 +540,7 @@ export default {
       viewMode: 'Layout',
       mobile: 'Mobile',
       pc: 'Desktop',
+      activeSession: 'Active chat',
 
       nickname: 'Other party nickname',
       nicknamePlaceholder: 'e.g. Alex Chen',
@@ -561,6 +562,7 @@ export default {
       attachImage: 'Attach image (PNG/JPG)',
       attachedImage: 'Image attached',
       add: 'Add to timeline',
+      sampleButton: 'Try with Sample File',
 
       timeline: 'Timeline',
       empty: 'No messages yet — add one above, or load a sample.',
