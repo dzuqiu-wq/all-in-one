@@ -1,5 +1,5 @@
 // Supported encoding types
-export type EncodingType = 'utf-8' | 'gbk' | 'gb2312' | 'windows-1252' | 'auto';
+export type EncodingType = 'utf-8' | 'utf-16be' | 'utf-16le' | 'gbk' | 'gb2312' | 'windows-1252' | 'auto';
 
 // Supported export formats
 export type ExportFormat = 'xlsx' | 'csv' | 'json' | 'markdown';

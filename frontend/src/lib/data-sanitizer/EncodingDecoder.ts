@@ -66,14 +66,14 @@ export class EncodingDecoder {
       // UTF-16 BOMs
       if (bytes[0] === 0xFE && bytes[1] === 0xFF) {
         return {
-          encoding: 'utf-8',
+          encoding: 'utf-16be',
           confidence: 0.9,
           reasons: ['UTF-16 BE BOM detected'],
         };
       }
       if (bytes[0] === 0xFF && bytes[1] === 0xFE) {
         return {
-          encoding: 'utf-8',
+          encoding: 'utf-16le',
           confidence: 0.9,
           reasons: ['UTF-16 LE BOM detected'],
         };
@@ -200,6 +200,10 @@ export class EncodingDecoder {
     switch (encoding) {
       case 'utf-8':
         return 'utf-8';
+      case 'utf-16be':
+        return 'utf-16be';
+      case 'utf-16le':
+        return 'utf-16le';
       case 'gbk':
         return 'gbk';
       case 'gb2312':
@@ -279,8 +283,10 @@ export class EncodingDecoder {
       }
     }
 
-    const unreasonableBlocks = text.match(/[ -ÿ]+/g) || [];
-    for (const block of unreasonableBlocks) {
+    // Match isolated unprintable control chars (except common whitespace),
+    // replacement characters (U+FFFD), and invalid UTF-8 surrogate halves
+    const mojibakeBlocks = text.match(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F�\uD800-\uDFFF]+/g) || [];
+    for (const block of mojibakeBlocks) {
       corruptedCount += block.length;
     }
 

@@ -51,7 +51,7 @@ services:
     # NO host ports - only accessible via Nginx
     environment:
       - NEXT_PUBLIC_API_URL=http://backend:8000
-      - NODE_ENV=development
+      - NODE_ENV=production
     volumes:
       - ./frontend:/app
       - /app/node_modules
