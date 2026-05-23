@@ -170,55 +170,32 @@ function MobileViewer({ session }: MobileViewerProps) {
               </div>
             );
           }
-          if (msg.sender === "me") {
-            return (
-              <div key={msg.id} className="flex justify-end mr-2">
-                <div className="relative max-w-[70%]">
-                  <img
-                    src={myAvatar || ME_AVATAR_PLACEHOLDER}
-                    alt=""
-                    className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-1"
-                  />
-                </div>
-                <div className="relative max-w-[70%] ml-2">
-                  <div className="bg-[#95EC69] text-[#191919] rounded-[4px] p-2 pr-6">
-                    {msg.type === "text" && <p className="text-body-sm break-words">{msg.content}</p>}
-                    {msg.type === "image" && msg.content && (
-                      <img src={msg.content} alt="" className="max-w-[200px] rounded" />
-                    )}
-                  </div>
-                  <div
-                    className="absolute right-[-6px] top-[10px] w-0 h-0"
-                    style={{
-                      borderLeft: "6px solid #95EC69",
-                      borderTop: "4px solid transparent",
-                      borderBottom: "4px solid transparent",
-                    }}
-                  />
-                </div>
-              </div>
-            );
-          }
+          const isMe = msg.sender === "me";
+          const msgAvatar = isMe ? (myAvatar || ME_AVATAR_PLACEHOLDER) : (avatar || DEFAULT_AVATAR_PLACEHOLDER);
           return (
-            <div key={msg.id} className="flex justify-start ml-2">
+            <div
+              key={msg.id}
+              className={`flex ${isMe ? "flex-row-reverse" : "flex-row"} items-start gap-2 ${isMe ? "mr-2" : "ml-2"}`}
+            >
               <img
-                src={avatar || DEFAULT_AVATAR_PLACEHOLDER}
+                src={msgAvatar}
                 alt=""
                 className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-1"
               />
-              <div className="relative max-w-[70%] ml-2">
-                <div className="bg-white text-[#191919] rounded-[4px] p-2">
+              <div className="relative max-w-[70%]">
+                <div className={`${isMe ? "bg-[#95EC69] text-[#191919]" : "bg-white text-[#191919]"} rounded-[4px] p-2 ${isMe ? "pr-6" : "pl-6"}`}>
                   {msg.type === "text" && <p className="text-body-sm break-words">{msg.content}</p>}
                   {msg.type === "image" && msg.content && (
                     <img src={msg.content} alt="" className="max-w-[200px] rounded" />
                   )}
                 </div>
                 <div
-                  className="absolute left-[-6px] top-[10px] w-0 h-0"
+                  className="absolute top-[10px] w-0 h-0"
                   style={{
-                    borderRight: "6px solid white",
-                    borderTop: "4px solid transparent",
-                    borderBottom: "4px solid transparent",
+                    ...(isMe
+                      ? { left: "-6px", borderRight: "6px solid #95EC69", borderTop: "4px solid transparent", borderBottom: "4px solid transparent" }
+                      : { right: "-6px", borderLeft: "6px solid white", borderTop: "4px solid transparent", borderBottom: "4px solid transparent" }
+                    ),
                   }}
                 />
               </div>
@@ -320,53 +297,32 @@ function PcViewer({ sessions, activeSessionId, onSessionSelect }: PcViewerProps)
                 </div>
               );
             }
-            if (msg.sender === "me") {
-              return (
-                <div key={msg.id} className="flex justify-end">
-                  <img
-                    src={myAvatar || ME_AVATAR_PLACEHOLDER}
-                    alt=""
-                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                  />
-                  <div className="relative max-w-[65%] ml-2">
-                    <div className="bg-[#95EC69] text-[#191919] rounded-[4px] p-2 pr-7">
-                      {msg.type === "text" && <p className="text-body-sm break-words">{msg.content}</p>}
-                      {msg.type === "image" && msg.content && (
-                        <img src={msg.content} alt="" className="max-w-[180px] rounded" />
-                      )}
-                    </div>
-                    <div
-                      className="absolute right-[-5px] top-[8px] w-0 h-0"
-                      style={{
-                        borderLeft: "5px solid #95EC69",
-                        borderTop: "3px solid transparent",
-                        borderBottom: "3px solid transparent",
-                      }}
-                    />
-                  </div>
-                </div>
-              );
-            }
+            const isMe = msg.sender === "me";
+            const msgAvatar = isMe ? (myAvatar || ME_AVATAR_PLACEHOLDER) : (avatar || DEFAULT_AVATAR_PLACEHOLDER);
             return (
-              <div key={msg.id} className="flex justify-start">
+              <div
+                key={msg.id}
+                className={`flex ${isMe ? "flex-row-reverse" : "flex-row"} items-start gap-2`}
+              >
                 <img
-                  src={avatar || DEFAULT_AVATAR_PLACEHOLDER}
+                  src={msgAvatar}
                   alt=""
                   className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                 />
-                <div className="relative max-w-[65%] ml-2">
-                  <div className="bg-white text-[#191919] rounded-[4px] p-2">
+                <div className="relative max-w-[65%]">
+                  <div className={`${isMe ? "bg-[#95EC69] text-[#191919]" : "bg-white text-[#191919]"} rounded-[4px] p-2 ${isMe ? "pr-7" : "pl-7"}`}>
                     {msg.type === "text" && <p className="text-body-sm break-words">{msg.content}</p>}
                     {msg.type === "image" && msg.content && (
                       <img src={msg.content} alt="" className="max-w-[180px] rounded" />
                     )}
                   </div>
                   <div
-                    className="absolute left-[-5px] top-[8px] w-0 h-0"
+                    className="absolute top-[8px] w-0 h-0"
                     style={{
-                      borderRight: "5px solid white",
-                      borderTop: "3px solid transparent",
-                      borderBottom: "3px solid transparent",
+                      ...(isMe
+                        ? { left: "-5px", borderRight: "5px solid #95EC69", borderTop: "3px solid transparent", borderBottom: "3px solid transparent" }
+                        : { right: "-5px", borderLeft: "5px solid white", borderTop: "3px solid transparent", borderBottom: "3px solid transparent" }
+                      ),
                     }}
                   />
                 </div>
