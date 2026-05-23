@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,6 +10,36 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Theme Colors (Light/Dark adaptive)
+        // These tokens work with Tailwind dark: prefix and CSS custom properties
+        theme: {
+          bg: {
+            primary: "var(--bg-primary, #faf9f5)",
+            secondary: "var(--bg-secondary, #f5f0e8)",
+            tertiary: "var(--bg-tertiary, #efe9de)",
+            inverse: "var(--bg-inverse, #181715)",
+          },
+          text: {
+            primary: "var(--text-primary, #141413)",
+            secondary: "var(--text-secondary, #3d3d3a)",
+            tertiary: "var(--text-tertiary, #6c6a64)",
+            inverse: "var(--text-inverse, #faf9f5)",
+            muted: "var(--text-muted, #8e8b82)",
+          },
+          border: {
+            primary: "var(--border-primary, #e6dfd8)",
+            secondary: "var(--border-secondary, #ebe6df)",
+          },
+          accent: {
+            primary: "var(--accent-primary, #cc785c)",
+            hover: "var(--accent-hover, #a9583e)",
+            soft: "var(--accent-soft, rgba(204, 120, 92, 0.15))",
+          },
+          surface: {
+            elevated: "var(--surface-elevated, #ffffff)",
+            overlay: "var(--surface-overlay, rgba(20, 20, 19, 0.5))",
+          },
+        },
         // Claude Brand Colors
         primary: {
           DEFAULT: "#cc785c",

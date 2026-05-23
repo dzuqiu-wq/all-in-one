@@ -96,16 +96,16 @@ interface PillToggleProps<T extends string> {
 
 function PillToggle<T extends string>({ options, value, onChange }: PillToggleProps<T>) {
   return (
-    <div className="inline-flex bg-[#F5F5F5] rounded-lg p-0.5">
+    <div className="inline-flex bg-[var(--bg-elevated)] rounded-xl p-1 shadow-sm">
       {options.map((opt) => (
         <button
           key={opt.value}
           type="button"
           onClick={() => onChange(opt.value)}
-          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-150 ${
+          className={`px-4 py-2 text-xs font-medium rounded-lg transition-all duration-200 ${
             value === opt.value
-              ? "bg-white text-[#1a1a1a] shadow-sm"
-              : "text-[#666] hover:text-[#1a1a1a]"
+              ? "bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm border border-[var(--border-subtle)]"
+              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
           }`}
         >
           {opt.label}
@@ -394,22 +394,22 @@ function FAQAccordion({ items }: { items: FAQItem[] }) {
   return (
     <div className="space-y-1">
       {items.map((item, idx) => (
-        <div key={idx} className="border-b border-[#eee] last:border-0">
+        <div key={idx} className="border-b border-[var(--border-subtle)] last:border-0">
           <button
             type="button"
             onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
-            className="w-full flex items-center justify-between py-4 text-left hover:text-[#07C160] transition-colors"
+            className="w-full flex items-center justify-between py-4 text-left hover:text-[var(--accent-violet)] transition-colors group"
           >
-            <span className="text-sm text-[#1a1a1a] font-medium pr-4">{item.q}</span>
+            <span className="text-sm text-[var(--text-primary)] font-medium pr-4 group-hover:text-[var(--accent-violet)]">{item.q}</span>
             <ChevronRight
-              className={`w-4 h-4 text-[#999] transition-transform duration-200 flex-shrink-0 ${
+              className={`w-4 h-4 text-[var(--text-secondary)] transition-all duration-200 flex-shrink-0 group-hover:text-[var(--accent-violet)] ${
                 openIndex === idx ? "rotate-90" : ""
               }`}
             />
           </button>
           {openIndex === idx && (
             <div className="pb-4 -mt-1">
-              <p className="text-sm text-[#666] leading-relaxed">{item.a}</p>
+              <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{item.a}</p>
             </div>
           )}
         </div>
@@ -600,13 +600,13 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       {/* Header Bar */}
-      <div className="bg-white border-b border-[#E5E5E5] sticky top-0 z-50">
+      <div className="bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-[1600px] mx-auto px-6">
           <div className="flex items-center justify-between h-14">
             {/* Left: Page Title */}
             <div>
-              <h1 className="text-base font-semibold text-[#1a1a1a]">{t("title")}</h1>
-              <p className="text-xs text-[#999]">{t("tag")}</p>
+              <h1 className="text-base font-semibold text-[var(--text-primary)]">{t("title")}</h1>
+              <p className="text-xs text-[var(--text-secondary)]">{t("tag")}</p>
             </div>
 
             {/* Center: View Mode Toggle */}
@@ -626,7 +626,7 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
               <button
                 type="button"
                 onClick={handleLoadSample}
-                className="px-3 py-1.5 text-xs font-medium text-[#666] hover:text-[#1a1a1a] hover:bg-[#F5F5F5] rounded-md transition-colors flex items-center gap-1.5"
+                className="px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-lg transition-colors flex items-center gap-1.5"
               >
                 <FolderOpen className="w-3.5 h-3.5" />
                 {t("sampleButton")}
@@ -635,7 +635,7 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
                 type="button"
                 onClick={handleExportPng}
                 disabled={isExporting}
-                className="px-3 py-1.5 text-xs font-medium bg-[#07C160] text-white hover:bg-[#06a055] rounded-md transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                className="px-3 py-1.5 text-xs font-medium bg-[var(--text-primary)] text-[var(--bg-primary)] hover:opacity-90 rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50"
               >
                 {isExporting ? (
                   <>
@@ -655,15 +655,15 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
       </div>
 
       {/* Main Content */}
-      <div className="max-w-[1600px] mx-auto px-6 py-6">
-        <div className="flex gap-6">
+      <div className="max-w-[1600px] mx-auto px-6 py-8">
+        <div className="flex gap-8">
           {/* Left Panel - Session Info & Editor */}
-          <div className="w-[320px] flex-shrink-0 space-y-4">
+          <div className="w-[380px] flex-shrink-0 space-y-6">
             {/* Session Selector */}
-            <div className="bg-white rounded-xl border border-[#E5E5E5] p-4">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium text-[#1a1a1a]">{t("activeSession")}</span>
-                <span className="text-xs text-[#999]">{activeSession.nickname}</span>
+            <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-subtle)] p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-medium text-[var(--text-primary)]">{t("activeSession")}</span>
+                <span className="text-xs text-[var(--text-secondary)]">{activeSession.nickname}</span>
               </div>
               {viewMode === "pc" && (
                 <div className="grid grid-cols-2 gap-1.5">
@@ -674,8 +674,8 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
                       onClick={() => setActiveSessionId(s.id)}
                       className={`px-2 py-1.5 text-xs rounded-md transition-all truncate ${
                         s.id === activeSessionId
-                          ? "bg-[#07C160] text-white"
-                          : "bg-[#F5F5F5] text-[#666] hover:bg-[#EEE]"
+                          ? "bg-[var(--accent-green)] text-white shadow-sm"
+                          : "bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
                       }`}
                     >
                       {s.nickname || `${idx + 1}`}
@@ -686,29 +686,29 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
             </div>
 
             {/* Profile Card */}
-            <div className="bg-white rounded-xl border border-[#E5E5E5] p-4 space-y-4">
-              <div className="flex items-center gap-2 text-xs font-medium text-[#1a1a1a]">
-                <Settings2 className="w-3.5 h-3.5 text-[#999]" />
+            <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-subtle)] p-5 space-y-5 shadow-sm">
+              <div className="flex items-center gap-2 text-xs font-medium text-[var(--text-primary)]">
+                <Settings2 className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
                 <span>{t("generalConfig")}</span>
               </div>
 
               {/* Nickname */}
               <div>
-                <label className="block text-xs text-[#999] mb-1.5">{t("nickname")}</label>
+                <label className="block text-xs text-[var(--text-secondary)] mb-1.5">{t("nickname")}</label>
                 <input
                   type="text"
                   value={activeSession.nickname}
                   onChange={(e) => updateNickname(e.target.value)}
                   placeholder={t("nicknamePlaceholder")}
-                  className="w-full px-3 py-2 text-sm bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg text-[#1a1a1a] placeholder:text-[#CCC] focus:outline-none focus:border-[#07C160] transition-colors"
+                  className="w-full px-4 py-2.5 text-sm bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent-violet)] transition-colors"
                 />
               </div>
 
               {/* Avatar */}
               <div>
-                <label className="block text-xs text-[#999] mb-1.5">{t("avatar")}</label>
+                <label className="block text-xs text-[var(--text-secondary)] mb-1.5">{t("avatar")}</label>
                 <div className="flex items-center gap-2">
-                  <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#07C160] text-white text-xs font-medium rounded-lg hover:bg-[#06a055] transition-colors">
+                  <label className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 bg-[var(--accent-green)] text-white text-xs font-medium rounded-lg hover:bg-[#06a055] transition-colors">
                     <Upload className="w-3 h-3" />
                     {t("uploadAvatar")}
                     <input
@@ -742,15 +742,15 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
             </div>
 
             {/* Tab Navigation */}
-            <div className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden">
-              <div className="flex border-b border-[#E5E5E5]">
+            <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-subtle)] shadow-sm overflow-hidden">
+              <div className="flex border-b border-[var(--border-subtle)]">
                 <button
                   type="button"
                   onClick={() => setActiveTab("editor")}
-                  className={`flex-1 px-4 py-3 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                  className={`flex-1 px-4 py-3 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 relative ${
                     activeTab === "editor"
-                      ? "text-[#07C160] border-b-2 border-[#07C160] bg-[#f0fdf4]"
-                      : "text-[#999] hover:text-[#1a1a1a]"
+                      ? "text-[var(--accent-green)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[var(--accent-green)]"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                   }`}
                 >
                   <LayoutGrid className="w-3 h-3" />
@@ -759,10 +759,10 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
                 <button
                   type="button"
                   onClick={() => setActiveTab("timeline")}
-                  className={`flex-1 px-4 py-3 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                  className={`flex-1 px-4 py-3 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 relative ${
                     activeTab === "timeline"
-                      ? "text-[#07C160] border-b-2 border-[#07C160] bg-[#f0fdf4]"
-                      : "text-[#999] hover:text-[#1a1a1a]"
+                      ? "text-[var(--accent-green)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[var(--accent-green)]"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                   }`}
                 >
                   <Clock className="w-3 h-3" />
@@ -771,10 +771,10 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
                 <button
                   type="button"
                   onClick={() => setActiveTab("faq")}
-                  className={`flex-1 px-4 py-3 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                  className={`flex-1 px-4 py-3 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 relative ${
                     activeTab === "faq"
-                      ? "text-[#07C160] border-b-2 border-[#07C160] bg-[#f0fdf4]"
-                      : "text-[#999] hover:text-[#1a1a1a]"
+                      ? "text-[var(--accent-green)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[var(--accent-green)]"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                   }`}
                 >
                   <HelpCircle className="w-3 h-3" />
@@ -789,7 +789,7 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
                   <div className="space-y-4">
                     {/* Sender */}
                     <div>
-                      <label className="block text-xs text-[#999] mb-1.5">{t("sender")}</label>
+                      <label className="block text-xs text-[var(--text-secondary)] font-medium mb-2">{t("sender")}</label>
                       <PillToggle
                         options={[
                           { value: "me", label: t("me") },
@@ -802,7 +802,7 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
 
                     {/* Message Type */}
                     <div>
-                      <label className="block text-xs text-[#999] mb-1.5">{t("messageType")}</label>
+                      <label className="block text-xs text-[var(--text-secondary)] font-medium mb-2">{t("messageType")}</label>
                       <PillToggle
                         options={[
                           { value: "text", label: t("typeText") },
@@ -816,19 +816,19 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
 
                     {/* Content Input */}
                     <div>
-                      <label className="block text-xs text-[#999] mb-1.5">{t("messageContent")}</label>
+                      <label className="block text-xs text-[var(--text-secondary)] font-medium mb-2">{t("messageContent")}</label>
                       {msgType === "text" && (
                         <textarea
                           value={textContent}
                           onChange={(e) => setTextContent(e.target.value)}
                           placeholder={t("textPlaceholder")}
                           rows={3}
-                          className="w-full px-3 py-2 text-sm bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg text-[#1a1a1a] placeholder:text-[#CCC] resize-none focus:outline-none focus:border-[#07C160] transition-colors"
+                          className="w-full px-4 py-3 text-sm bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] resize-none focus:outline-none focus:border-[var(--accent-violet)] transition-colors"
                         />
                       )}
                       {msgType === "image" && (
                         <div>
-                          <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 bg-[#FAFAFA] border border-[#E5E5E5] text-xs text-[#666] rounded-lg hover:border-[#07C160] transition-colors">
+                          <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)] rounded-xl hover:border-[var(--accent-violet)] hover:text-[var(--text-primary)] transition-colors">
                             <Paperclip className="w-3 h-3" />
                             {t("attachImage")}
                             <input
@@ -852,7 +852,7 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
                           value={timeContent}
                           onChange={(e) => setTimeContent(e.target.value)}
                           placeholder={t("timePlaceholder")}
-                          className="w-full px-3 py-2 text-sm bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg text-[#1a1a1a] placeholder:text-[#CCC] focus:outline-none focus:border-[#07C160] transition-colors"
+                          className="w-full px-4 py-3 text-sm bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent-violet)] transition-colors"
                         />
                       )}
                     </div>
@@ -861,7 +861,7 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
                     <button
                       type="button"
                       onClick={handleAddMessage}
-                      className="w-full py-2.5 bg-[#FA9D8B] text-white text-sm font-medium rounded-lg hover:bg-[#e8857a] active:scale-[0.98] transition-all"
+                      className="w-full py-3 bg-[var(--text-primary)] text-[var(--bg-primary)] text-sm font-medium rounded-xl hover:opacity-90 active:scale-[0.98] transition-all"
                     >
                       {t("add")}
                     </button>
@@ -885,14 +885,14 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
                     {activeSession.messages.length === 0 ? (
                       <div className="text-center py-6">
                         <MessageCircle className="w-8 h-8 text-[#DDD] mx-auto mb-2" />
-                        <p className="text-xs text-[#999]">{t("empty")}</p>
+                        <p className="text-xs text-[var(--text-secondary)]">{t("empty")}</p>
                       </div>
                     ) : (
                       <div className="space-y-2 max-h-[300px] overflow-y-auto">
                         {activeSession.messages.map((msg, idx) => (
                           <div
                             key={msg.id}
-                            className="flex items-center gap-2 p-2 bg-[#FAFAFA] rounded-lg border border-[#EEE]"
+                            className="flex items-center gap-3 p-3 bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-subtle)]"
                           >
                             <img
                               src={msg.sender === "me" ? ME_AVATAR_PLACEHOLDER : (activeSession.avatar || DEFAULT_AVATAR_PLACEHOLDER)}
@@ -900,7 +900,7 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
                               className="w-5 h-5 rounded-full object-cover flex-shrink-0"
                             />
                             <div className="flex-1 min-w-0">
-                              <p className="text-xs text-[#1a1a1a] truncate">
+                              <p className="text-xs text-[var(--text-primary)] truncate">
                                 {msg.type === "time" ? `⏱ ${msg.content}` : msg.content}
                               </p>
                             </div>
@@ -909,7 +909,7 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
                                 type="button"
                                 onClick={() => moveMessage(msg.id, "up")}
                                 disabled={idx === 0}
-                                className="p-1 text-[#CCC] hover:text-[#666] disabled:opacity-30"
+                                className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 transition-colors"
                               >
                                 <ChevronUp className="w-3 h-3" />
                               </button>
@@ -917,14 +917,14 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
                                 type="button"
                                 onClick={() => moveMessage(msg.id, "down")}
                                 disabled={idx === activeSession.messages.length - 1}
-                                className="p-1 text-[#CCC] hover:text-[#666] disabled:opacity-30"
+                                className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 transition-colors"
                               >
                                 <ChevronDown className="w-3 h-3" />
                               </button>
                               <button
                                 type="button"
                                 onClick={() => removeMessage(msg.id)}
-                                className="p-1 text-[#CCC] hover:text-[#E53935]"
+                                className="p-1.5 text-[var(--text-secondary)] hover:text-red-500 transition-colors"
                               >
                                 <Trash2 className="w-3 h-3" />
                               </button>
@@ -945,28 +945,32 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
           </div>
 
           {/* Right Panel - Preview */}
-          <div className="flex-1 flex justify-center">
+          <div className="flex-1 flex items-start justify-center sticky top-24">
             <div
               id="wechat-preview-wrapper"
               ref={previewWrapperRef}
-              className="flex items-start justify-center"
             >
-              {viewMode === "mobile" ? (
-                <MobileViewer session={activeSession} />
-              ) : (
-                <PcViewer
-                  sessions={sessions}
-                  activeSessionId={activeSessionId}
-                  onSessionSelect={setActiveSessionId}
-                />
-              )}
+              <div className="relative">
+                {/* Decorative glow effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent-violet)]/5 to-[var(--accent-green)]/5 rounded-3xl blur-2xl -z-10" />
+
+                {viewMode === "mobile" ? (
+                  <MobileViewer session={activeSession} />
+                ) : (
+                  <PcViewer
+                    sessions={sessions}
+                    activeSessionId={activeSessionId}
+                    onSessionSelect={setActiveSessionId}
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Share & Article */}
-      <div className="max-w-[1600px] mx-auto px-6 py-8">
+      <div className="max-w-[1600px] mx-auto px-6 py-12">
         <ShareButtons
           title={{
             en: "WeChat Chat History Generator — All-in-One Toolbox",
@@ -980,7 +984,7 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
         />
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-6 pb-12">
+      <div className="max-w-[1600px] mx-auto px-6 pb-16">
         <ToolArticle content={getArticle("wechat-generator", locale as "en" | "zh")} />
       </div>
     </div>

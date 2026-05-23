@@ -64,6 +64,36 @@
     --radius-lg: 12px;
     --radius-xl: 16px;
     --radius-pill: 9999px;
+
+    /* =============================================
+     * Design System Theme Tokens
+     * (Linear/Stripe-inspired, used by WeChat Generator)
+     * ============================================= */
+
+    /* Light mode theme tokens (default) */
+    --bg-primary: #F4F4F5;
+    --bg-surface: #FFFFFF;
+    --bg-elevated: #FAFAFA;
+    --border-subtle: #E4E4E7;
+    --border-default: #D4D4D8;
+    --text-primary: #18181B;
+    --text-secondary: #71717A;
+    --accent-green: #10B981;
+    --accent-violet: #8B5CF6;
+  }
+
+  /* Dark mode - uses media query for automatic system detection */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary: #09090B;
+      --bg-surface: #18181B;
+      --bg-elevated: #27272A;
+      --border-subtle: #27272A;
+      --border-default: #3F3F46;
+      --text-primary: #FAFAFA;
+      --text-secondary: #A1A1AA;
+      --accent-violet: #A78BFA;
+    }
   }
 
   * {
