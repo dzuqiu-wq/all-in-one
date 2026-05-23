@@ -160,12 +160,8 @@ function MobileViewer({ session }: MobileViewerProps) {
         <MoreHorizontal className="w-5 h-5 text-[#000]" />
       </div>
 
-      {/* Message area — WeChat default chat background */}
-      <div className="flex-1 overflow-y-auto px-3 py-2" style={{
-        backgroundColor: "#EDEDED",
-        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='%23d5d5d5' fill-opacity='0.4'%3E%3Cpath d='M0 0h20v20H0V0zm20 20h20v20H20V20z'/%3E%3C/g%3E%3C/svg%3E")`,
-        backgroundSize: "40px 40px",
-      }}>
+      {/* Message area — WeChat standard Light Mode chat background */}
+      <div className="flex-1 overflow-y-auto px-3 py-2 bg-[#F3F3F3]">
         {messages.length === 0 && (
           <p className="text-center text-[#B0B0B0] text-[13px] mt-12">暂无消息</p>
         )}
