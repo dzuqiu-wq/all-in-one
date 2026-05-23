@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useMemo } from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import {
   ChevronLeft,
   MoreHorizontal,
@@ -428,8 +428,8 @@ interface WechatGeneratorClientProps {
 
 export default function WechatGeneratorClient({ locale }: WechatGeneratorClientProps) {
   const t = useTranslations("tools.wechatGenerator");
-  const resolvedLocale = useLocale();
-  const isZh = resolvedLocale === "zh";
+  // Use the locale prop directly from server component for correct SSG/SSR behavior
+  const isZh = locale === "zh";
 
   // State
   const [sessions, setSessions] = useState<ChatSession[]>(createDefaultSessions);
@@ -981,7 +981,7 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
       </div>
 
       <div className="max-w-[1600px] mx-auto px-6 pb-12">
-        <ToolArticle content={getArticle("wechat-generator", resolvedLocale as "en" | "zh")} />
+        <ToolArticle content={getArticle("wechat-generator", locale as "en" | "zh")} />
       </div>
     </div>
   );
