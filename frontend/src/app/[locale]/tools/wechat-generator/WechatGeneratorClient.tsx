@@ -51,6 +51,7 @@ interface ChatSession {
   id: string;
   nickname: string;
   avatar: string;
+  myAvatar: string;
   messages: ChatMessage[];
 }
 
@@ -77,10 +78,10 @@ function readFileAsDataUrl(file: File): Promise<string> {
 
 function createDefaultSessions(): ChatSession[] {
   return [
-    { id: newId(), nickname: "设计师小芮", avatar: DEFAULT_AVATAR_PLACEHOLDER, messages: [] },
-    { id: newId(), nickname: "Alex", avatar: DEFAULT_AVATAR_PLACEHOLDER, messages: [] },
-    { id: newId(), nickname: "Taylor", avatar: DEFAULT_AVATAR_PLACEHOLDER, messages: [] },
-    { id: newId(), nickname: "Jordan", avatar: DEFAULT_AVATAR_PLACEHOLDER, messages: [] },
+    { id: newId(), nickname: "设计师小芮", avatar: DEFAULT_AVATAR_PLACEHOLDER, myAvatar: ME_AVATAR_PLACEHOLDER, messages: [] },
+    { id: newId(), nickname: "Alex", avatar: DEFAULT_AVATAR_PLACEHOLDER, myAvatar: ME_AVATAR_PLACEHOLDER, messages: [] },
+    { id: newId(), nickname: "Taylor", avatar: DEFAULT_AVATAR_PLACEHOLDER, myAvatar: ME_AVATAR_PLACEHOLDER, messages: [] },
+    { id: newId(), nickname: "Jordan", avatar: DEFAULT_AVATAR_PLACEHOLDER, myAvatar: ME_AVATAR_PLACEHOLDER, messages: [] },
   ];
 }
 
@@ -124,7 +125,7 @@ interface MobileViewerProps {
 }
 
 function MobileViewer({ session }: MobileViewerProps) {
-  const { nickname, avatar, messages } = session;
+  const { nickname, avatar, myAvatar, messages } = session;
 
   return (
     <div className="max-w-[360px] w-full aspect-[9/19.5] bg-[#F3F3F3] shadow-2xl rounded-[32px] overflow-hidden border-[6px] border-slate-800 flex flex-col">
@@ -173,6 +174,13 @@ function MobileViewer({ session }: MobileViewerProps) {
             return (
               <div key={msg.id} className="flex justify-end mr-2">
                 <div className="relative max-w-[70%]">
+                  <img
+                    src={myAvatar || ME_AVATAR_PLACEHOLDER}
+                    alt=""
+                    className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-1"
+                  />
+                </div>
+                <div className="relative max-w-[70%] ml-2">
                   <div className="bg-[#95EC69] text-[#191919] rounded-[4px] p-2 pr-6">
                     {msg.type === "text" && <p className="text-body-sm break-words">{msg.content}</p>}
                     {msg.type === "image" && msg.content && (
@@ -246,7 +254,7 @@ function PcViewer({ sessions, activeSessionId, onSessionSelect }: PcViewerProps)
   const activeSession = sessions.find((s) => s.id === activeSessionId) ?? sessions[0];
   if (!activeSession) return null;
 
-  const { nickname, avatar, messages } = activeSession;
+  const { nickname, avatar, myAvatar, messages } = activeSession;
 
   return (
     <div className="min-w-[640px] w-full bg-[#F5F5F5] border border-gray-300 shadow-2xl flex rounded-lg overflow-hidden">
@@ -315,7 +323,12 @@ function PcViewer({ sessions, activeSessionId, onSessionSelect }: PcViewerProps)
             if (msg.sender === "me") {
               return (
                 <div key={msg.id} className="flex justify-end">
-                  <div className="relative max-w-[65%]">
+                  <img
+                    src={myAvatar || ME_AVATAR_PLACEHOLDER}
+                    alt=""
+                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                  />
+                  <div className="relative max-w-[65%] ml-2">
                     <div className="bg-[#95EC69] text-[#191919] rounded-[4px] p-2 pr-7">
                       {msg.type === "text" && <p className="text-body-sm break-words">{msg.content}</p>}
                       {msg.type === "image" && msg.content && (
@@ -446,6 +459,7 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
   const [timeContent, setTimeContent] = useState("");
   const [isExporting, setIsExporting] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string>("");
+  const [myAvatarPreview, setMyAvatarPreview] = useState<string>("");
 
   const activeSession = useMemo(
     () => sessions.find((s) => s.id === activeSessionId) ?? sessions[0],
@@ -501,15 +515,23 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
     setAvatarPreview("");
   }, [activeSessionId]);
 
+  const updateMyAvatar = useCallback((myAvatar: string) => {
+    setSessions((prev) =>
+      prev.map((s) => (s.id === activeSessionId ? { ...s, myAvatar } : s))
+    );
+    setMyAvatarPreview("");
+  }, [activeSessionId]);
+
   const resetChat = useCallback(() => {
     setSessions((prev) =>
       prev.map((s) =>
         s.id === activeSessionId
-          ? { ...s, messages: [], avatar: DEFAULT_AVATAR_PLACEHOLDER }
+          ? { ...s, messages: [], avatar: DEFAULT_AVATAR_PLACEHOLDER, myAvatar: ME_AVATAR_PLACEHOLDER }
           : s
       )
     );
     setAvatarPreview("");
+    setMyAvatarPreview("");
     setTextContent("");
     setImageContent("");
     setTimeContent("");
@@ -542,7 +564,7 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
     setSessions((prev) =>
       prev.map((s) =>
         s.id === activeSessionId
-          ? { ...s, nickname: sample.nickname, messages: sample.messages }
+          ? { ...s, nickname: sample.nickname, myAvatar: sample.myAvatar, messages: sample.messages }
           : s
       )
     );
@@ -560,6 +582,19 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
     setAvatarPreview("");
     updateAvatar(DEFAULT_AVATAR_PLACEHOLDER);
   }, [updateAvatar]);
+
+  const handleMyAvatarChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const dataUrl = await readFileAsDataUrl(file);
+    setMyAvatarPreview(dataUrl);
+    updateMyAvatar(dataUrl);
+  }, [updateMyAvatar]);
+
+  const handleResetMyAvatar = useCallback(() => {
+    setMyAvatarPreview("");
+    updateMyAvatar(ME_AVATAR_PLACEHOLDER);
+  }, [updateMyAvatar]);
 
   const handleImageChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -711,40 +746,79 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
                 />
               </div>
 
-              {/* Avatar */}
-              <div>
-                <label className="block text-xs text-[var(--text-secondary)] mb-1.5">{t("avatar")}</label>
-                <div className="flex items-center gap-2">
-                  <label className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 bg-[var(--accent-green)] text-white text-xs font-medium rounded-lg hover:bg-[#06a055] transition-colors">
-                    <Upload className="w-3 h-3" />
-                    {t("uploadAvatar")}
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg"
-                      onChange={handleAvatarChange}
-                      className="sr-only"
-                    />
-                  </label>
+              {/* Avatar Grid */}
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                {/* Opponent Avatar */}
+                <div>
+                  <label className="block text-xs text-[var(--text-secondary)] mb-1.5">{t("avatar")}</label>
+                  <div className="flex items-center gap-2">
+                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 bg-[var(--accent-green)] text-white text-xs font-medium rounded-lg hover:bg-[#06a055] transition-colors">
+                      <Upload className="w-3 h-3" />
+                      {t("uploadAvatar")}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg"
+                        onChange={handleAvatarChange}
+                        className="sr-only"
+                      />
+                    </label>
+                    {(avatarPreview || activeSession.avatar) && (
+                      <button
+                        type="button"
+                        onClick={handleResetAvatar}
+                        className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                        title={t("resetAvatar")}
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                   {(avatarPreview || activeSession.avatar) && (
-                    <button
-                      type="button"
-                      onClick={handleResetAvatar}
-                      className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-                      title={t("resetAvatar")}
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="mt-2 w-10 h-10 rounded-full overflow-hidden border border-[var(--border-subtle)]">
+                      <img
+                        src={avatarPreview || activeSession.avatar}
+                        alt="avatar"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   )}
                 </div>
-                {(avatarPreview || activeSession.avatar) && (
-                  <div className="mt-2 w-10 h-10 rounded-full overflow-hidden border border-[var(--border-subtle)]">
-                    <img
-                      src={avatarPreview || activeSession.avatar}
-                      alt="avatar"
-                      className="w-full h-full object-cover"
-                    />
+
+                {/* My Avatar */}
+                <div>
+                  <label className="block text-xs text-[var(--text-secondary)] mb-1.5">{isZh ? "我方头像" : "My Avatar"}</label>
+                  <div className="flex items-center gap-2">
+                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 bg-[var(--accent-violet)] text-white text-xs font-medium rounded-lg hover:opacity-90 transition-colors">
+                      <Upload className="w-3 h-3" />
+                      {isZh ? "上传" : "Upload"}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg"
+                        onChange={handleMyAvatarChange}
+                        className="sr-only"
+                      />
+                    </label>
+                    {(myAvatarPreview || activeSession.myAvatar) && (
+                      <button
+                        type="button"
+                        onClick={handleResetMyAvatar}
+                        className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                        title={isZh ? "重置" : "Reset"}
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
-                )}
+                  {(myAvatarPreview || activeSession.myAvatar) && (
+                    <div className="mt-2 w-10 h-10 rounded-full overflow-hidden border border-[var(--border-subtle)]">
+                      <img
+                        src={myAvatarPreview || activeSession.myAvatar}
+                        alt="my-avatar"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

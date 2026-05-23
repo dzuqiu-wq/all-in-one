@@ -481,9 +481,11 @@ export async function buildSampleWordPdfResult(): Promise<WordPdfSampleResult> {
 // ---------------------------------------------------------------------------
 
 import type { ChatMessage } from "./wechatTypes";
+import { ME_AVATAR_PLACEHOLDER } from "./wechatTypes";
 
 interface WechatSamplePayload {
   nickname: string;
+  myAvatar: string;
   messages: ChatMessage[];
 }
 
@@ -501,6 +503,7 @@ export function getWechatSample(locale: "en" | "zh"): WechatSamplePayload {
   if (locale === "zh") {
     return {
       nickname: "设计师小芮",
+      myAvatar: ME_AVATAR_PLACEHOLDER,
       messages: [
         { id: newId(), sender: "other", type: "time",  content: "今天 09:42" },
         { id: newId(), sender: "other", type: "text",  content: "你周末偷偷把第八款工具上线了？" },
@@ -519,6 +522,7 @@ export function getWechatSample(locale: "en" | "zh"): WechatSamplePayload {
 
   return {
     nickname: "Riley · Design",
+    myAvatar: ME_AVATAR_PLACEHOLDER,
     messages: [
       { id: newId(), sender: "other", type: "time",  content: "Today 09:42" },
       { id: newId(), sender: "other", type: "text",  content: "Did you secretly ship the 8th tool over the weekend?" },
