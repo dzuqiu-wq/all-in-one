@@ -128,45 +128,48 @@ function MobileViewer({ session }: MobileViewerProps) {
   const { nickname, avatar, myAvatar, messages } = session;
 
   return (
-    <div className="max-w-[360px] w-full aspect-[9/19.5] bg-[#F3F3F3] shadow-2xl rounded-[32px] overflow-hidden border-[6px] border-slate-800 flex flex-col">
-      {/* Status bar */}
-      <div className="h-7 bg-black flex items-center justify-between px-4 text-white text-body-xs font-medium">
+    <div className="max-w-[375px] w-full aspect-[9/19.5] bg-white shadow-2xl rounded-[40px] overflow-hidden border-[6px] border-slate-800 flex flex-col">
+      {/* Status bar — iPhone-style, 20px */}
+      <div className="h-5 bg-black flex items-center justify-between px-6 text-white" style={{ fontSize: 10, fontWeight: 500, letterSpacing: "-0.2px" }}>
         <span className="w-12 text-left">9:41</span>
-        <div className="flex items-center gap-1.5">
-          <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor">
-            <rect x="0" y="8" width="2.5" height="4" rx="0.5" />
-            <rect x="3.5" y="5" width="2.5" height="7" rx="0.5" />
-            <rect x="7" y="2" width="2.5" height="10" rx="0.5" />
-            <rect x="10.5" y="0" width="2.5" height="12" rx="0.5" />
+        <div className="flex items-center gap-1">
+          {/* Signal bars */}
+          <svg width="12" height="9" viewBox="0 0 12 9" fill="currentColor">
+            <rect x="0" y="6" width="1.8" height="3" rx="0.4" />
+            <rect x="2.5" y="4" width="1.8" height="5" rx="0.4" />
+            <rect x="5" y="2" width="1.8" height="7" rx="0.4" />
+            <rect x="7.5" y="0" width="1.8" height="9" rx="0.4" />
           </svg>
-          <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor">
-            <path d="M8 10a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM8 0l6 7.5H2L8 0z" />
+          {/* WiFi */}
+          <svg width="12" height="9" viewBox="0 0 12 9" fill="currentColor">
+            <path d="M6 7.5a1 1 0 100-2 1 1 0 000 2zM3.8 5.2a2.7 2.7 0 014.4 0M1.7 3a5.6 5.6 0 018.6 0" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
           </svg>
-          <svg width="20" height="12" viewBox="0 0 20 12" fill="currentColor">
-            <rect x="0" y="1" width="16" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none" />
-            <rect x="17" y="4" width="2" height="4" rx="0.5" fill="currentColor" />
-            <rect x="1.5" y="2.5" width="10" height="7" rx="1" fill="currentColor" />
+          {/* Battery */}
+          <svg width="20" height="10" viewBox="0 0 20 10" fill="none">
+            <rect x="0.5" y="0.5" width="16" height="9" rx="2" stroke="currentColor" strokeWidth="1" />
+            <rect x="17.5" y="3" width="1.8" height="4" rx="0.8" fill="currentColor" />
+            <rect x="2" y="2" width="12" height="6" rx="1" fill="currentColor" />
           </svg>
         </div>
       </div>
 
-      {/* Header */}
-      <div className="bg-[#EDEDED] border-b border-[#D8D8D8] h-11 flex items-center justify-between px-3">
-        <ChevronLeft className="w-5 h-5 text-[#333]" />
-        <span className="text-title-sm font-medium text-[#333]">{nickname || "聊天"}</span>
-        <MoreHorizontal className="w-5 h-5 text-[#333]" />
+      {/* Nav bar — 44px WeChat-style header */}
+      <div className="bg-[#EDEDED] h-11 flex items-center justify-between px-4" style={{ borderBottom: "0.5px solid #D9D9D9" }}>
+        <ChevronLeft className="w-5 h-5 text-[#000]" />
+        <span className="text-[17px] font-semibold text-[#000] tracking-tight">{nickname || "聊天"}</span>
+        <MoreHorizontal className="w-5 h-5 text-[#000]" />
       </div>
 
-      {/* Message area */}
-      <div className="flex-1 overflow-y-auto p-3 bg-[#EEEAE3] space-y-3">
+      {/* Message area — WeChat default chat background */}
+      <div className="flex-1 overflow-y-auto px-3 py-2" style={{ backgroundColor: "#EDEDED", backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d5d5d5' fill-opacity='0.4'%3E%3Cpath d='M0 0h20v20H0V0zm20 20h20v20H20V20z'/%3E%3C/g%3E%3C/svg%3E\")", backgroundSize: "40px 40px" }}>
         {messages.length === 0 && (
-          <p className="text-center text-[#999] text-body-xs mt-8">暂无消息</p>
+          <p className="text-center text-[#B0B0B0] text-[13px] mt-12">暂无消息</p>
         )}
         {messages.map((msg) => {
           if (msg.type === "time") {
             return (
-              <div key={msg.id} className="text-center text-[#999] text-body-xs my-4">
-                {msg.content}
+              <div key={msg.id} className="flex justify-center my-3">
+                <span className="inline-block px-2 py-0.5 text-[11px] text-[#B0B0B0] bg-[#D5D5D5]/50 rounded-sm">{msg.content}</span>
               </div>
             );
           }
@@ -175,43 +178,44 @@ function MobileViewer({ session }: MobileViewerProps) {
           return (
             <div
               key={msg.id}
-              className={`flex ${isMe ? "flex-row-reverse" : "flex-row"} items-start gap-2 ${isMe ? "mr-2" : "ml-2"}`}
+              className={`flex items-start gap-2 mb-3 ${isMe ? "flex-row-reverse" : "flex-row"}`}
             >
+              {/* Avatar */}
               <img
                 src={msgAvatar}
                 alt=""
-                className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-1"
+                className="w-9 h-9 rounded-md object-cover flex-shrink-0"
+                style={{ marginTop: 2 }}
               />
-              <div className="relative max-w-[70%]">
-                <div className={`${isMe ? "bg-[#95EC69] text-[#191919]" : "bg-white text-[#191919]"} rounded-[4px] p-2 ${isMe ? "pr-6" : "pl-6"}`}>
-                  {msg.type === "text" && <p className="text-body-sm break-words">{msg.content}</p>}
-                  {msg.type === "image" && msg.content && (
-                    <img src={msg.content} alt="" className="max-w-[200px] rounded" />
-                  )}
-                </div>
+              {/* Bubble */}
+              <div className={`relative max-w-[75%] px-3 py-2 ${isMe ? "bg-[#95EC69]" : "bg-white"}`} style={{ borderRadius: 6, fontSize: 15, lineHeight: "21px", color: "#000", wordBreak: "break-word" }}>
+                {/* Bubble arrow */}
                 <div
-                  className="absolute top-[10px] w-0 h-0"
-                  style={{
-                    ...(isMe
-                      ? { left: "-6px", borderRight: "6px solid #95EC69", borderTop: "4px solid transparent", borderBottom: "4px solid transparent" }
-                      : { right: "-6px", borderLeft: "6px solid white", borderTop: "4px solid transparent", borderBottom: "4px solid transparent" }
-                    ),
-                  }}
+                  className="absolute top-2.5 w-0 h-0"
+                  style={
+                    isMe
+                      ? { left: -5, borderTop: "5px solid transparent", borderBottom: "5px solid transparent", borderRight: "5px solid #95EC69" }
+                      : { right: -5, borderTop: "5px solid transparent", borderBottom: "5px solid transparent", borderLeft: "5px solid white" }
+                  }
                 />
+                {msg.type === "text" && <p>{msg.content}</p>}
+                {msg.type === "image" && msg.content && (
+                  <img src={msg.content} alt="" className="max-w-[180px] rounded" />
+                )}
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Input bar */}
-      <div className="bg-[#F7F7F7] border-t border-[#E5E5E5] h-12 flex items-center justify-around px-4">
-        <Mic className="w-5 h-5 text-[#999]" />
-        <Smile className="w-5 h-5 text-[#999]" />
-        <Plus className="w-5 h-5 text-[#999]" />
-        <div className="flex-1 mx-3 bg-white rounded-full px-4 py-2">
-          <span className="text-body-xs text-[#999]">消息</span>
+      {/* Input bar — WeChat-style toolbar, 48px */}
+      <div className="bg-[#F7F7F7] h-12 flex items-center px-4 gap-3" style={{ borderTop: "0.5px solid #E5E5E5" }}>
+        <Mic className="w-6 h-6 text-[#7F7F7F]" />
+        <div className="flex-1 h-8 bg-white rounded-md flex items-center px-3" style={{ border: "0.5px solid transparent" }}>
+          <span className="text-[14px] text-[#B0B0B0]">消息</span>
         </div>
+        <Smile className="w-6 h-6 text-[#7F7F7F]" />
+        <Plus className="w-6 h-6 text-[#7F7F7F]" />
       </div>
     </div>
   );
