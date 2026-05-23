@@ -21,9 +21,13 @@ import {
   FolderOpen,
   Paperclip,
   AtSign,
+  Settings2,
+  LayoutGrid,
+  Clock,
   HelpCircle,
   ChevronRight,
-  PanelLeft,
+  Smartphone,
+  Monitor,
 } from "lucide-react";
 import html2canvas from "html2canvas";
 import ToolArticle from "@/components/ToolArticle";
@@ -50,6 +54,8 @@ interface ChatSession {
   messages: ChatMessage[];
 }
 
+type EditorTab = "editor" | "timeline" | "faq";
+
 function newId(): string {
   return typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
     ? crypto.randomUUID()
@@ -71,19 +77,15 @@ function readFileAsDataUrl(file: File): Promise<string> {
 
 function createDefaultSessions(): ChatSession[] {
   return [
-    { id: newId(), nickname: "小王", avatar: DEFAULT_AVATAR_PLACEHOLDER, messages: [] },
+    { id: newId(), nickname: "设计师小芮", avatar: DEFAULT_AVATAR_PLACEHOLDER, messages: [] },
     { id: newId(), nickname: "Alex", avatar: DEFAULT_AVATAR_PLACEHOLDER, messages: [] },
     { id: newId(), nickname: "Taylor", avatar: DEFAULT_AVATAR_PLACEHOLDER, messages: [] },
     { id: newId(), nickname: "Jordan", avatar: DEFAULT_AVATAR_PLACEHOLDER, messages: [] },
   ];
 }
 
-function createEmptySession(): ChatSession {
-  return { id: newId(), nickname: "", avatar: DEFAULT_AVATAR_PLACEHOLDER, messages: [] };
-}
-
 // ---------------------------------------------------------------------------
-// Pill Toggle Button — Premium Segmented Control
+// Pill Toggle Button
 // ---------------------------------------------------------------------------
 
 interface PillToggleProps<T extends string> {
@@ -94,16 +96,16 @@ interface PillToggleProps<T extends string> {
 
 function PillToggle<T extends string>({ options, value, onChange }: PillToggleProps<T>) {
   return (
-    <div className="inline-flex bg-[#F0F0F0] rounded-full p-0.5 gap-0.5">
+    <div className="inline-flex bg-[#F5F5F5] rounded-lg p-0.5">
       {options.map((opt) => (
         <button
           key={opt.value}
           type="button"
           onClick={() => onChange(opt.value)}
-          className={`px-4 py-1.5 text-body-sm font-medium rounded-full transition-all duration-200 ${
+          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-150 ${
             value === opt.value
-              ? "bg-[#1a1a2e] text-white shadow-sm"
-              : "text-[#666] hover:text-[#1a1a2e]"
+              ? "bg-white text-[#1a1a1a] shadow-sm"
+              : "text-[#666] hover:text-[#1a1a1a]"
           }`}
         >
           {opt.label}
@@ -125,7 +127,7 @@ function MobileViewer({ session }: MobileViewerProps) {
   const { nickname, avatar, messages } = session;
 
   return (
-    <div className="max-w-[375px] w-full aspect-[9/19.5] bg-[#F3F3F3] shadow-2xl rounded-[32px] overflow-hidden border-[6px] border-slate-800 flex flex-col">
+    <div className="max-w-[360px] w-full aspect-[9/19.5] bg-[#F3F3F3] shadow-2xl rounded-[32px] overflow-hidden border-[6px] border-slate-800 flex flex-col">
       {/* Status bar */}
       <div className="h-7 bg-black flex items-center justify-between px-4 text-white text-body-xs font-medium">
         <span className="w-12 text-left">9:41</span>
@@ -258,7 +260,7 @@ function PcViewer({ sessions, activeSessionId, onSessionSelect }: PcViewerProps)
         </div>
       </div>
 
-      {/* Middle Queue — Contact List */}
+      {/* Middle Queue */}
       <div className="w-52 bg-[#E6E5E5] border-r border-gray-300 flex flex-col">
         <div className="p-3 border-b border-gray-300">
           <div className="bg-white rounded-md px-3 py-1.5 flex items-center gap-2">
@@ -291,15 +293,13 @@ function PcViewer({ sessions, activeSessionId, onSessionSelect }: PcViewerProps)
         </div>
       </div>
 
-      {/* Right Main Chat Area */}
+      {/* Right Chat Area */}
       <div className="flex-1 flex flex-col bg-[#EDEDED]">
-        {/* Header */}
         <div className="bg-[#FAFAFA] border-b border-gray-200 px-4 py-3 flex items-center gap-2">
           <div className="w-2 h-2 bg-[#07C160] rounded-full" />
           <span className="text-title-sm font-medium text-[#1a1a1a]">{nickname || "聊天"}</span>
         </div>
 
-        {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {messages.length === 0 && (
             <p className="text-center text-[#999] text-body-xs mt-8">暂无消息</p>
@@ -362,7 +362,6 @@ function PcViewer({ sessions, activeSessionId, onSessionSelect }: PcViewerProps)
           })}
         </div>
 
-        {/* Input area */}
         <div className="bg-white border-t border-gray-200 p-3">
           <div className="flex items-center gap-2 mb-2 text-[#999]">
             <Smile className="w-4 h-4" />
@@ -393,24 +392,24 @@ function FAQAccordion({ items }: { items: FAQItem[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       {items.map((item, idx) => (
-        <div key={idx} className="border border-hairline rounded-lg overflow-hidden">
+        <div key={idx} className="border-b border-[#eee] last:border-0">
           <button
             type="button"
             onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
-            className="w-full flex items-center justify-between p-4 text-left bg-canvas hover:bg-surface-card transition-colors"
+            className="w-full flex items-center justify-between py-4 text-left hover:text-[#07C160] transition-colors"
           >
-            <span className="text-body-sm font-medium text-ink">{item.q}</span>
+            <span className="text-sm text-[#1a1a1a] font-medium pr-4">{item.q}</span>
             <ChevronRight
-              className={`w-4 h-4 text-muted transition-transform duration-200 ${
+              className={`w-4 h-4 text-[#999] transition-transform duration-200 flex-shrink-0 ${
                 openIndex === idx ? "rotate-90" : ""
               }`}
             />
           </button>
           {openIndex === idx && (
-            <div className="px-4 pb-4 pt-2 bg-white">
-              <p className="text-body-sm text-body leading-relaxed">{item.a}</p>
+            <div className="pb-4 -mt-1">
+              <p className="text-sm text-[#666] leading-relaxed">{item.a}</p>
             </div>
           )}
         </div>
@@ -432,31 +431,28 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
   const resolvedLocale = useLocale();
   const isZh = resolvedLocale === "zh";
 
-  // Multi-session state
+  // State
   const [sessions, setSessions] = useState<ChatSession[]>(createDefaultSessions);
   const [activeSessionId, setActiveSessionId] = useState<string>(sessions[0].id);
   const [viewMode, setViewMode] = useState<ViewMode>("mobile");
+  const [activeTab, setActiveTab] = useState<EditorTab>("editor");
 
   const previewWrapperRef = useRef<HTMLDivElement>(null);
 
-  // Editor state
   const [sender, setSender] = useState<MessageSender>("me");
   const [msgType, setMsgType] = useState<MessageType>("text");
   const [textContent, setTextContent] = useState("");
   const [imageContent, setImageContent] = useState<string>("");
   const [timeContent, setTimeContent] = useState("");
   const [isExporting, setIsExporting] = useState(false);
-
-  // Avatar local state
   const [avatarPreview, setAvatarPreview] = useState<string>("");
 
-  // Derive active session
   const activeSession = useMemo(
     () => sessions.find((s) => s.id === activeSessionId) ?? sessions[0],
     [sessions, activeSessionId]
   );
 
-  // Actions that operate on active session
+  // Actions
   const addMessage = useCallback((msg: ChatMessage) => {
     setSessions((prev) =>
       prev.map((s) =>
@@ -592,353 +588,368 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
     }
   }, []);
 
-  // i18n-aware FAQ items (using t() for proper next-intl locale switching)
-  const sampleBtnText = t("sampleButton");
+  // i18n FAQ items
   const faqItems: FAQItem[] = [
-    {
-      q: t("faq1Q"),
-      a: t("faq1A"),
-    },
-    {
-      q: t("faq2Q"),
-      a: t("faq2A"),
-    },
-    {
-      q: t("faq3Q"),
-      a: t("faq3A"),
-    },
+    { q: t("faq1Q"), a: t("faq1A") },
+    { q: t("faq2Q"), a: t("faq2A") },
+    { q: t("faq3Q"), a: t("faq3A") },
   ];
 
   if (!activeSession) return null;
 
   return (
-    <div className="min-h-screen bg-canvas">
-      <div className="max-w-7xl mx-auto px-6 py-section">
-        {/* Page Header */}
-        <div className="mb-10">
-          <div className="caption-upper text-muted mb-4 tracking-wider">{t("tag")}</div>
-          <h1 className="text-display-lg font-serif text-ink mb-4">{t("title")}</h1>
-          <p className="text-title-md text-body max-w-2xl leading-relaxed">{t("description")}</p>
-        </div>
-
-        {/* Workspace Split: Left Controls | Right Preview */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column — Control Dashboard (lg:col-span-5) */}
-          <div className="lg:col-span-5 lg:sticky lg:top-8 lg:h-fit space-y-5 overflow-y-auto max-h-[calc(100vh-180px)] pr-2">
-
-            {/* Card 1: View Mode + Active Session Profile */}
-            <div className="bg-white rounded-2xl border border-hairline p-6 space-y-6">
-              <div className="flex items-center gap-2 pb-4 border-b border-hairline-soft">
-                <PanelLeft className="w-4 h-4 text-primary" />
-                <h2 className="text-title-sm font-medium text-ink">{t("generalConfig")}</h2>
-              </div>
-
-              {/* View Mode Toggle */}
-              <div>
-                <label className="caption-upper text-muted-soft block mb-2.5 text-xs tracking-wider">{t("viewMode")}</label>
-                <PillToggle
-                  options={[
-                    { value: "mobile", label: t("mobile") },
-                    { value: "pc", label: t("pc") },
-                  ]}
-                  value={viewMode}
-                  onChange={setViewMode}
-                />
-              </div>
-
-              {/* Session Selector (PC mode only) */}
-              {viewMode === "pc" && (
-                <div>
-                  <label className="caption-upper text-muted-soft block mb-2.5 text-xs tracking-wider">{t("activeSession")}</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {sessions.map((s, idx) => (
-                      <button
-                        key={s.id}
-                        type="button"
-                        onClick={() => setActiveSessionId(s.id)}
-                        className={`px-3 py-2.5 rounded-lg text-body-sm font-medium transition-all duration-200 ${
-                          s.id === activeSessionId
-                            ? "bg-[#07C160] text-white shadow-sm"
-                            : "bg-[#f5f5f5] border border-hairline text-ink hover:border-[#07C160]/50"
-                        }`}
-                      >
-                        <span className="truncate block">{s.nickname || `${isZh ? "会话" : "Chat"} ${idx + 1}`}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Nickname + Avatar */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {/* Nickname */}
-                <div>
-                  <label className="caption-upper text-muted-soft block mb-2.5 text-xs tracking-wider">{t("nickname")}</label>
-                  <input
-                    type="text"
-                    value={activeSession.nickname}
-                    onChange={(e) => updateNickname(e.target.value)}
-                    placeholder={t("nicknamePlaceholder")}
-                    className="w-full px-3.5 py-2.5 bg-[#fafafa] border border-hairline rounded-lg text-body-sm text-ink placeholder:text-[#999] focus:border-[#07C160] focus:outline-none transition-colors"
-                  />
-                </div>
-
-                {/* Avatar */}
-                <div>
-                  <label className="caption-upper text-muted-soft block mb-2.5 text-xs tracking-wider">{t("avatar")}</label>
-                  <div className="flex items-center gap-2">
-                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 bg-[#07C160] text-white text-body-sm font-medium rounded-lg hover:bg-[#06a055] transition-colors">
-                      <Upload className="w-3.5 h-3.5" />
-                      <span>{t("uploadAvatar")}</span>
-                      <input
-                        type="file"
-                        accept="image/png,image/jpeg"
-                        onChange={handleAvatarChange}
-                        className="sr-only"
-                      />
-                    </label>
-                    {(avatarPreview || activeSession.avatar) && (
-                      <button
-                        type="button"
-                        onClick={handleResetAvatar}
-                        className="p-2 text-[#999] hover:text-[#1a1a1a] transition-colors"
-                        title={t("resetAvatar")}
-                      >
-                        <RotateCcw className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                  {(avatarPreview || activeSession.avatar) && (
-                    <div className="mt-3 w-14 h-14 rounded-full overflow-hidden border-2 border-[#eee]">
-                      <img
-                        src={avatarPreview || activeSession.avatar}
-                        alt="avatar preview"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                  <p className="mt-2 text-xs text-[#999]">{t("avatarHint")}</p>
-                </div>
-              </div>
+    <div className="min-h-screen bg-[#FAFAFA]">
+      {/* Header Bar */}
+      <div className="bg-white border-b border-[#E5E5E5] sticky top-0 z-50">
+        <div className="max-w-[1600px] mx-auto px-6">
+          <div className="flex items-center justify-between h-14">
+            {/* Left: Page Title */}
+            <div>
+              <h1 className="text-base font-semibold text-[#1a1a1a]">{t("title")}</h1>
+              <p className="text-xs text-[#999]">{t("tag")}</p>
             </div>
 
-            {/* Card 2: Message Editor */}
-            <div className="bg-white rounded-2xl border border-hairline p-6 space-y-6">
-              <div className="flex items-center gap-2 pb-4 border-b border-hairline-soft">
-                <MessageCircle className="w-4 h-4 text-primary" />
-                <h2 className="text-title-sm font-medium text-ink">{t("messageEditor")}</h2>
-              </div>
+            {/* Center: View Mode Toggle */}
+            <div className="flex items-center gap-3">
+              <PillToggle
+                options={[
+                  { value: "mobile", label: t("mobile") },
+                  { value: "pc", label: t("pc") },
+                ]}
+                value={viewMode}
+                onChange={setViewMode}
+              />
+            </div>
 
-              {/* Sender Toggle */}
-              <div>
-                <label className="caption-upper text-muted-soft block mb-2.5 text-xs tracking-wider">{t("sender")}</label>
-                <PillToggle
-                  options={[
-                    { value: "me", label: t("me") },
-                    { value: "other", label: t("other") },
-                  ]}
-                  value={sender}
-                  onChange={setSender}
-                />
-              </div>
-
-              {/* Message Type Toggle */}
-              <div>
-                <label className="caption-upper text-muted-soft block mb-2.5 text-xs tracking-wider">{t("messageType")}</label>
-                <PillToggle
-                  options={[
-                    { value: "text", label: t("typeText") },
-                    { value: "image", label: t("typeImage") },
-                    { value: "time", label: t("typeTime") },
-                  ]}
-                  value={msgType}
-                  onChange={setMsgType}
-                />
-              </div>
-
-              {/* Content Input */}
-              <div>
-                <label className="caption-upper text-muted-soft block mb-2.5 text-xs tracking-wider">{t("messageContent")}</label>
-                {msgType === "text" && (
-                  <textarea
-                    value={textContent}
-                    onChange={(e) => setTextContent(e.target.value)}
-                    placeholder={t("textPlaceholder")}
-                    rows={3}
-                    className="w-full px-3.5 py-2.5 bg-[#fafafa] border border-hairline rounded-lg text-body-sm text-ink placeholder:text-[#999] resize-none focus:border-[#07C160] focus:outline-none transition-colors"
-                  />
-                )}
-                {msgType === "image" && (
-                  <div>
-                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2.5 bg-[#fafafa] border border-hairline text-body-sm text-ink rounded-lg hover:border-[#07C160] transition-colors">
-                      <Paperclip className="w-3.5 h-3.5" />
-                      <span>{t("attachImage")}</span>
-                      <input
-                        type="file"
-                        accept="image/png,image/jpeg"
-                        onChange={handleImageChange}
-                        className="sr-only"
-                      />
-                    </label>
-                    {imageContent && (
-                      <div className="mt-3">
-                        <img src={imageContent} alt="preview" className="w-20 h-20 object-cover rounded-lg border border-hairline" />
-                        <p className="mt-1.5 text-xs text-[#07C160] font-medium">{t("attachedImage")}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-                {msgType === "time" && (
-                  <input
-                    type="text"
-                    value={timeContent}
-                    onChange={(e) => setTimeContent(e.target.value)}
-                    placeholder={t("timePlaceholder")}
-                    className="w-full px-3.5 py-2.5 bg-[#fafafa] border border-hairline rounded-lg text-body-sm text-ink placeholder:text-[#999] focus:border-[#07C160] focus:outline-none transition-colors"
-                  />
-                )}
-              </div>
-
-              {/* Coral Add Button */}
-              <button
-                type="button"
-                onClick={handleAddMessage}
-                className="w-full py-3 bg-[#FA9D8B] text-white text-body-sm font-medium rounded-lg hover:bg-[#e8857a] active:scale-[0.98] transition-all duration-200 shadow-sm"
-              >
-                {t("add")}
-              </button>
-
-              {/* Sample Button */}
+            {/* Right: Actions */}
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={handleLoadSample}
-                className="w-full py-3 bg-[#fef9f3] text-[#b8783a] text-body-sm font-medium rounded-lg border border-[#e8c9a8] hover:bg-[#fdf3e7] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
+                className="px-3 py-1.5 text-xs font-medium text-[#666] hover:text-[#1a1a1a] hover:bg-[#F5F5F5] rounded-md transition-colors flex items-center gap-1.5"
               >
-                <FolderOpen className="w-4 h-4" />
-                {sampleBtnText}
+                <FolderOpen className="w-3.5 h-3.5" />
+                {t("sampleButton")}
+              </button>
+              <button
+                type="button"
+                onClick={handleExportPng}
+                disabled={isExporting}
+                className="px-3 py-1.5 text-xs font-medium bg-[#07C160] text-white hover:bg-[#06a055] rounded-md transition-colors flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {isExporting ? (
+                  <>
+                    <RotateCcw className="w-3.5 h-3.5 animate-spin" />
+                    {t("exporting")}
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-3.5 h-3.5" />
+                    {t("exportImage")}
+                  </>
+                )}
               </button>
             </div>
+          </div>
+        </div>
+      </div>
 
-            {/* Card 3: Timeline */}
-            <div className="bg-white rounded-2xl border border-hairline p-6 space-y-4">
-              <div className="flex items-center justify-between pb-4 border-b border-hairline-soft">
-                <div className="flex items-center gap-2">
-                  <HelpCircle className="w-4 h-4 text-primary" />
-                  <h2 className="text-title-sm font-medium text-ink">{t("timeline")}</h2>
-                </div>
-                <span className="text-xs text-[#999] bg-[#f5f5f5] px-2 py-1 rounded-full">
-                  {activeSession.messages.length} {isZh ? "条" : "items"}
-                </span>
+      {/* Main Content */}
+      <div className="max-w-[1600px] mx-auto px-6 py-6">
+        <div className="flex gap-6">
+          {/* Left Panel - Session Info & Editor */}
+          <div className="w-[320px] flex-shrink-0 space-y-4">
+            {/* Session Selector */}
+            <div className="bg-white rounded-xl border border-[#E5E5E5] p-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-medium text-[#1a1a1a]">{t("activeSession")}</span>
+                <span className="text-xs text-[#999]">{activeSession.nickname}</span>
               </div>
-
-              {activeSession.messages.length === 0 ? (
-                <div className="text-center py-8">
-                  <MessageCircle className="w-10 h-10 text-[#ddd] mx-auto mb-3" />
-                  <p className="text-body-sm text-[#999]">{t("empty")}</p>
-                </div>
-              ) : (
-                <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-                  {activeSession.messages.map((msg, idx) => (
-                    <div
-                      key={msg.id}
-                      className="flex items-center gap-2.5 p-2.5 bg-[#fafafa] rounded-lg border border-[#eee] hover:border-[#ddd] transition-colors"
+              {viewMode === "pc" && (
+                <div className="grid grid-cols-2 gap-1.5">
+                  {sessions.map((s, idx) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setActiveSessionId(s.id)}
+                      className={`px-2 py-1.5 text-xs rounded-md transition-all truncate ${
+                        s.id === activeSessionId
+                          ? "bg-[#07C160] text-white"
+                          : "bg-[#F5F5F5] text-[#666] hover:bg-[#EEE]"
+                      }`}
                     >
-                      <img
-                        src={msg.sender === "me" ? ME_AVATAR_PLACEHOLDER : (activeSession.avatar || DEFAULT_AVATAR_PLACEHOLDER)}
-                        alt=""
-                        className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-body-xs text-[#1a1a1a] truncate">
-                          {msg.type === "time" ? `⏱ ${msg.content}` : msg.content}
-                        </p>
-                        <p className="text-[10px] text-[#999] capitalize">{msg.type}</p>
-                      </div>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
-                        msg.sender === "me" ? "bg-[#e8f5e9] text-[#2e7d32]" : "bg-[#fff3e0] text-[#ef6c00]"
-                      }`}>
-                        {isZh ? (msg.sender === "me" ? "我" : "对方") : msg.sender}
-                      </span>
-                      <div className="flex gap-0.5">
-                        <button
-                          type="button"
-                          onClick={() => moveMessage(msg.id, "up")}
-                          disabled={idx === 0}
-                          className="p-1 text-[#999] hover:text-[#1a1a1a] transition-colors disabled:opacity-30"
-                          title={t("moveUp")}
-                        >
-                          <ChevronUp className="w-3 h-3" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => moveMessage(msg.id, "down")}
-                          disabled={idx === activeSession.messages.length - 1}
-                          className="p-1 text-[#999] hover:text-[#1a1a1a] transition-colors disabled:opacity-30"
-                          title={t("moveDown")}
-                        >
-                          <ChevronDown className="w-3 h-3" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => removeMessage(msg.id)}
-                          className="p-1 text-[#999] hover:text-[#e53935] transition-colors"
-                          title={t("removeRow")}
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
+                      {s.nickname || `${idx + 1}`}
+                    </button>
                   ))}
                 </div>
               )}
+            </div>
 
-              {/* Export & Reset */}
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={handleExportPng}
-                  disabled={isExporting}
-                  className="flex-1 py-2.5 bg-[#07C160] text-white text-body-sm font-medium rounded-lg hover:bg-[#06a055] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
-                >
-                  {isExporting ? (
-                    <>
-                      <RotateCcw className="w-4 h-4 animate-spin" />
-                      {t("exporting")}
-                    </>
-                  ) : (
-                    <>
-                      <Download className="w-4 h-4" />
-                      {t("exportImage")}
-                    </>
+            {/* Profile Card */}
+            <div className="bg-white rounded-xl border border-[#E5E5E5] p-4 space-y-4">
+              <div className="flex items-center gap-2 text-xs font-medium text-[#1a1a1a]">
+                <Settings2 className="w-3.5 h-3.5 text-[#999]" />
+                <span>{t("generalConfig")}</span>
+              </div>
+
+              {/* Nickname */}
+              <div>
+                <label className="block text-xs text-[#999] mb-1.5">{t("nickname")}</label>
+                <input
+                  type="text"
+                  value={activeSession.nickname}
+                  onChange={(e) => updateNickname(e.target.value)}
+                  placeholder={t("nicknamePlaceholder")}
+                  className="w-full px-3 py-2 text-sm bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg text-[#1a1a1a] placeholder:text-[#CCC] focus:outline-none focus:border-[#07C160] transition-colors"
+                />
+              </div>
+
+              {/* Avatar */}
+              <div>
+                <label className="block text-xs text-[#999] mb-1.5">{t("avatar")}</label>
+                <div className="flex items-center gap-2">
+                  <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#07C160] text-white text-xs font-medium rounded-lg hover:bg-[#06a055] transition-colors">
+                    <Upload className="w-3 h-3" />
+                    {t("uploadAvatar")}
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg"
+                      onChange={handleAvatarChange}
+                      className="sr-only"
+                    />
+                  </label>
+                  {(avatarPreview || activeSession.avatar) && (
+                    <button
+                      type="button"
+                      onClick={handleResetAvatar}
+                      className="p-1.5 text-[#999] hover:text-[#1a1a1a] transition-colors"
+                      title={t("resetAvatar")}
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                    </button>
                   )}
-                </button>
-                <button
-                  type="button"
-                  onClick={resetChat}
-                  className="px-3 py-2.5 text-[#999] hover:text-[#1a1a1a] hover:bg-[#f5f5f5] rounded-lg transition-colors"
-                  title={t("reset")}
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                </div>
+                {(avatarPreview || activeSession.avatar) && (
+                  <div className="mt-2 w-10 h-10 rounded-full overflow-hidden border border-[#EEE]">
+                    <img
+                      src={avatarPreview || activeSession.avatar}
+                      alt="avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* FAQ Section */}
-            <div className="bg-white rounded-2xl border border-hairline p-6 space-y-4">
-              <div className="flex items-center gap-2 pb-4 border-b border-hairline-soft">
-                <HelpCircle className="w-4 h-4 text-primary" />
-                <h2 className="text-title-sm font-medium text-ink">{t("faqTitle")}</h2>
+            {/* Tab Navigation */}
+            <div className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden">
+              <div className="flex border-b border-[#E5E5E5]">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("editor")}
+                  className={`flex-1 px-4 py-3 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                    activeTab === "editor"
+                      ? "text-[#07C160] border-b-2 border-[#07C160] bg-[#f0fdf4]"
+                      : "text-[#999] hover:text-[#1a1a1a]"
+                  }`}
+                >
+                  <LayoutGrid className="w-3 h-3" />
+                  {t("messageEditor")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("timeline")}
+                  className={`flex-1 px-4 py-3 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                    activeTab === "timeline"
+                      ? "text-[#07C160] border-b-2 border-[#07C160] bg-[#f0fdf4]"
+                      : "text-[#999] hover:text-[#1a1a1a]"
+                  }`}
+                >
+                  <Clock className="w-3 h-3" />
+                  {t("timeline")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("faq")}
+                  className={`flex-1 px-4 py-3 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                    activeTab === "faq"
+                      ? "text-[#07C160] border-b-2 border-[#07C160] bg-[#f0fdf4]"
+                      : "text-[#999] hover:text-[#1a1a1a]"
+                  }`}
+                >
+                  <HelpCircle className="w-3 h-3" />
+                  {t("faqTitle")}
+                </button>
               </div>
-              <FAQAccordion items={faqItems} />
+
+              {/* Tab Content */}
+              <div className="p-4">
+                {/* Editor Tab */}
+                {activeTab === "editor" && (
+                  <div className="space-y-4">
+                    {/* Sender */}
+                    <div>
+                      <label className="block text-xs text-[#999] mb-1.5">{t("sender")}</label>
+                      <PillToggle
+                        options={[
+                          { value: "me", label: t("me") },
+                          { value: "other", label: t("other") },
+                        ]}
+                        value={sender}
+                        onChange={setSender}
+                      />
+                    </div>
+
+                    {/* Message Type */}
+                    <div>
+                      <label className="block text-xs text-[#999] mb-1.5">{t("messageType")}</label>
+                      <PillToggle
+                        options={[
+                          { value: "text", label: t("typeText") },
+                          { value: "image", label: t("typeImage") },
+                          { value: "time", label: t("typeTime") },
+                        ]}
+                        value={msgType}
+                        onChange={setMsgType}
+                      />
+                    </div>
+
+                    {/* Content Input */}
+                    <div>
+                      <label className="block text-xs text-[#999] mb-1.5">{t("messageContent")}</label>
+                      {msgType === "text" && (
+                        <textarea
+                          value={textContent}
+                          onChange={(e) => setTextContent(e.target.value)}
+                          placeholder={t("textPlaceholder")}
+                          rows={3}
+                          className="w-full px-3 py-2 text-sm bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg text-[#1a1a1a] placeholder:text-[#CCC] resize-none focus:outline-none focus:border-[#07C160] transition-colors"
+                        />
+                      )}
+                      {msgType === "image" && (
+                        <div>
+                          <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 bg-[#FAFAFA] border border-[#E5E5E5] text-xs text-[#666] rounded-lg hover:border-[#07C160] transition-colors">
+                            <Paperclip className="w-3 h-3" />
+                            {t("attachImage")}
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg"
+                              onChange={handleImageChange}
+                              className="sr-only"
+                            />
+                          </label>
+                          {imageContent && (
+                            <div className="mt-2 flex items-center gap-2">
+                              <img src={imageContent} alt="preview" className="w-12 h-12 object-cover rounded-lg border border-[#EEE]" />
+                              <span className="text-xs text-[#07C160]">{t("attachedImage")}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {msgType === "time" && (
+                        <input
+                          type="text"
+                          value={timeContent}
+                          onChange={(e) => setTimeContent(e.target.value)}
+                          placeholder={t("timePlaceholder")}
+                          className="w-full px-3 py-2 text-sm bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg text-[#1a1a1a] placeholder:text-[#CCC] focus:outline-none focus:border-[#07C160] transition-colors"
+                        />
+                      )}
+                    </div>
+
+                    {/* Add Button */}
+                    <button
+                      type="button"
+                      onClick={handleAddMessage}
+                      className="w-full py-2.5 bg-[#FA9D8B] text-white text-sm font-medium rounded-lg hover:bg-[#e8857a] active:scale-[0.98] transition-all"
+                    >
+                      {t("add")}
+                    </button>
+                  </div>
+                )}
+
+                {/* Timeline Tab */}
+                {activeTab === "timeline" && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-[#999]">{activeSession.messages.length} {isZh ? "条消息" : "messages"}</span>
+                      <button
+                        type="button"
+                        onClick={resetChat}
+                        className="text-xs text-[#999] hover:text-[#1a1a1a] transition-colors"
+                      >
+                        {t("reset")}
+                      </button>
+                    </div>
+
+                    {activeSession.messages.length === 0 ? (
+                      <div className="text-center py-6">
+                        <MessageCircle className="w-8 h-8 text-[#DDD] mx-auto mb-2" />
+                        <p className="text-xs text-[#999]">{t("empty")}</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                        {activeSession.messages.map((msg, idx) => (
+                          <div
+                            key={msg.id}
+                            className="flex items-center gap-2 p-2 bg-[#FAFAFA] rounded-lg border border-[#EEE]"
+                          >
+                            <img
+                              src={msg.sender === "me" ? ME_AVATAR_PLACEHOLDER : (activeSession.avatar || DEFAULT_AVATAR_PLACEHOLDER)}
+                              alt=""
+                              className="w-5 h-5 rounded-full object-cover flex-shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs text-[#1a1a1a] truncate">
+                                {msg.type === "time" ? `⏱ ${msg.content}` : msg.content}
+                              </p>
+                            </div>
+                            <div className="flex gap-0.5">
+                              <button
+                                type="button"
+                                onClick={() => moveMessage(msg.id, "up")}
+                                disabled={idx === 0}
+                                className="p-1 text-[#CCC] hover:text-[#666] disabled:opacity-30"
+                              >
+                                <ChevronUp className="w-3 h-3" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => moveMessage(msg.id, "down")}
+                                disabled={idx === activeSession.messages.length - 1}
+                                className="p-1 text-[#CCC] hover:text-[#666] disabled:opacity-30"
+                              >
+                                <ChevronDown className="w-3 h-3" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => removeMessage(msg.id)}
+                                className="p-1 text-[#CCC] hover:text-[#E53935]"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* FAQ Tab */}
+                {activeTab === "faq" && (
+                  <FAQAccordion items={faqItems} />
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Right Column — Live Preview (lg:col-span-7) */}
-          <div className="lg:col-span-7 flex items-start justify-center">
+          {/* Right Panel - Preview */}
+          <div className="flex-1 flex justify-center">
             <div
               id="wechat-preview-wrapper"
               ref={previewWrapperRef}
-              className="w-full flex justify-center"
+              className="flex items-start justify-center"
             >
               {viewMode === "mobile" ? (
                 <MobileViewer session={activeSession} />
@@ -952,25 +963,24 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
             </div>
           </div>
         </div>
-
-        {/* Share Buttons */}
-        <div className="mt-12 pt-8 border-t border-hairline">
-          <ShareButtons
-            title={{
-              en: "WeChat Chat History Generator — All-in-One Toolbox",
-              zh: "微信聊天记录生成器 — All-in-One Toolbox",
-            }}
-            eyebrow={{
-              en: "Share this tool",
-              zh: "分享这个工具",
-            }}
-            hashtags={["WeChat", "ChatMockup", "DesignTools", "AllInOneToolbox"]}
-          />
-        </div>
       </div>
 
-      {/* Long-form Article */}
-      <div className="max-w-7xl mx-auto px-6 pb-section">
+      {/* Share & Article */}
+      <div className="max-w-[1600px] mx-auto px-6 py-8">
+        <ShareButtons
+          title={{
+            en: "WeChat Chat History Generator — All-in-One Toolbox",
+            zh: "微信聊天记录生成器 — All-in-One Toolbox",
+          }}
+          eyebrow={{
+            en: "Share this tool",
+            zh: "分享这个工具",
+          }}
+          hashtags={["WeChat", "ChatMockup", "DesignTools", "AllInOneToolbox"]}
+        />
+      </div>
+
+      <div className="max-w-[1600px] mx-auto px-6 pb-12">
         <ToolArticle content={getArticle("wechat-generator", resolvedLocale as "en" | "zh")} />
       </div>
     </div>
