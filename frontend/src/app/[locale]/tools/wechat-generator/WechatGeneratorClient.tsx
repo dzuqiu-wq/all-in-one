@@ -510,53 +510,56 @@ export default function WechatGeneratorClient() {
                 />
               </div>
 
-              {/* Nickname */}
-              <div>
-                <label className="caption-upper text-muted-soft block mb-2">{t("nickname")}</label>
-                <input
-                  type="text"
-                  value={session.nickname}
-                  onChange={(e) => updateNickname(e.target.value)}
-                  placeholder={t("nicknamePlaceholder")}
-                  className="w-full px-3 py-2 surface-card border border-hairline rounded-md text-body-sm text-ink focus:border-primary focus:outline-none"
-                />
-              </div>
-
-              {/* Avatar */}
-              <div>
-                <label className="caption-upper text-muted-soft block mb-2">{t("avatar")}</label>
-                <div className="flex items-center gap-3">
-                  <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 bg-primary text-on-primary text-body-sm font-medium rounded-md hover:bg-primary-active transition-colors">
-                    <Upload className="w-4 h-4" />
-                    {t("uploadAvatar")}
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg"
-                      onChange={handleAvatarChange}
-                      className="sr-only"
-                    />
-                  </label>
-                  {(avatarPreview || session.avatar) && (
-                    <button
-                      type="button"
-                      onClick={handleResetAvatar}
-                      className="p-2 text-muted hover:text-ink transition-colors"
-                      title={t("resetAvatar")}
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                    </button>
-                  )}
+              {/* Nickname + Avatar Side-by-Side */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Nickname */}
+                <div>
+                  <label className="caption-upper text-muted-soft block mb-2">{t("nickname")}</label>
+                  <input
+                    type="text"
+                    value={session.nickname}
+                    onChange={(e) => updateNickname(e.target.value)}
+                    placeholder={t("nicknamePlaceholder")}
+                    className="w-full px-3 py-2 surface-card border border-hairline rounded-md text-body-sm text-ink focus:border-primary focus:outline-none"
+                  />
                 </div>
-                {(avatarPreview || session.avatar) && (
-                  <div className="mt-3 w-16 h-16 rounded-full overflow-hidden border border-hairline">
-                    <img
-                      src={avatarPreview || session.avatar}
-                      alt="avatar preview"
-                      className="w-full h-full object-cover"
-                    />
+
+                {/* Avatar */}
+                <div>
+                  <label className="caption-upper text-muted-soft block mb-2">{t("avatar")}</label>
+                  <div className="flex items-center gap-3">
+                    <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 bg-primary text-on-primary text-body-sm font-medium rounded-md hover:bg-primary-active transition-colors">
+                      <Upload className="w-4 h-4" />
+                      {t("uploadAvatar")}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg"
+                        onChange={handleAvatarChange}
+                        className="sr-only"
+                      />
+                    </label>
+                    {(avatarPreview || session.avatar) && (
+                      <button
+                        type="button"
+                        onClick={handleResetAvatar}
+                        className="p-2 text-muted hover:text-ink transition-colors"
+                        title={t("resetAvatar")}
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
-                )}
-                <p className="mt-2 text-xs text-muted">{t("avatarHint")}</p>
+                  {(avatarPreview || session.avatar) && (
+                    <div className="mt-3 w-12 h-12 rounded-full overflow-hidden border border-hairline">
+                      <img
+                        src={avatarPreview || session.avatar}
+                        alt="avatar preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <p className="mt-2 text-xs text-muted">{t("avatarHint")}</p>
+                </div>
               </div>
             </div>
 
@@ -650,7 +653,7 @@ export default function WechatGeneratorClient() {
                 className="w-full py-2.5 bg-surface-cream-strong text-primary text-body-sm font-medium rounded-md border border-primary/30 hover:bg-primary/10 transition-colors flex items-center justify-center gap-2"
               >
                 <FolderOpen className="w-4 h-4" />
-                {t("sample.button", { defaultMessage: "Try with Sample File" })}
+                {t("sampleButton")}
               </button>
             </div>
 
