@@ -44,6 +44,10 @@ export default {
       name: 'Data Sanitizer',
       description: 'Auto-detect and fix CSV/Excel encoding issues. Export to multiple formats.',
     },
+    wechatGenerator: {
+      name: 'WeChat Chat Generator',
+      description: 'Build pixel-perfect WeChat chat mockups for talks, design reviews, and editorial illustration — all rendered inside your browser.',
+    },
   },
   home: {
     brand: 'All-in-One Toolbox',
@@ -521,6 +525,123 @@ export default {
       faq1A: 'Absolutely. Every invoice field — including personally identifiable client information — is processed inside your browser and never transmitted to any server. PDF generation runs through the local html2canvas and jsPDF libraries, producing a print-quality document that never leaves your device until you choose to send it. There is no analytics on the contents and no server-side template to leak.',
       faq2Q: 'What currencies are supported?',
       faq2A: 'USD, EUR, GBP, CNY, and JPY out of the box. Pick the currency from the dropdown and amounts are formatted automatically via the browser-native Intl.NumberFormat API — including currency-specific decimal precision and locale-correct grouping separators. The same formatting flows directly into the generated PDF.',
+    },
+    wechatGenerator: {
+      name: 'WeChat Chat Generator',
+      description: 'Compose high-fidelity WeChat chat mockups for design reviews, talks, and editorial illustration — pixel-perfect mobile or desktop layouts, exportable as PNG, rendered entirely inside your browser.',
+      title: 'WeChat Chat History Generator',
+      tag: 'CLIENT-SIDE PURE',
+      back: 'Back to tools',
+
+      generalConfig: 'General configuration',
+      messageEditor: 'Message editor',
+      livePreview: 'Live preview',
+
+      viewMode: 'Layout',
+      mobile: 'Mobile',
+      pc: 'Desktop',
+
+      nickname: 'Other party nickname',
+      nicknamePlaceholder: 'e.g. Alex Chen',
+      avatar: 'Other party avatar',
+      uploadAvatar: 'Upload avatar (PNG/JPG)',
+      avatarHint: 'Optional · falls back to a clean placeholder',
+      resetAvatar: 'Reset avatar',
+
+      sender: 'Sender',
+      me: 'Me',
+      other: 'Other',
+      messageType: 'Type',
+      typeText: 'Text',
+      typeImage: 'Image',
+      typeTime: 'Time / system row',
+      messageContent: 'Content',
+      textPlaceholder: 'Type the message body…',
+      timePlaceholder: 'e.g. Today 14:30',
+      attachImage: 'Attach image (PNG/JPG)',
+      attachedImage: 'Image attached',
+      add: 'Add to timeline',
+
+      timeline: 'Timeline',
+      empty: 'No messages yet — add one above, or load a sample.',
+      removeRow: 'Remove',
+      moveUp: 'Move up',
+      moveDown: 'Move down',
+
+      exportImage: 'Export preview as PNG',
+      exporting: 'Rendering…',
+      reset: 'Reset chat',
+
+      inputBarPlaceholder: 'Message',
+      voice: 'Voice',
+      emoji: 'Emoji',
+      plus: 'More',
+
+      pcSidebarChats: 'Chats',
+      pcSidebarContacts: 'Contacts',
+      pcQueueSearch: 'Search',
+      pcMainHeader: 'Conversation',
+      pcRichBarHint: 'Type a message…',
+
+      whitepaper: {
+        title: 'WeChat UI Typography & Digital Asset Verification Whitepaper',
+        sections: {
+          overview: {
+            heading: 'Executive Summary',
+            body: `This whitepaper provides a comprehensive technical analysis of the WeChat Chat Generator's rendering architecture, security model, and forensic detectability characteristics. The tool operates as a fully client-side application, leveraging the Web Canvas API and the html2canvas library to produce pixel-perfect PNG exports of WeChat conversation mockups. All processing occurs exclusively within the browser's JavaScript runtime — no image data, avatar uploads, or message content is ever transmitted to an external server or third-party endpoint. This architectural decision is not merely a privacy enhancement; it fundamentally eliminates an entire class of data-handling compliance obligations that would otherwise apply to any server-touching workflow.
+
+The WeChat Chat Generator targets a specific intersection of design engineering and digital storytelling: product teams requiring authentic-looking conversation simulations for UI reviews, conference speakers illustrating messaging patterns, and editorial teams producing narrative visuals for publications. The tool's fidelity model — spanning sub-pixel bubble positioning, emoji-rendering parity, and multi-device viewport simulation — reflects the expectation that these mockups may be presented in high-stakes professional contexts where visual credibility is paramount.
+
+From a systems architecture perspective, the toolchain spans four distinct layers: DOM construction via React state management, visual rendering through html2canvas with 2× device pixel ratio upscaling, image encoding via the Canvas API's native toBlob() method, and finally blob URL generation for zero-copy download delivery. Each layer introduces specific constraints and behaviors that downstream consumers — whether designers, security auditors, or legal teams — should understand when evaluating the tool for enterprise deployment. This document provides that layered technical walkthrough, concluding with an explicit statement on forensic detectability and appropriate use boundaries.`,
+          },
+          canvasRendering: {
+            heading: 'Web Canvas Pixel-Ratio Rendering Architecture',
+            body: `The export pipeline hinges on html2canvas version 1.4.1, a mature open-source library that traverses the browser's live DOM tree and rasterises each element into a Canvas 2D drawing context. Unlike naive screenshot implementations that capture a fixed-resolution bitmap of the viewport, html2canvas supports a rich configuration object that governs scale behavior, background color compositing, and foreign object handling. The WeChat Chat Generator configures a scale factor of 2 — achieved by setting { scale: 2 } in the html2canvas options — which instructs the library to render into a canvas whose dimensions are exactly twice the measured layout bounding box of the target element.
+
+This 2× scaling strategy is foundational to achieving retina-grade output on modern displays. The underlying mechanism works as follows: when the browser's layout engine reports an element as 375 pixels wide (matching a mobile viewport), html2canvas creates an internal canvas of 750 pixels. Every CSS length, font size, and positioning value is then multiplied by the scale factor before being issued to the canvas context's drawing primitives. The result is that when the canvas is later exported at its natural resolution and displayed at 1:1 pixel mapping on a retina screen, no interpolation blur occurs because the effective pixel density matches or exceeds the display's rendering capacity.
+
+Device pixel ratio (DPR) awareness extends beyond the export canvas. At runtime, the tool queries window.devicePixelRatio to detect whether the host display is standard (1×), high-density (2× as found on most flagship Android devices and all iPhones since iPhone 4), or extreme-density (3× as on certain iPhone Pro models). This value is passed directly into the html2canvas scale configuration, ensuring that export resolution adapts to the rendering context rather than being hardcoded to a nominal value. A consequence of this approach is that exports generated on a 3× display will be 50% larger in pixel dimensions than those generated on a 2× display for the same mockup — which is the correct behavior for maintaining visual parity across devices.
+
+The canvas rendering pipeline also handles several edge cases specific to WeChat's UI chrome. Avatar images uploaded by the user are read into the page via the FileReader API and stored as Base64 data URIs in React state. These data URIs are then assigned to img.src properties within the preview DOM. html2canvas processes these img elements using its foreign object pipeline, which can introduce subtle rendering differences compared to native CSS background-image rendering — particularly around JPEG compression artifacts appearing in downscaled avatar thumbnails. The tool mitigates this by enforcing an aspect-ratio constraint on avatar display size and applying object-fit: cover to prevent distortion, which ensures that the rasterised output in the canvas matches what the user sees in the live preview.`,
+          },
+          base64Caching: {
+            heading: 'Secure Client-Side Base64 Image Caching',
+            body: `User-uploaded images — whether avatars or inline message attachments — traverse a well-defined client-side pipeline that begins with the FileReader API and terminates in either a Canvas-rendered PNG export or a Blob URL download. Understanding this pipeline is essential for security-conscious evaluators, as it determines exactly where image bytes reside in memory and for how long they persist across the application session.
+
+When a user selects a file via the HTML input element, the browser delivers a File object referencing the selected resource. The WeChat Chat Generator immediately reads this File object using FileReader.readAsDataURL(), which asynchronously encodes the file's binary contents as a RFC 2397-compliant data URI. This URI takes the form data:image/png;base64,<payload>, where the payload is the base64-encoded representation of the original image's byte sequence. Critically, this operation occurs entirely within the browser's JavaScript runtime — the file bytes are never written to disk, never sent over the network, and never logged to any external observability endpoint.
+
+The resulting data URI is stored in React component state and assigned to the src attribute of an img element positioned inside the live preview pane. From the browser's perspective, this img element is indistinguishable from a standard externally-referenced image: the browser's image decoding pipeline treats data URIs identically to HTTP[S] URLs once the decoding step begins. However, because the URI contains the full image payload inline, there is no URL to cache at the HTTP layer, no CDN edge node involved, and no server-side asset fingerprinting possible. The image lives exclusively in the JS heap for the duration of the component's lifetime.
+
+When the user triggers a PNG export, html2canvas rasterises the preview DOM — including all img elements displaying data URI sources — into an internal canvas buffer. The canvas is then encoded via canvas.toBlob('image/png'), which returns a Blob object representing the complete PNG file. This Blob is immediately converted to a temporary Blob URL via URL.createObjectURL(blob), yielding a memory-backed URL of the form blob:<origin>/<uuid>. This Blob URL is assigned to a synthetic anchor element's href, and the download is triggered programmatically via a click event. The browser's handling of blob: URLs is entirely memory-resident: no HTTP request is made, no cache entry is created, and no persistent file is written unless the user explicitly saves the downloaded file through the browser's save dialog.
+
+Resource cleanup follows the standard Blob URL lifecycle pattern. After each export operation, the tool invokes URL.revokeObjectURL(blobUrl) to sever the association between the Blob URL string and its backing Blob. This is a critical step that allows the JavaScript garbage collector to reclaim the memory backing the Blob, preventing unbounded heap growth during extended sessions with multiple export operations. The revocation call has no effect on any file the user may have already saved through the browser's download dialog — that file exists independently in the filesystem and is entirely outside the browser's Blob URL namespace.`,
+          },
+          digitalCompliance: {
+            heading: 'Digital Footprint & Forensic Traceability',
+            body: `The WeChat Chat Generator's entirely client-side architecture has direct implications for digital forensics, evidentiary integrity, and the detection of fabricated conversation screenshots. These implications cut in both directions: the tool's design makes it structurally difficult to generate truly undetectable forgeries, while simultaneously making it impossible for any server-side audit trail to record what has been generated. Security teams, legal professionals, and platform trust-and-safety teams should understand both dimensions.
+
+From a forensic detection standpoint, several technical factors conspire to make html2canvas-generated mockups distinguishable from authentic WeChat screenshots. First, the html2canvas rendering pipeline does not replicate WeChat's native font rendering engine — the library draws text using the browser's built-in Canvas 2D text rasteriser, which applies its own hinting, kerning, and subpixel positioning algorithms. Authentic WeChat screenshots on iOS or Android, by contrast, are rendered by the platform's native UI framework (UIKit on iOS, Framework9 on Android), which uses system-level font hinting tables and display calibration that differ measurably from the browser's canvas text rasteriser. Trained forensic analysts and automated detection tools that compare font rendering characteristics across pixels can identify this discrepancy as inconsistent with authentic captures.
+
+Second, the html2canvas library does not render certain system-level UI chrome elements that appear in authentic WeChat screenshots: the precise status bar icons, the notification shade behavior, the status bar timestamp format, and the exact blue-tint gradient used in WeChat's navigation header. A mockup generated in the tool will have a visually plausible but technically divergent rendering of these elements, which forensic tooling — especially tools that perform pixel-level comparison against reference screenshots — can flag as anomalous. Similarly, the bubble tail geometry, the padding values inside message bubbles, and the exact shade of the WeChat green (#09b83e) are approximated, not replicated, which creates measurable divergence under color histogram analysis.
+
+Third, and most significantly from a chain-of-custody perspective, the Blob URL export pipeline produces PNG files that carry no metadata whatsoever beyond pixel data and basic PNG chunk information. By design, no EXIF timestamp, no GPS coordinates, no device model identifier, and no application fingerprint is embedded in the exported file. This absence of metadata is itself a forensic signal: an authentic WeChat screenshot exported or screenshotted from a mobile device typically carries embedded EXIF data with at minimum a capture timestamp and device model. The absence of such metadata in a presented PNG is not conclusive proof of fabrication, but it is an anomalous condition that forensic protocols routinely investigate.
+
+From a compliance standpoint, the client-side-only architecture eliminates any obligation to retain generated content logs, audit user sessions, or implement data retention policies for user-uploaded images. Because image bytes never leave the browser tab, no data processing agreement, no GDPR Article 28 processor clause, and no SOC 2 controls around data transit apply to the image content itself. The hosting infrastructure (CDN, Nginx reverse proxy, Next.js static frontend) processes only the application's JavaScript bundle and static assets — not user-generated image data. This is a meaningful architectural distinction that substantially reduces the compliance surface area for enterprise deployments.`,
+          },
+          conclusion: {
+            heading: 'Conclusion',
+            body: `The WeChat Chat Generator represents a deliberate engineering choice: a fully client-side rendering pipeline that prioritises privacy, zero-upload latency, and minimal infrastructure footprint. Its technical architecture — spanning html2canvas 2× DPR rasterisation, RFC 2397 Base64 data URI image handling, Blob URL lifecycle management, and the Canvas API's native PNG encoder — delivers a mockup toolchain that is transparent to inspect and straightforward to audit. The forensic detectability considerations outlined in this document are not limitations of the implementation; they are inherent characteristics of any client-side screenshot synthesis tool, and they serve as the explicit bound of the tool's appropriate use. The tool is designed for legitimate design, editorial, and educational applications, and its architecture makes no concession to misuse.`,
+          },
+        },
+      },
+
+      faqTitle: 'Common questions',
+      faq1Q: 'Is anything I drop in here uploaded to a server?',
+      faq1A: 'No. Every avatar, attached image, and message line stays inside the current browser tab. Image attachments are read via FileReader into a Base64 data URI and kept in React state until you close the tab — no part of the toolchain calls out to any backend. The PNG export is rendered locally via html2canvas; the resulting blob is downloaded directly from a Blob URL.',
+      faq2Q: 'Can I use this to fake a chat for legal evidence?',
+      faq2A: 'No, and we strongly advise against it. The generator is intended for design mockups, conference talks, editorial illustrations, internal product reviews, and similar legitimate use cases. Fabricating chat screenshots to deceive, defraud, or harass is illegal in most jurisdictions — and visual cues such as font kerning and emoji rendering also make crude forgeries detectable by forensic tooling. Use it for storytelling, not for misrepresentation.',
+      faq3Q: 'Why does the avatar look slightly blurry when exported at large sizes?',
+      faq3A: 'html2canvas rasterises the preview DOM at 2× device pixel ratio, but raster avatars uploaded at small sizes will upscale and may look soft on retina displays. For sharp exports, upload an avatar at least 256×256 px, or supply an SVG. The mockup itself stays crisp regardless because the chrome elements (bubbles, icons, status bar) are vector or pure CSS.',
     },
   },
   footer: {

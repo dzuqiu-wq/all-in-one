@@ -19,6 +19,7 @@ import pdfWatermark from "./pdf-watermark";
 import invoiceGenerator from "./invoice-generator";
 import imageOptimizer from "./image-optimizer";
 import qrcodeGenerator from "./qrcode-generator";
+import wechatGenerator from "./wechat-generator";
 import dataSanitizer from "./data-sanitizer";
 
 export type ArticleLocale = "en" | "zh";
@@ -32,6 +33,7 @@ const REGISTRY: Record<ToolSlug, BilingualArticle> = {
   "invoice-generator": invoiceGenerator,
   "image-optimizer": imageOptimizer,
   "qrcode-generator": qrcodeGenerator,
+  "wechat-generator": wechatGenerator,
   "data-sanitizer": dataSanitizer,
 };
 

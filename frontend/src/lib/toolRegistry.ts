@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   Coins,
   Image as PixelIcon,
+  MessageCircle,
 } from "lucide-react";
 
 export type ToolSlug =
@@ -31,7 +32,8 @@ export type ToolSlug =
   | "invoice-generator"
   | "image-optimizer"
   | "qrcode-generator"
-  | "data-sanitizer";
+  | "data-sanitizer"
+  | "wechat-generator";
 
 export type ToolCategory =
   | "digital-legal"
@@ -157,6 +159,16 @@ export const TOOLS: readonly ToolDescriptor[] = [
     category: "pixel-image",
     runtime: "client",
     icon: QrCode,
+    schemaCategory: "DesignApplication",
+  },
+  {
+    slug: "wechat-generator",
+    href: "/tools/wechat-generator",
+    intlKey: "tools.wechatGenerator",
+    navKey: "nav.wechatGenerator",
+    category: "pixel-image",
+    runtime: "client",
+    icon: MessageCircle,
     schemaCategory: "DesignApplication",
   },
 ] as const;

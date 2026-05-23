@@ -58,6 +58,10 @@ const translations = {
     dataSanitizer: {
       en: 'Data Sanitizer',
       zh: '数据清洗与乱码修复'
+    },
+    wechatGenerator: {
+      en: 'WeChat Chat Generator',
+      zh: '微信聊天记录生成器',
     }
   },
   resources: {
@@ -195,6 +199,11 @@ export default function Footer() {
               <FooterLink
                 path="/tools/data-sanitizer"
                 label={t(translations.product.dataSanitizer, locale)}
+                locale={locale}
+              />
+              <FooterLink
+                path="/tools/wechat-generator"
+                label={t(translations.product.wechatGenerator, locale)}
                 locale={locale}
               />
             </nav>

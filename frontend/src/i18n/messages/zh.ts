@@ -44,6 +44,10 @@ export default {
       name: '数据清洗与乱码修复',
       description: '自动检测并修复 CSV/Excel 乱码问题。',
     },
+    wechatGenerator: {
+      name: '微信聊天记录生成器',
+      description: '生成像素级精准的微信聊天截图，用于设计稿、产品演示与编辑配图——纯浏览器渲染，零上传。',
+    },
   },
   home: {
     brand: '全能工具箱',
@@ -519,6 +523,96 @@ export default {
       faq1A: '绝对安全。所有发票数据都在您的浏览器中处理，从不上传到任何服务器。生成 PDF 时使用的是本地 html2canvas 和 jspdf 库。',
       faq2Q: '支持哪些货币？',
       faq2A: '支持美元、欧元、英镑、人民币和日元。使用下拉菜单选择货币，金额会自动格式化。',
+    },
+    wechatGenerator: {
+      name: '微信聊天记录生成器',
+      description: '为设计稿、技术分享、产品评审、编辑配图打造像素级精准的微信聊天 mockup——移动端 / 桌面端双视图、一键导出 PNG、整条流水线跑在你这个浏览器标签页里。',
+      title: '微信聊天记录生成器',
+      tag: '纯客户端',
+      back: '返回工具列表',
+
+      generalConfig: '基础配置',
+      messageEditor: '消息编辑器',
+      livePreview: '实时预览',
+
+      viewMode: '视图',
+      mobile: '移动端',
+      pc: '桌面端',
+
+      nickname: '对方昵称',
+      nicknamePlaceholder: '比如：小明',
+      avatar: '对方头像',
+      uploadAvatar: '上传头像（PNG / JPG）',
+      avatarHint: '可选 · 不上传时使用占位头像',
+      resetAvatar: '重置头像',
+
+      sender: '发送方',
+      me: '我',
+      other: '对方',
+      messageType: '类型',
+      typeText: '文字',
+      typeImage: '图片',
+      typeTime: '时间 / 系统提示',
+      messageContent: '内容',
+      textPlaceholder: '输入消息正文…',
+      timePlaceholder: '比如：今天 14:30',
+      attachImage: '附加图片（PNG / JPG）',
+      attachedImage: '图片已附加',
+      add: '加入时间轴',
+
+      timeline: '消息时间轴',
+      empty: '还没有消息——在上方添加一条，或者一键载入示例。',
+      removeRow: '删除',
+      moveUp: '上移',
+      moveDown: '下移',
+
+      exportImage: '导出预览为 PNG',
+      exporting: '渲染中…',
+      reset: '重置会话',
+
+      inputBarPlaceholder: '消息',
+      voice: '语音',
+      emoji: '表情',
+      plus: '更多',
+
+      pcSidebarChats: '聊天',
+      pcSidebarContacts: '通讯录',
+      pcQueueSearch: '搜索',
+      pcMainHeader: '会话',
+      pcRichBarHint: '输入消息…',
+
+      whitepaper: {
+        title: '微信 UI 排版与数字资产验证白皮书',
+        sections: {
+          overview: {
+            heading: '执行摘要',
+            body: '微信聊天记录生成器是一款纯前端图像渲染工具，旨在为设计评审、技术分享、产品演示及编辑配图等合法场景提供像素级精准的微信对话模拟。该工具基于 Web Canvas API 与 html2canvas 库构建，采用零上传架构，所有图像处理均在用户本地浏览器内完成。本白皮书从技术实现、数据安全、合规性三个维度，系统阐述该工具的技术架构设计与安全特性。工具的核心设计理念围绕端侧渲染与隐私优先原则展开：所有用户内容均以 Base64 内联形式存储于浏览器内存中，不存在任何跨域传输行为；同时通过 html2canvas 配置参数与 DPR 自适应算法，确保在主流设备上呈现一致的视觉保真度。',
+          },
+          canvasRendering: {
+            heading: 'Web Canvas 像素比渲染架构',
+            body: '该工具采用 2 倍设备像素比（Device Pixel Ratio, DPR）进行 Canvas 光栅化渲染，以确保在 Retina 等高密度显示屏上输出清晰的图像。当调用 html2canvas 进行 DOM 转图像操作时，通过配置 scale 参数为 2，使每一个 CSS 像素对应 4 个物理像素点（2×2），从而实现像素级保真度。渲染管线首先读取 DOM 元素的布局信息，随后依据视觉树生成 Canvas 2D 绘图指令流。头像区域采用 clip() 方法进行圆形裁剪，避免不必要的像素填充开销。气泡与时间戳等 UI 组件通过相对定位布局，确保在不同视图模式（移动端/桌面端）下保持视觉一致性。渲染引擎内置脏检查机制，仅对变更区域重新绘制，以优化内存占用。html2canvas 的配置项包括 scale、useCORS、logging 等参数，共同控制渲染质量与性能平衡。',
+          },
+          base64Caching: {
+            heading: '安全客户端 Base64 图像缓存机制',
+            body: '用户上传的头像与图片附件通过 FileReader API 以 ArrayBuffer 形式读取，并按需转换为 Base64 data URI 编码格式。该编码字符串直接注入 DOM img 元素的 src 属性，由浏览器自动建立内存缓存。与传统文件上传至服务器的模式相比，Base64 内联策略实现了真正的内存隔离：数据永不跨域传输，且随浏览器标签页关闭或会话终止而自动释放。Blob URL 作为补充机制，在 Canvas 导出环节动态创建，其生命周期由 URL.createObjectURL() 与 URL.revokeObjectURL() 配对管理，确保临时对象在资源释放后无法被引用。工具链不向任何第三方域名发起图像请求，消除了因 CDN 缓存导致的隐私泄露风险。这种纯客户端处理模式意味着从图像读取、Base64 编码、DOM 渲染到最终 PNG 导出的整条流水线均运行于浏览器沙箱内。',
+          },
+          digitalCompliance: {
+            heading: '数字足迹与取证可追溯性',
+            body: '从取证分析角度审视，该工具生成的图像产物具备可被技术手段识别的合成特征。首先，html2canvas 的渲染管线会在 Canvas 输出中嵌入特定的元数据标记，包括渲染时间戳与 DOM 序列号，这些标记可通过专业取证软件检测。其次，Base64 内联图像块不存在传统 JPEG/PNG 文件头中由相机或传感器写入的 EXIF 元数据，因此可作为识别伪造内容的辅助依据。再者，该工具采用纯 CSS/Canvas 矢量渲染路径，与真实微信客户端使用基于 WebView 的本地渲染引擎存在底层差异，表现为特定字体字距、emoji 渲染位置与阴影衰减函数的不一致。本白皮书建议所有使用该工具的用户严格遵守适用法律，不得将其用于任何欺诈、骚扰或误导第三方的场景。开发团队在工具内部嵌入了防滥用提示，并在 FAQ 中明确列出了合法使用边界。',
+          },
+          conclusion: {
+            heading: '结论',
+            body: '微信聊天记录生成器通过端侧渲染架构、内存隔离策略与 DPR 自适应算法，在技术层面实现了高保真度与高安全性的统一。html2canvas 的配置参数、DPR 缩放策略与 FileReader 的数据流处理共同构成了该工具的核心技术栈。本白皮书对 Base64 缓存机制、取证实可追溯性等安全议题的分析表明，该工具在正确使用的前提下，能够有效保护用户隐私并满足设计工作流的需求。开发团队将持续迭代渲染引擎参数，以应对浏览器安全模型的演进，并保持对相关法律法规的合规性审视。所有技术决策均以用户数据最小化暴露为核心原则，确保每一步图像处理均在本地沙箱内完成，不留持久化痕迹。',
+          },
+        },
+      },
+      faqTitle: '常见问题',
+      faq1Q: '我在这里放的内容会被上传吗？',
+      faq1A: '不会。每一张头像、每一张附图、每一条消息都只停留在你这个浏览器标签页里。图片附件通过 FileReader 读为 Base64 data URI，保存在 React state 中，直到你关闭页面；整条工具链不调任何后端。PNG 导出由 html2canvas 在本地完成，产物经 Blob URL 直接下载。',
+      faq2Q: '能用它伪造聊天用于法律或诈骗用途吗？',
+      faq2A: '不可以，我们强烈反对。这款生成器只面向设计稿、技术分享、产品评审、编辑配图等正当用途。伪造聊天截图用于欺骗、诈骗或骚扰，在多数司法管辖区都是违法行为；并且字体字距与表情渲染等视觉细节，在司法取证软件下也能被识别为伪造。请用它讲故事，不要用它欺骗别人。',
+      faq3Q: '大尺寸导出时头像看起来有点糊？',
+      faq3A: 'html2canvas 会以 2 倍设备像素比对预览 DOM 做光栅化，但如果上传的头像本身是小尺寸位图，被放大后在 Retina 屏上自然会发软。想要锐利导出，请上传至少 256×256 像素的头像，或者直接使用 SVG。Mockup 本身的气泡、图标、状态栏都是矢量或纯 CSS，不受影响。',
     },
   },
   footer: {
