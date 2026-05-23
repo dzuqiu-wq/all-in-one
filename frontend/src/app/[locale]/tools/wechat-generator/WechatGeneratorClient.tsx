@@ -23,6 +23,9 @@ import {
   AtSign,
 } from "lucide-react";
 import html2canvas from "html2canvas";
+import ToolArticle from "@/components/ToolArticle";
+import ShareButtons from "@/components/ShareButtons";
+import { getArticle } from "@/content/articles";
 import {
   type ChatMessage,
   type ViewMode,
@@ -378,9 +381,13 @@ function PcViewer({ sessions, activeSessionId, onSessionSelect }: PcViewerProps)
 // Main Component
 // ---------------------------------------------------------------------------
 
-export default function WechatGeneratorClient() {
+interface WechatGeneratorClientProps {
+  locale: string;
+}
+
+export default function WechatGeneratorClient({ locale }: WechatGeneratorClientProps) {
   const t = useTranslations("tools.wechatGenerator");
-  const locale = useLocale();
+  const resolvedLocale = useLocale();
 
   // Multi-session state
   const [sessions, setSessions] = useState<ChatSession[]>(createDefaultSessions);
@@ -543,7 +550,7 @@ export default function WechatGeneratorClient() {
   }, []);
 
   // i18n with fallback for sampleButton
-  const sampleBtnText = t("sampleButton", { defaultValue: locale === "zh" ? "一键载入示例" : "Try with Sample File" });
+  const sampleBtnText = t("sampleButton", { defaultValue: resolvedLocale === "zh" ? "一键载入示例" : "Try with Sample File" });
 
   if (!activeSession) return null;
 
@@ -856,6 +863,26 @@ export default function WechatGeneratorClient() {
             </div>
           </div>
         </div>
+
+        {/* Share Buttons */}
+        <div className="mt-12">
+          <ShareButtons
+            title={{
+              en: "WeChat Chat History Generator — All-in-One Toolbox",
+              zh: "微信聊天记录生成器 — All-in-One Toolbox",
+            }}
+            eyebrow={{
+              en: "Share this tool",
+              zh: "分享这个工具",
+            }}
+            hashtags={["WeChat", "ChatMockup", "DesignTools", "AllInOneToolbox"]}
+          />
+        </div>
+      </div>
+
+      {/* Long-form Article */}
+      <div className="max-w-7xl mx-auto px-6 pb-section">
+        <ToolArticle content={getArticle("wechat-generator", resolvedLocale as "en" | "zh")} />
       </div>
     </div>
   );

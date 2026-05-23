@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Image as ImageIcon, QrCode, Merge, Stamp, Wrench, Receipt } from "lucide-react";
+import { FileText, Image as ImageIcon, QrCode, Merge, Stamp, Wrench, Receipt, MessageCircle } from "lucide-react";
 import type { ComponentType } from "react";
 import { useLocalizedHref } from "@/i18n/useLocalizedHref";
 
@@ -12,6 +12,7 @@ export const ToolIcons: Record<string, ComponentType<{ className?: string }>> = 
   Stamp,
   Wrench,
   Receipt,
+  MessageCircle,
 };
 
 export interface ToolItem {
@@ -87,5 +88,13 @@ export const tools: ToolItem[] = [
     category: "utility",
     type: "client",
     description: "Auto-detect and fix CSV/Excel encoding issues. Export to multiple formats.",
+  },
+  {
+    name: "WeChat Chat Generator",
+    href: "/tools/wechat-generator",
+    iconName: "MessageCircle",
+    category: "utility",
+    type: "client",
+    description: "Build pixel-perfect WeChat chat mockups for design reviews and editorial illustration.",
   },
 ];

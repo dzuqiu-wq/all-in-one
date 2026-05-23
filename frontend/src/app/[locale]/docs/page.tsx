@@ -271,6 +271,63 @@ export default async function DocsPage({ params }: Props) {
           </InfoSubsection>
         </InfoSection>
 
+        <InfoSection heading="工具 6 · pdf-lib 电子印章与水印">
+          <p>
+            位于 <code>/tools/pdf-watermark</code>。基于 <a href="https://pdf-lib.js.org" target="_blank" rel="noopener noreferrer">pdf-lib</a> 实现，支持圆形、椭圆形和矩形三种印章样式，所有操作在浏览器内完成。
+          </p>
+          <InfoSubsection heading="印章渲染引擎">
+            <ul className="list-disc pl-6 space-y-2">
+              <li><strong>圆形印章</strong>：标准公章样式，带弧形文字排版与五角星图标；</li>
+              <li><strong>椭圆形印章</strong>：业务章样式，适合内部审批流程；</li>
+              <li><strong>矩形印章</strong>：长方形样式，适合日期或编号印章。</li>
+            </ul>
+          </InfoSubsection>
+          <InfoSubsection heading="水印叠加策略">
+            <p>
+              水印以半透明方式平铺在 PDF 页面上，通过计算页面尺寸与水印尺寸来确定平铺网格。叠加时保留原文可读性，同时确保来源标注清晰可辨。所有渲染在浏览器内完成，PDF 文件从不离开用户设备。
+            </p>
+          </InfoSubsection>
+        </InfoSection>
+
+        <InfoSection heading="工具 7 · html2canvas + jsPDF 发票生成">
+          <p>
+            位于 <code>/tools/invoice-generator</code>。基于 html2canvas 与 jsPDF 实现，支持多币种与自动税率计算。
+          </p>
+          <InfoSubsection heading="双引擎渲染管线">
+            <ol className="list-decimal pl-6 space-y-2">
+              <li>用户在表单中填写发票各项数据（公司信息、商品明细、金额）；</li>
+              <li>表单数据驱动 React 组件渲染为 HTML 发票模板；</li>
+              <li>html2canvas 以 2× DPR 对模板 DOM 进行光栅化；</li>
+              <li>jsPDF 将光栅化图像嵌入 PDF 文档；</li>
+              <li>Blob URL 触发下载，全程无服务器参与。</li>
+            </ol>
+          </InfoSubsection>
+          <InfoSubsection heading="多币种支持">
+            <p>
+              支持美元 (USD)、欧元 (EUR)、英镑 (GBP)、人民币 (CNY)、日元 (JPY) 五种主流货币。金额格式化使用浏览器原生 <code>Intl.NumberFormat</code> API，自动处理小数精度、千位分隔符与货币符号。
+            </p>
+          </InfoSubsection>
+        </InfoSection>
+
+        <InfoSection heading="工具 8 · PapaParse + SheetJS 数据清洗">
+          <p>
+            位于 <code>/tools/data-sanitizer</code>。基于 PapaParse 与 SheetJS 实现，用于 CSV/Excel 编码修复与多格式数据导出。
+          </p>
+          <InfoSubsection heading="编码自动检测">
+            <p>
+              支持 UTF-8、GBK、GB2312、Big5、Windows-1252、ISO-8859-1 等常见编码格式。工具通过解析文件魔术字节与内容特征自动判断源文件编码，无需用户手动指定。乱码检测基于字符集分布熵值分析，可识别绝大多数编码错配场景。
+            </p>
+          </InfoSubsection>
+          <InfoSubsection heading="多格式导出">
+            <ul className="list-disc pl-6 space-y-2">
+              <li><strong>CSV</strong>：标准化逗号分隔格式，强制 UTF-8 BOM；</li>
+              <li><strong>JSON</strong>：扁平化对象数组结构；</li>
+              <li><strong>Markdown</strong>：表格形式，便于嵌入文档或幻灯片；</li>
+              <li><strong>XLSX</strong>：保留原始数据类型，适合 Excel 工作流。</li>
+            </ul>
+          </InfoSubsection>
+        </InfoSection>
+
         <InfoSection heading="性能预算">
           <ul className="list-disc pl-6 space-y-2">
             <li><strong>首屏 LCP</strong>（最大内容绘制）：&lt; 1.5 s（中位数）；</li>
@@ -446,6 +503,63 @@ export default async function DocsPage({ params }: Props) {
           <p>
             One-click sample session data is provided, including mock conversations, preset avatars, and timeline events for quick demonstrations. Supports custom nicknames, avatars, date ranges, and message content — exportable as storyboards, meeting notes, or product demo assets.
           </p>
+        </InfoSubsection>
+      </InfoSection>
+
+      <InfoSection heading="Tool 6 · pdf-lib Electronic Seal &amp; Watermark">
+        <p>
+          Lives at <code>/tools/pdf-watermark</code>. Implemented atop <a href="https://pdf-lib.js.org" target="_blank" rel="noopener noreferrer">pdf-lib</a>, adding text watermarks or electronic stamps to PDF documents entirely in the browser.
+        </p>
+        <InfoSubsection heading="Stamp Rendering Engine">
+          <ul className="list-disc pl-6 space-y-2">
+            <li><strong>Circle seal</strong>: standard business seal with arc-typeset organization text and five-point star;</li>
+            <li><strong>Oval seal</strong>: suitable for internal approval workflows;</li>
+            <li><strong>Rectangle stamp</strong>: ideal for dates and sequential numbering.</li>
+          </ul>
+        </InfoSubsection>
+        <InfoSubsection heading="Watermark Overlay Strategy">
+          <p>
+            Watermarks are tiled across PDF pages at calculated intervals, proportional to page and watermark dimensions. Semi-transparent rendering preserves full readability of the underlying document while marking provenance and intent. All rendering occurs in the browser — the PDF never leaves the user's device.
+          </p>
+        </InfoSubsection>
+      </InfoSection>
+
+      <InfoSection heading="Tool 7 · html2canvas + jsPDF Invoice Generator">
+        <p>
+          Lives at <code>/tools/invoice-generator</code>. Implemented with html2canvas for rasterisation and jsPDF for PDF assembly, supporting multi-currency invoicing with automatic tax calculations.
+        </p>
+        <InfoSubsection heading="Dual-Engine Rendering Pipeline">
+          <ol className="list-decimal pl-6 space-y-2">
+            <li>User fills in invoice fields (company info, line items, amounts);</li>
+            <li>Form data drives React components to render an HTML invoice template;</li>
+            <li>html2canvas rasterises the template DOM at 2× DPR;</li>
+            <li>jsPDF embeds the rasterised image into a PDF document;</li>
+            <li>Blob URL triggers download — no server involved.</li>
+          </ol>
+        </InfoSubsection>
+        <InfoSubsection heading="Multi-Currency Support">
+          <p>
+            Supports USD, EUR, GBP, CNY, and JPY out of the box. Amount formatting uses the browser-native <code>Intl.NumberFormat</code> API, handling decimal precision, thousand separators, and currency symbols automatically.
+          </p>
+        </InfoSubsection>
+      </InfoSection>
+
+      <InfoSection heading="Tool 8 · PapaParse + SheetJS Data Sanitizer">
+        <p>
+          Lives at <code>/tools/data-sanitizer</code>. Implemented atop <a href="https://www.papaparse.com" target="_blank" rel="noopener noreferrer">PapaParse</a> and <a href="https://sheetjs.com" target="_blank" rel="noopener noreferrer">SheetJS</a> for encoding repair and multi-format data export.
+        </p>
+        <InfoSubsection heading="Automatic Encoding Detection">
+          <p>
+            Supports UTF-8, GBK, GB2312, Big5, Windows-1252, ISO-8859-1, and more. The tool auto-detects source file encoding by parsing magic bytes and content signatures — no manual specification required. Garbled text detection is based on charset distribution entropy analysis, identifying the vast majority of encoding mismatch scenarios.
+          </p>
+        </InfoSubsection>
+        <InfoSubsection heading="Multi-Format Export">
+          <ul className="list-disc pl-6 space-y-2">
+            <li><strong>CSV</strong>: standardised comma-separated format, forced UTF-8 BOM;</li>
+            <li><strong>JSON</strong>: flattened object array structure;</li>
+            <li><strong>Markdown</strong>: table format for easy embedding in docs or slides;</li>
+            <li><strong>XLSX</strong>: preserves original data types for Excel workflows.</li>
+          </ul>
         </InfoSubsection>
       </InfoSection>
 

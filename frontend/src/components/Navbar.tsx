@@ -136,6 +136,7 @@ function getLocaleToolKey(href: string): string {
     "/tools/image-optimizer": "nav.imageOptimizer",
     "/tools/qrcode-generator": "nav.qrcode",
     "/tools/data-sanitizer": "nav.dataSanitizer",
+    "/tools/wechat-generator": "nav.wechatGenerator",
   };
   return hrefToKey[href] || "";
 }
