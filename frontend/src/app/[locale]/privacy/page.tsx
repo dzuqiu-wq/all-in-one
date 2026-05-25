@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import InfoPageLayout, {
   InfoSection,
-  InfoSubsection,
   InfoCallout,
 } from "@/components/InfoPageLayout";
 

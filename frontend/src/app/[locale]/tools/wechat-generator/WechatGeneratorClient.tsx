@@ -9,7 +9,6 @@ import {
   Smile,
   Plus,
   Upload,
-  X,
   ChevronUp,
   ChevronDown,
   Trash2,
@@ -26,8 +25,6 @@ import {
   Clock,
   HelpCircle,
   ChevronRight,
-  Smartphone,
-  Monitor,
 } from "lucide-react";
 import html2canvas from "html2canvas";
 import ToolArticle from "@/components/ToolArticle";

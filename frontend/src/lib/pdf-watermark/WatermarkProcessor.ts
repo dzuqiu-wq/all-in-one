@@ -1,5 +1,7 @@
 import {
   PDFDocument,
+  PDFPage,
+  PDFImage,
   StandardFonts,
   rgb,
   degrees,
@@ -131,7 +133,7 @@ export class WatermarkProcessor {
   }
 
   private async applyTextWatermark(
-    page: any,
+    page: PDFPage,
     textConfig: TextConfig,
     watermarkConfig: WatermarkConfig,
     pageWidth: number,
@@ -168,8 +170,8 @@ export class WatermarkProcessor {
   }
 
   private applyStampWatermark(
-    page: any,
-    stampImage: any,
+    page: PDFPage,
+    stampImage: PDFImage,
     watermarkConfig: WatermarkConfig,
     pageWidth: number,
     pageHeight: number

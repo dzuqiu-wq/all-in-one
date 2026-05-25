@@ -6,6 +6,6 @@ interface Props {
 }
 
 export default async function LocalePage({ params }: Props) {
-  const { locale } = await params;
+  await params;
   return <HomeContent />;
 }

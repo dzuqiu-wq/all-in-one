@@ -21,7 +21,7 @@ export default function AdBanner({ slot, format = "auto", className = "" }: AdBa
         // @ts-expect-error - AdSense global
         if (typeof adsbygoogle !== "undefined") {
           // @ts-expect-error - AdSense global
-          (adsbygoogle = (window as any).adsbygoogle || []).push({});
+          (adsbygoogle = (window as Window).adsbygoogle || []).push({});
           setIsLoaded(true);
         }
       } catch {

@@ -103,7 +103,6 @@ function buildEntry(
   pathSegment: string,
   primaryLocale: Locale,
 ): MetadataRoute.Sitemap[number] {
-  const otherLocale: Locale = primaryLocale === "en" ? "zh" : "en";
   const suffix = pathSegment === "" ? "" : `/${pathSegment}`;
   const url = `${BASE_URL}/${primaryLocale}${suffix}`;
   const tuning = PAGE_TUNING[classify(pathSegment)];

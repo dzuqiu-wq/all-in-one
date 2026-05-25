@@ -15,7 +15,7 @@ export default function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Determine current locale from pathname
-  const isZh = pathname.startsWith("/zh");
+  const _isZh = pathname.startsWith("/zh");
 
   const homeHref = useLocalizedHref("/");
   const aboutHref = useLocalizedHref("/about");

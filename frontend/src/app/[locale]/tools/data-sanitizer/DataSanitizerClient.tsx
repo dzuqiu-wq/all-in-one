@@ -143,7 +143,7 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
     setProcessingState({ status: 'detecting', percent: 30, message: t("reDecoding") });
 
     try {
-      const bytes = new Uint8Array(await file.arrayBuffer());
+      const _bytes = new Uint8Array(await file.arrayBuffer());
       const encodingToUse = selectedEncoding === 'auto' ? 'utf-8' : selectedEncoding;
 
       const result = await dataTransformer.parse(file, encodingToUse);

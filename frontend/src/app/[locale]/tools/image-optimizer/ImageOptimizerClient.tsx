@@ -94,7 +94,7 @@ function StructuredDataEN() {
   );
 }
 
-function StructuredDataZH() {
+function _StructuredDataZH() {
   return (
     <>
       <script

@@ -214,7 +214,7 @@ export class DataTransformer {
     return new Blob([jsonText], { type: 'application/json;charset=utf-8' });
   }
 
-  toMarkdown(result: ParseResult, options: TransformOptions = DEFAULT_OPTIONS): Blob {
+  toMarkdown(result: ParseResult, _options: TransformOptions = DEFAULT_OPTIONS): Blob {
     const { headers, data } = result;
     const lines: string[] = [];
 
