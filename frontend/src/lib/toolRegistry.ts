@@ -30,6 +30,7 @@ import {
   FileCode2,
   Hash,
   Crop,
+  Key,
 } from "lucide-react";
 
 export type ToolSlug =
@@ -47,7 +48,8 @@ export type ToolSlug =
   | "base64"
   | "hash-generator"
   | "image-converter"
-  | "image-resizer";
+  | "image-resizer"
+  | "password-generator";
 
 export type ToolCategory =
   | "digital-legal"
@@ -261,6 +263,16 @@ export const TOOLS: readonly ToolDescriptor[] = [
     runtime: "client",
     icon: Crop,
     schemaCategory: "MultimediaApplication",
+  },
+  {
+    slug: "password-generator",
+    href: "/tools/password-generator",
+    intlKey: "tools.passwordGenerator",
+    navKey: "nav.passwordGenerator",
+    category: "developer",
+    runtime: "client",
+    icon: Key,
+    schemaCategory: "UtilitiesApplication",
   },
 ] as const;
 
