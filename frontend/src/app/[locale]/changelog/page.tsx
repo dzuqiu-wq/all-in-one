@@ -123,7 +123,7 @@ export default async function ChangelogPage({ params }: Props) {
                 "JSON 格式化与压缩器；",
                 "Base64 编码 / 解码器；",
                 "哈希生成器：SHA-1 / SHA-256 / SHA-384 / SHA-512，基于 Web Crypto API；",
-                "密码生成器：基于 <code>crypto.getRandomValues()</code> CSPRNG，可配置长度与字符集；",
+                "密码生成器：基于 `crypto.getRandomValues()` CSPRNG，可配置长度与字符集；",
                 "UUID v4 生成器：批量生成、一键复制。",
               ],
             },
@@ -166,14 +166,14 @@ export default async function ChangelogPage({ params }: Props) {
               items: [
                 "ESLint flat config 迁移完成，修复 7+ 处既有错误；",
                 "Prettier 统一格式化规则；",
-                "新增 <code>.editorconfig</code>，统一团队编辑器缩进、行尾与字符编码。",
+                "新增 `.editorconfig`，统一团队编辑器缩进、行尾与字符编码。",
               ],
             },
             {
               title: "CI 工作流增强",
               items: [
                 "新增步骤：lint、type-check、test、build；",
-                "新增 <code>npm audit</code> 依赖安全扫描；",
+                "新增 `npm audit` 依赖安全扫描；",
                 "PR 合并前所有检查必须为绿。",
               ],
             },
@@ -351,7 +351,7 @@ export default async function ChangelogPage({ params }: Props) {
                 "JSON formatter & minifier;",
                 "Base64 encoder / decoder;",
                 "Hash generator: SHA-1 / SHA-256 / SHA-384 / SHA-512 via the Web Crypto API;",
-                "Password generator: CSPRNG-backed via <code>crypto.getRandomValues()</code> with configurable length and character sets;",
+                "Password generator: CSPRNG-backed via `crypto.getRandomValues()` with configurable length and character sets;",
                 "UUID v4 generator: batch generation and one-click copy.",
               ],
             },
@@ -394,14 +394,14 @@ export default async function ChangelogPage({ params }: Props) {
               items: [
                 "Migrated to ESLint flat config and fixed 7+ pre-existing errors;",
                 "Prettier unifies formatting rules across the codebase;",
-                "Added <code>.editorconfig</code> to align team editor indentation, line endings, and character encoding.",
+                "Added `.editorconfig` to align team editor indentation, line endings, and character encoding.",
               ],
             },
             {
               title: "CI workflow hardening",
               items: [
                 "New steps: lint, type-check, test, build;",
-                "Added <code>npm audit</code> dependency security scanning;",
+                "Added `npm audit` dependency security scanning;",
                 "All checks must be green before any PR can merge.",
               ],
             },
