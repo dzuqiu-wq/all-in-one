@@ -57,12 +57,15 @@ export default function HomeContent() {
   return (
     <div className="bg-canvas">
       {/* ---------- Hero ---------- */}
-      <section className="max-w-7xl mx-auto px-6 py-section">
+      <section className="max-w-6xl mx-auto px-6 py-section">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="caption-upper text-muted mb-6">{t("home.brand")}</div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-canvas-soft rounded-full text-sm text-ink-mute mb-6">
+              <span className="w-2 h-2 bg-primary rounded-full" />
+              <span>{t("home.brand")}</span>
+            </div>
             <h1
-              className="text-display-xl font-serif text-ink mb-6"
+              className="text-display-xl text-ink mb-6"
               style={{ fontSize: "clamp(40px, 6vw, 64px)" }}
             >
               {t("home.headline")}
@@ -74,14 +77,14 @@ export default function HomeContent() {
             <div className="flex flex-wrap items-center gap-3">
               <Link
                 href={wordPdfHref}
-                className="inline-flex items-center gap-2 px-5 py-3 bg-primary text-on-primary text-body-sm font-medium rounded-md hover:bg-primary-active transition-colors no-underline"
+                className="btn-primary inline-flex items-center gap-2 no-underline"
               >
                 {t("home.startWithWordPdf")}
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <a
                 href="#category-digital-legal"
-                className="inline-flex items-center gap-2 px-5 py-3 bg-canvas border border-hairline text-ink text-body-sm font-medium rounded-md hover:bg-surface-card transition-colors no-underline"
+                className="btn-secondary inline-flex items-center gap-2 no-underline"
               >
                 {t("home.browseAll")}
               </a>
@@ -122,8 +125,8 @@ export default function HomeContent() {
       </section>
 
       {/* ---------- Values ---------- */}
-      <section className="surface-soft border-y border-hairline">
-        <div className="max-w-7xl mx-auto px-6 py-xxl">
+      <section className="bg-canvas-soft border-y border-hairline">
+        <div className="max-w-6xl mx-auto px-6 py-xxl">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <ValueCard
               icon={Shield}
@@ -145,7 +148,7 @@ export default function HomeContent() {
       </section>
 
       {/* ---------- Industrial Category Matrix ---------- */}
-      <section id="tools" className="max-w-7xl mx-auto px-6 py-section">
+      <section id="tools" className="max-w-6xl mx-auto px-6 py-section">
         <div className="mb-16 max-w-3xl">
           <div className="caption-upper text-muted mb-4">
             {t("home.categories.eyebrow")}
@@ -166,7 +169,7 @@ export default function HomeContent() {
       </section>
 
       {/* ---------- Mid Ad ---------- */}
-      <section className="max-w-7xl mx-auto px-6 pb-section">
+      <section className="max-w-6xl mx-auto px-6 pb-section">
         <AdBanner
           slot="home-mid-rectangle"
           format="rectangle"
@@ -175,15 +178,15 @@ export default function HomeContent() {
       </section>
 
       {/* ---------- Indie Hacker Philosophy ---------- */}
-      <section className="max-w-7xl mx-auto px-6 pb-section">
-        <div className="surface-card hairline rounded-xl p-section">
+      <section className="max-w-6xl mx-auto px-6 pb-section">
+        <div className="bg-canvas border border-hairline rounded-xl p-section">
           <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-12">
             <div>
-              <div className="caption-upper text-muted mb-4">
+              <div className="text-xs font-medium text-ink-mute uppercase tracking-wider mb-4">
                 {t("home.philosophy.eyebrow")}
               </div>
               <h2
-                className="font-serif text-ink"
+                className="text-ink"
                 style={{
                   fontSize: "clamp(28px, 3.5vw, 38px)",
                   lineHeight: 1.15,
@@ -209,7 +212,7 @@ export default function HomeContent() {
                 href={SOCIAL.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 mt-4 px-4 py-2.5 border border-hairline rounded-md text-body-sm font-medium text-ink hover:bg-surface-cream-strong transition-colors no-underline"
+                className="inline-flex items-center gap-2 mt-4 px-4 py-2.5 border border-hairline rounded-md text-sm font-medium text-ink hover:bg-canvas-soft transition-colors no-underline"
               >
                 <Github className="w-4 h-4" strokeWidth={1.75} />
                 {t("common.contributeOnGithub")}
@@ -220,7 +223,7 @@ export default function HomeContent() {
       </section>
 
       {/* ---------- System Status ---------- */}
-      <section className="max-w-7xl mx-auto px-6 pb-section">
+      <section className="max-w-6xl mx-auto px-6 pb-section">
         <SystemStatus
           heading={t("home.status.title")}
           eyebrow={t("home.status.eyebrow")}
@@ -232,25 +235,25 @@ export default function HomeContent() {
       </section>
 
       {/* ---------- CTA ---------- */}
-      <section className="max-w-7xl mx-auto px-6 pb-section">
-        <div className="bg-primary rounded-xl p-section text-center">
-          <h2 className="text-display-md font-serif text-on-primary mb-6">
+      <section className="max-w-6xl mx-auto px-6 pb-section">
+        <div className="bg-ink rounded-xl p-section text-center">
+          <h2 className="text-3xl font-medium text-canvas mb-4">
             {t("home.cta.title")}
           </h2>
-          <p className="text-title-md text-on-primary opacity-90 mb-8 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-title-md text-canvas/80 mb-8 max-w-2xl mx-auto leading-relaxed opacity-90">
             {t("home.cta.description")}
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
               href={wordPdfHref}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-canvas text-ink text-body-sm font-medium rounded-md hover:bg-surface-card transition-colors no-underline"
+              className="btn-primary inline-flex items-center gap-2 no-underline"
             >
               {t("home.cta.button")}
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               href={aboutHref}
-              className="inline-flex items-center gap-2 px-6 py-3 border border-on-primary/30 text-on-primary text-body-sm font-medium rounded-md hover:bg-on-primary/10 transition-colors no-underline"
+              className="inline-flex items-center gap-2 px-6 py-3 text-canvas/80 hover:text-canvas text-sm font-medium rounded-md border border-canvas/20 hover:border-canvas/40 transition-colors no-underline"
             >
               {t("footer.about")}
               <ArrowRight className="w-4 h-4" />
@@ -260,7 +263,7 @@ export default function HomeContent() {
       </section>
 
       {/* ---------- Footer share strip ---------- */}
-      <section className="max-w-7xl mx-auto px-6 pb-section">
+      <section className="max-w-6xl mx-auto px-6 pb-section">
         <ShareButtons
           title={{
             en: "Seven privacy-first browser tools, zero upload — All-in-One Toolbox",
@@ -285,10 +288,14 @@ interface ValueCardProps {
 
 function ValueCard({ icon: Icon, title, description }: ValueCardProps) {
   return (
-    <div>
-      <Icon className="w-6 h-6 text-primary mb-4" strokeWidth={1.5} />
-      <h4 className="text-title-md font-sans text-ink mb-2">{title}</h4>
-      <p className="text-body-md text-body leading-relaxed">{description}</p>
+    <div className="flex gap-4">
+      <div className="w-10 h-10 bg-canvas rounded-lg flex items-center justify-center flex-shrink-0">
+        <Icon className="w-5 h-5 text-primary" strokeWidth={1.5} />
+      </div>
+      <div>
+        <h4 className="text-base font-medium text-ink mb-1">{title}</h4>
+        <p className="text-sm text-ink-mute leading-relaxed">{description}</p>
+      </div>
     </div>
   );
 }
@@ -301,12 +308,6 @@ function CategoryMatrix({ category }: CategoryMatrixProps) {
   const t = useTranslations();
   const Icon = category.icon;
   const categoryTools = TOOLS.filter((tool) => tool.category === category.id);
-  const accentClass =
-    category.accent === "primary"
-      ? "text-primary"
-      : category.accent === "ink"
-        ? "text-ink"
-        : "text-muted";
 
   return (
     <section
@@ -316,13 +317,13 @@ function CategoryMatrix({ category }: CategoryMatrixProps) {
     >
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8 pb-6 border-b border-hairline">
         <div className="flex-1 max-w-2xl">
-          <div className={`inline-flex items-center gap-2 caption-upper ${accentClass} mb-3`}>
+          <div className="inline-flex items-center gap-2 text-sm text-ink-mute mb-3">
             <Icon className="w-3.5 h-3.5" strokeWidth={2} />
             <span>{t(`${category.intlKey}.label`)}</span>
           </div>
           <h3
             id={`category-${category.id}-title`}
-            className="font-serif text-ink mb-3"
+            className="text-display-md text-ink mb-3"
             style={{
               fontSize: "clamp(26px, 3.2vw, 34px)",
               lineHeight: 1.15,
@@ -362,28 +363,28 @@ function ToolMatrixCard({ tool }: ToolMatrixCardProps) {
   return (
     <Link
       href={href}
-      className="group block surface-card hairline rounded-lg p-xl transition-all duration-300 hover:bg-surface-cream-strong no-underline hover:no-underline"
+      className="group block bg-canvas border border-hairline rounded-lg p-6 hover:border-primary hover:shadow-sm transition-all duration-300 no-underline hover:no-underline"
     >
       <div className="flex items-start justify-between mb-6">
-        <div className="w-12 h-12 bg-canvas rounded-md flex items-center justify-center">
+        <div className="w-10 h-10 bg-canvas-soft rounded-md flex items-center justify-center">
           <Icon className="w-6 h-6 text-ink" strokeWidth={1.5} />
         </div>
-        <span className="caption-upper text-muted-soft px-3 py-1 bg-canvas rounded-pill">
+        <span className="text-xs font-medium text-ink-mute px-3 py-1 bg-canvas-soft rounded-pill">
           {tool.runtime === "server" ? t("tools.server") : t("tools.browser")}
         </span>
       </div>
 
       <h4
-        className="text-display-sm font-serif text-ink mb-3"
-        style={{ marginBottom: "12px" }}
+        className="text-lg font-medium text-ink mb-2"
+        style={{ marginBottom: "8px" }}
       >
         {t(`${tool.intlKey}.name`)}
       </h4>
-      <p className="text-body-md text-body leading-relaxed mb-6">
+      <p className="text-sm text-ink-mute mb-4 leading-relaxed line-clamp-2">
         {t(`${tool.intlKey}.description`)}
       </p>
 
-      <div className="flex items-center gap-2 text-body-sm font-medium text-primary group-hover:text-primary-active transition-colors">
+      <div className="flex items-center gap-2 text-sm font-medium text-primary group-hover:gap-3 transition-all">
         {t("home.tryItNow")}
         <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
       </div>
