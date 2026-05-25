@@ -1,5 +1,5 @@
 # Continuous Integration — runs on every push and pull request to verify
-# the codebase still builds, type-checks, and (for the backend) parses
+# the codebase still builds, type-checks, tests, and (for the backend) parses
 # cleanly before a CD pipeline ever touches the VPS.
 #
 # This workflow MUST pass for the CD workflow to consider a commit
@@ -29,10 +29,10 @@ concurrency:
 
 jobs:
   # ==========================================================================
-  # Frontend — Next.js production build + type checking
+  # Frontend — Next.js production build + lint + unit tests + type checking
   # ==========================================================================
   frontend:
-    name: Frontend · Build + Typecheck
+    name: Frontend · Build + Lint + Test
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -54,10 +54,22 @@ jobs:
       - name: Install dependencies (npm ci)
         run: npm ci --no-audit --no-fund
 
+      - name: Run ESLint
+        run: npm run lint
+
       - name: Type check (tsc --noEmit)
         # We run tsc explicitly because `next build` skips strict checks when
         # `typescript.ignoreBuildErrors` is enabled in next.config.
         run: npx tsc --noEmit
+
+      - name: Run unit tests (Vitest)
+        run: npm run test:run
+
+      - name: Security audit (npm)
+        # Continue on error so a transient advisory does not block CI.
+        # Use `audit fix` locally to address findings.
+        run: npm audit --audit-level=high
+        continue-on-error: true
 
       - name: Build (next build)
         env:
@@ -72,12 +84,12 @@ jobs:
           echo "::endgroup::"
 
   # ==========================================================================
-  # Backend — Python syntax check via py_compile
+  # Backend — Python syntax check + pytest unit tests
   # ==========================================================================
   backend:
-    name: Backend · Python compile
+    name: Backend · Compile + Test
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
 
     defaults:
       run:
@@ -117,6 +129,62 @@ jobs:
         # Import the FastAPI app module so we catch import-time wiring
         # errors (missing env defaults, broken relative imports, etc).
         run: python -c "import app.main; print('app.main imported ok')"
+
+      - name: Run unit tests (pytest)
+        # Skip integration tests in CI — they need Gotenberg running.
+        run: pytest tests/ -v -m "not integration"
+
+  # ==========================================================================
+  # E2E — Playwright tests against a real Next.js build
+  # ==========================================================================
+  e2e:
+    name: E2E · Playwright
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: frontend
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies (npm ci)
+        run: npm ci --no-audit --no-fund
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Build app
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: npm run build
+
+      - name: Start app and run Playwright tests
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+          CI: "true"
+        run: |
+          npm run start &
+          npx wait-on http://localhost:3000 -t 60000 || true
+          npx playwright test
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7
 
   # ==========================================================================
   # Docker — validate that compose files still parse
