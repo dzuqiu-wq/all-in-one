@@ -32,6 +32,7 @@ import {
   Crop,
   Key,
   Palette,
+  Fingerprint,
 } from "lucide-react";
 
 export type ToolSlug =
@@ -51,7 +52,8 @@ export type ToolSlug =
   | "image-converter"
   | "image-resizer"
   | "password-generator"
-  | "color-converter";
+  | "color-converter"
+  | "uuid-generator";
 
 export type ToolCategory =
   | "digital-legal"
@@ -285,6 +287,16 @@ export const TOOLS: readonly ToolDescriptor[] = [
     runtime: "client",
     icon: Palette,
     schemaCategory: "DesignApplication",
+  },
+  {
+    slug: "uuid-generator",
+    href: "/tools/uuid-generator",
+    intlKey: "tools.uuidGenerator",
+    navKey: "nav.uuidGenerator",
+    category: "developer",
+    runtime: "client",
+    icon: Fingerprint,
+    schemaCategory: "UtilitiesApplication",
   },
 ] as const;
 

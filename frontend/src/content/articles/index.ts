@@ -30,6 +30,7 @@ import imageConverter from "./image-converter";
 import imageResizer from "./image-resizer";
 import passwordGenerator from "./password-generator";
 import colorConverter from "./color-converter";
+import uuidGenerator from "./uuid-generator";
 
 export type ArticleLocale = "en" | "zh";
 
@@ -53,6 +54,7 @@ const REGISTRY: Record<ToolSlug, BilingualArticle> = {
   "image-resizer": imageResizer,
   "password-generator": passwordGenerator,
   "color-converter": colorConverter,
+  "uuid-generator": uuidGenerator,
 };
 
 export function getArticle(slug: ToolSlug, locale: ArticleLocale): ToolArticleContent {
