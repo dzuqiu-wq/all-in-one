@@ -307,10 +307,10 @@ export default function WordToPDFPage() {
         {/* Hero */}
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4">{t("tag")}</div>
-          <h1 className="text-display-lg font-serif text-ink mb-4" style={{ fontSize: "clamp(36px, 5vw, 48px)" }}>
+          <h1 className="text-3xl font-medium text-ink mb-4" style={{ fontSize: "clamp(36px, 5vw, 48px)" }}>
             {t("title")}
           </h1>
-          <p className="text-title-md text-body max-w-2xl leading-relaxed">
+          <p className="text-lg font-medium text-ink max-w-2xl leading-relaxed">
             {t("description")}
           </p>
         </div>
@@ -325,8 +325,8 @@ export default function WordToPDFPage() {
           onDrop={handleDrop}
           onDragOver={(e) => e.preventDefault()}
           onClick={() => fileInputRef.current?.click()}
-          className={`surface-card border-2 border-dashed rounded-xl p-xxl text-center cursor-pointer transition-all duration-300 ${
-            file ? "border-primary bg-surface-cream-strong" : "border-hairline hover:border-primary hover:bg-surface-cream-strong"
+          className={`bg-canvas border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-300 ${
+            file ? "border-primary bg-primary/5" : "border-hairline hover:border-primary hover:bg-surface-cream-strong"
           }`}
         >
           <input
@@ -337,7 +337,7 @@ export default function WordToPDFPage() {
             className="hidden"
           />
           <FileText className="w-12 h-12 mx-auto mb-4 text-primary" strokeWidth={1.5} />
-          <h4 className="text-title-md font-sans text-ink mb-2">
+          <h4 className="text-lg font-medium text-ink mb-2">
             {file ? file.name : t("dropzone")}
           </h4>
           <p className="text-body-sm text-muted">
@@ -357,14 +357,14 @@ export default function WordToPDFPage() {
           <div className="mt-6 flex gap-3">
             <button
               onClick={handleConvert}
-              className="flex-1 py-3 bg-primary text-on-primary text-body-sm font-medium rounded-md hover:bg-primary-active transition-colors flex items-center justify-center gap-2"
+              className="flex-1 btn-primary flex items-center justify-center gap-2"
             >
               <Upload className="w-4 h-4" />
               {t("convert")}
             </button>
             <button
               onClick={handleReset}
-              className="px-6 py-3 bg-canvas border border-hairline text-ink text-body-sm font-medium rounded-md hover:bg-surface-card transition-colors"
+              className="px-6 py-3 btn-secondary hover:bg-surface-card transition-colors"
             >
               {t("reset")}
             </button>
@@ -373,7 +373,7 @@ export default function WordToPDFPage() {
 
         {/* Processing State */}
         {state === "processing" && (
-          <div className="mt-6 surface-card rounded-lg p-lg">
+          <div className="mt-6 bg-canvas border border-hairline rounded-lg p-6">
             <div className="flex items-center gap-3">
               <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               <span className="text-body-sm font-medium text-ink">{t("processing")}</span>
@@ -391,7 +391,7 @@ export default function WordToPDFPage() {
                 <p className="text-body-sm text-body">{error}</p>
                 <button
                   onClick={handleReset}
-                  className="mt-4 px-4 py-2 bg-canvas border border-hairline text-body-sm rounded-md hover:bg-surface-card transition-colors"
+                  className="mt-4 px-4 py-2 btn-secondary hover:bg-surface-card transition-colors"
                 >
                   {t("tryAgain")}
                 </button>
@@ -403,10 +403,10 @@ export default function WordToPDFPage() {
         {/* Success State */}
         {result && (
           <div className="mt-8 space-y-6">
-            <div className="surface-card rounded-xl p-xl">
+            <div className="bg-canvas border border-hairline rounded-xl p-8">
               <div className="flex items-center gap-3 mb-6">
                 <CheckCircle className="w-6 h-6 text-success" />
-                <h4 className="text-title-md font-sans text-ink">{t("success")}</h4>
+                <h4 className="text-lg font-medium text-ink">{t("success")}</h4>
               </div>
 
               <div className="grid grid-cols-3 gap-4 mb-6">
@@ -427,14 +427,14 @@ export default function WordToPDFPage() {
               <div className="flex gap-3">
                 <button
                   onClick={handleDownload}
-                  className="flex-1 py-3 bg-primary text-on-primary text-body-sm font-medium rounded-md hover:bg-primary-active transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 btn-primary flex items-center justify-center gap-2"
                 >
                   <Download className="w-4 h-4" />
                   {t("download")} {result.fileName}
                 </button>
                 <button
                   onClick={handleReset}
-                  className="px-6 py-3 bg-canvas border border-hairline text-ink text-body-sm font-medium rounded-md hover:bg-surface-card transition-colors"
+                  className="px-6 py-3 btn-secondary hover:bg-surface-card transition-colors"
                 >
                   {t("convertAnother")}
                 </button>
@@ -463,7 +463,7 @@ export default function WordToPDFPage() {
 
         {/* FAQ Section */}
         <section className="mt-section pt-xl border-t border-hairline">
-          <h2 className="text-display-md font-serif text-ink mb-8">
+          <h2 className="text-3xl font-medium text-ink mb-8">
             {t("faqTitle")}
           </h2>
           <div className="space-y-6">
@@ -475,7 +475,7 @@ export default function WordToPDFPage() {
               { q: t("faq5Q"), a: t("faq5A") },
               { q: t("faq6Q"), a: t("faq6A") },
             ].map((item, idx) => (
-              <details key={idx} className="group surface-card rounded-lg p-lg">
+              <details key={idx} className="group bg-canvas border border-hairline rounded-lg p-6">
                 <summary className="cursor-pointer text-title-sm font-sans font-medium text-ink hover:text-primary transition-colors">
                   {item.q}
                 </summary>
