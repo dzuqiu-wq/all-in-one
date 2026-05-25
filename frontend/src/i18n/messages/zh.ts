@@ -491,6 +491,7 @@ export default {
       stats: '输入 · {chars} 字符 / {lines} 行',
     },
     base64: {
+      name: "Base64 编解码器",
       tag: "开发者工具",
       title: "Base64 编解码器",
       description: "在浏览器中对 Base64 文本进行编码和解码。支持标准和 URL-safe 变体，原生支持 UTF-8。",
@@ -512,6 +513,7 @@ export default {
       faq3A: "不会。编解码完全在浏览器中通过原生 btoa/atob 和 TextEncoder/TextDecoder API 完成，不向任何服务器发送数据。",
     },
     hashGenerator: {
+      name: "哈希生成器",
       tag: "开发者工具",
       title: "哈希生成器（SHA-1/256/384/512）",
       description: "使用 Web Crypto API 在浏览器中计算加密哈希。无需上传，无追踪。",
@@ -530,6 +532,7 @@ export default {
       faq3A: "不会。所有哈希计算都在你的浏览器中通过 Web Crypto API 完成，输入永不离开你的设备。",
     },
     imageConverter: {
+      name: "图片格式转换",
       tag: "图片工具",
       title: "图片格式转换器",
       description: "在浏览器中转换 PNG ↔ JPEG ↔ WebP。无需上传，无追踪。使用原生 Canvas 编码。",
@@ -555,6 +558,7 @@ export default {
       faq3A: "不会。所有转换都在浏览器本地完成，图片文件永不离开你的设备。",
     },
     imageResizer: {
+      name: "图片尺寸调整",
       tag: "图片工具",
       title: "图片尺寸调整",
       description: "精确调整图片尺寸，可选锁定纵横比。完全使用 Canvas API 在浏览器中运行。",
@@ -580,6 +584,7 @@ export default {
       faq3A: "源文件限制 10 MB。输出分辨率最大 16384 × 16384 像素（浏览器 Canvas 限制）。超大输出在移动设备上可能因内存不足失败。",
     },
     passwordGenerator: {
+      name: "密码生成器",
       tag: "开发者工具",
       title: "密码生成器",
       description: "在浏览器中使用 Web Crypto CSPRNG 生成密码学安全的密码。不传输、不存储。",
@@ -608,6 +613,7 @@ export default {
       faq3A: "不会。生成过程完全在浏览器中进行。除当前页面会话外，不发送至任何服务器、不被记录、不被缓存。刷新即清空。",
     },
     colorConverter: {
+      name: "颜色转换器",
       tag: "设计工具",
       title: "颜色转换器（HEX / RGB / HSL）",
       description: "在 HEX、RGB 和 HSL 颜色空间之间转换，实时预览。所有计算在浏览器中完成。",
@@ -626,6 +632,7 @@ export default {
       faq3A: "在 sRGB 色域内是的——但整数通道的舍入可能在往返时让色感漂移每通道 ±1 单位。像素级精度要求请在原色彩空间中编辑。",
     },
     uuidGenerator: {
+      name: "UUID 生成器",
       tag: "开发者工具",
       title: "UUID 生成器（RFC 4122 v4）",
       description: "生成密码学随机的 UUID（v4 版本）。一次最多 10,000 个。纯浏览器，无服务器。",

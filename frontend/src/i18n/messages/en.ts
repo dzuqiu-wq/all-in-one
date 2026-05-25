@@ -493,6 +493,7 @@ export default {
       stats: 'Input · {chars} characters / {lines} lines',
     },
     base64: {
+      name: "Base64 Encoder & Decoder",
       tag: "Developer Tool",
       title: "Base64 Encoder & Decoder",
       description: "Encode and decode Base64 text in your browser. Supports standard and URL-safe variants. UTF-8 friendly.",
@@ -514,6 +515,7 @@ export default {
       faq3A: "No. Encoding and decoding happen entirely in your browser via the native btoa/atob and TextEncoder/TextDecoder APIs. Nothing is sent to any server.",
     },
     hashGenerator: {
+      name: "Hash Generator",
       tag: "Developer Tool",
       title: "Hash Generator (SHA-1/256/384/512)",
       description: "Compute cryptographic hashes in your browser using Web Crypto API. No upload, no tracking.",
@@ -532,6 +534,7 @@ export default {
       faq3A: "No. All hashing happens locally in your browser via the Web Crypto API. The input never leaves your device.",
     },
     imageConverter: {
+      name: "Image Format Converter",
       tag: "Image Tool",
       title: "Image Format Converter",
       description: "Convert PNG ↔ JPEG ↔ WebP entirely in your browser. No upload, no tracking. Native Canvas encoding.",
@@ -557,6 +560,7 @@ export default {
       faq3A: "No. All conversion happens locally in your browser. The image file never leaves your device.",
     },
     imageResizer: {
+      name: "Image Resizer",
       tag: "Image Tool",
       title: "Image Resizer",
       description: "Resize images precisely with optional aspect-ratio lock. Runs entirely in your browser using Canvas.",
@@ -582,6 +586,7 @@ export default {
       faq3A: "Source file limit is 10 MB. Output dimensions can be up to 16384 × 16384 pixels (browser Canvas limit). Very large outputs may run out of memory on mobile devices.",
     },
     passwordGenerator: {
+      name: "Password Generator",
       tag: "Developer Tool",
       title: "Password Generator",
       description: "Generate cryptographically secure passwords in your browser using the Web Crypto CSPRNG. No transmission, no storage.",
@@ -610,6 +615,7 @@ export default {
       faq3A: "No. Generation happens entirely in your browser. Nothing is sent to any server, logged, or cached beyond the current page session. Reload and the password is gone.",
     },
     colorConverter: {
+      name: "Color Converter",
       tag: "Design Tool",
       title: "Color Converter (HEX / RGB / HSL)",
       description: "Convert between HEX, RGB, and HSL color spaces with live preview. All math runs in your browser.",
@@ -628,6 +634,7 @@ export default {
       faq3A: "Within the sRGB gamut, yes — but rounding to integer channels can drift the perceived color by ±1 unit per channel on round-trips. For pixel-perfect work, edit in the original color space.",
     },
     uuidGenerator: {
+      name: "UUID Generator",
       tag: "Developer Tool",
       title: "UUID Generator (RFC 4122 v4)",
       description: "Generate cryptographically random UUIDs (version 4). Up to 10,000 at once. Browser-only, no server.",
