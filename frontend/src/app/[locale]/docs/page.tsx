@@ -328,6 +328,66 @@ export default async function DocsPage({ params }: Props) {
           </InfoSubsection>
         </InfoSection>
 
+        <InfoSection heading="工具 9 · Excel 转 PDF">
+          <p>
+            位于 <code>/tools/excel-to-pdf</code>。复用 Gotenberg + LibreOffice 服务端管道，将 .xlsx/.xls 工作簿转换为 PDF。公式被计算为最终值，图表与嵌入图像一并渲染。5 秒超时，5MB 大小限制，纯内存管道。
+          </p>
+        </InfoSection>
+
+        <InfoSection heading="工具 10 · PowerPoint 转 PDF">
+          <p>
+            位于 <code>/tools/powerpoint-to-pdf</code>。同样的 LibreOffice 后端,将 .pptx/.ppt 演示文稿转换为 PDF。每张幻灯片占一页;动画与过渡被剥离（PDF 不支持时间轴）,但静态布局、字体回退与嵌入图像完整保留。
+          </p>
+        </InfoSection>
+
+        <InfoSection heading="工具 11 · JSON 格式化与验证">
+          <p>
+            位于 <code>/tools/json-formatter</code>。基于浏览器原生 <code>JSON.parse</code> 与 <code>JSON.stringify</code>,零依赖、零上传。支持 2/4 空格缩进、压缩、与验证三种操作,错误信息直接来自 V8/SpiderMonkey 引擎抛出的 SyntaxError。
+          </p>
+        </InfoSection>
+
+        <InfoSection heading="工具 12 · Base64 编解码">
+          <p>
+            位于 <code>/tools/base64</code>。通过 <code>btoa</code>/<code>atob</code> 与 <code>TextEncoder</code>/<code>TextDecoder</code> 桥接实现 UTF-8 安全编解码。支持标准与 URL-safe 两种变体（后者把 +、/ 替换为 -、_ 并去除填充）。
+          </p>
+        </InfoSection>
+
+        <InfoSection heading="工具 13 · 哈希生成器">
+          <p>
+            位于 <code>/tools/hash-generator</code>。基于浏览器原生 Web Crypto API 的 <code>crypto.subtle.digest()</code>,支持 SHA-1、SHA-256、SHA-384、SHA-512。MD5 因密码学已破被故意不暴露——任何安全场景请用 SHA-256 起步。
+          </p>
+        </InfoSection>
+
+        <InfoSection heading="工具 14 · 图片格式转换">
+          <p>
+            位于 <code>/tools/image-converter</code>。通过 HTML Canvas 的 <code>toBlob()</code> 在 PNG、JPEG、WebP 之间转换。质量滑块对 PNG 无效（无损）,对 JPEG/WebP 取值 0.1-1.0。源图通过 <code>createImageBitmap</code> 解码后立即 <code>close()</code> 释放 GPU 内存。
+          </p>
+        </InfoSection>
+
+        <InfoSection heading="工具 15 · 图片尺寸调整">
+          <p>
+            位于 <code>/tools/image-resizer</code>。Canvas <code>drawImage(...)</code> 双线性缩放,<code>imageSmoothingQuality = &quot;high&quot;</code> 启用 bicubic 类滤波。锁定纵横比时编辑任一维度自动更新另一维度。源 MIME 保留,文件名追加 <code>-WxH</code> 后缀避免覆盖原图。
+          </p>
+        </InfoSection>
+
+        <InfoSection heading="工具 16 · 密码生成器">
+          <p>
+            位于 <code>/tools/password-generator</code>。<code>crypto.getRandomValues(Uint32Array)</code> 驱动的密码学安全 PRNG,每字符独立采样。Shannon 熵估算（长度 × log2(字符池)）给出 weak/medium/strong 分级。永不存储,永不传输。
+          </p>
+        </InfoSection>
+
+        <InfoSection heading="工具 17 · 颜色转换器">
+          <p>
+            位于 <code>/tools/color-converter</code>。RGB 作为单一真相源,HEX 与 HSL 通过 <code>useMemo</code> 派生。HSL 用 hexcone 算法,无 sRGB 伽马校正（因为目标只是各空间间互转,不做 P3/OKLCH 跨色域映射）。
+          </p>
+        </InfoSection>
+
+        <InfoSection heading="工具 18 · UUID 生成器">
+          <p>
+            位于 <code>/tools/uuid-generator</code>。优先调用 <code>crypto.randomUUID()</code>,旧浏览器回退到 <code>crypto.getRandomValues</code> 手动设置 RFC 4122 v4 的版本位（byte 6 = 0x40 mask）与变体位（byte 8 = 0x80 mask）。一次最多 10,000 个。
+          </p>
+        </InfoSection>
+
         <InfoSection heading="性能预算">
           <ul className="list-disc pl-6 space-y-2">
             <li><strong>首屏 LCP</strong>（最大内容绘制）：&lt; 1.5 s（中位数）；</li>
@@ -561,6 +621,66 @@ export default async function DocsPage({ params }: Props) {
             <li><strong>XLSX</strong>: preserves original data types for Excel workflows.</li>
           </ul>
         </InfoSubsection>
+      </InfoSection>
+
+      <InfoSection heading="Tool 9 · Excel to PDF">
+        <p>
+          Lives at <code>/tools/excel-to-pdf</code>. Reuses the Gotenberg + LibreOffice server pipeline to convert .xlsx/.xls workbooks to PDF. Formulas are evaluated to their final values; charts and embedded images render in the output. Same 5-second timeout, 5MB ceiling, memory-only pipeline.
+        </p>
+      </InfoSection>
+
+      <InfoSection heading="Tool 10 · PowerPoint to PDF">
+        <p>
+          Lives at <code>/tools/powerpoint-to-pdf</code>. Same LibreOffice backend, converting .pptx/.ppt decks to PDF. One slide per page; animations and slide transitions are stripped (PDF has no timeline), but static layout, font fallback, and embedded media are preserved.
+        </p>
+      </InfoSection>
+
+      <InfoSection heading="Tool 11 · JSON Formatter &amp; Validator">
+        <p>
+          Lives at <code>/tools/json-formatter</code>. Backed by the browser-native <code>JSON.parse</code> and <code>JSON.stringify</code> — zero dependencies, zero upload. Supports 2/4-space indent, minification, and validation, with error messages surfaced directly from the V8/SpiderMonkey SyntaxError.
+        </p>
+      </InfoSection>
+
+      <InfoSection heading="Tool 12 · Base64 Encoder/Decoder">
+        <p>
+          Lives at <code>/tools/base64</code>. Bridges <code>btoa</code>/<code>atob</code> with <code>TextEncoder</code>/<code>TextDecoder</code> for UTF-8-safe round-trips. Supports both the standard and URL-safe variants (the latter swaps + for -, / for _, and strips padding).
+        </p>
+      </InfoSection>
+
+      <InfoSection heading="Tool 13 · Hash Generator">
+        <p>
+          Lives at <code>/tools/hash-generator</code>. Powered by the browser-native Web Crypto API via <code>crypto.subtle.digest()</code>, supporting SHA-1, SHA-256, SHA-384, and SHA-512. MD5 is intentionally not exposed — it is cryptographically broken; use SHA-256 or stronger for any security purpose.
+        </p>
+      </InfoSection>
+
+      <InfoSection heading="Tool 14 · Image Format Converter">
+        <p>
+          Lives at <code>/tools/image-converter</code>. Re-encodes between PNG, JPEG, and WebP using the HTML Canvas <code>toBlob()</code> path. Quality is ignored for PNG (lossless); 0.1-1.0 for JPEG/WebP. Source bitmaps are decoded with <code>createImageBitmap</code> and <code>close()</code>&apos;d in a <code>finally</code> block to release GPU memory.
+        </p>
+      </InfoSection>
+
+      <InfoSection heading="Tool 15 · Image Resizer">
+        <p>
+          Lives at <code>/tools/image-resizer</code>. Canvas <code>drawImage(...)</code> with <code>imageSmoothingQuality = &quot;high&quot;</code> for bicubic-like resampling. Aspect-ratio lock auto-updates the other dimension on edit. Source MIME is preserved; the downloaded filename appends <code>-WxH</code> so multiple outputs do not collide with the original.
+        </p>
+      </InfoSection>
+
+      <InfoSection heading="Tool 16 · Password Generator">
+        <p>
+          Lives at <code>/tools/password-generator</code>. Driven by <code>crypto.getRandomValues(Uint32Array)</code> — a cryptographically secure PRNG — with independent per-character sampling. Shannon entropy (length × log2(pool)) drives a weak/medium/strong strength meter. Nothing is stored or transmitted.
+        </p>
+      </InfoSection>
+
+      <InfoSection heading="Tool 17 · Color Converter">
+        <p>
+          Lives at <code>/tools/color-converter</code>. RGB is the single source of truth; HEX and HSL are derived via <code>useMemo</code>. HSL uses the hexcone algorithm without sRGB gamma correction (the goal is round-tripping across the three encodings, not P3/OKLCH gamut mapping).
+        </p>
+      </InfoSection>
+
+      <InfoSection heading="Tool 18 · UUID Generator">
+        <p>
+          Lives at <code>/tools/uuid-generator</code>. Prefers <code>crypto.randomUUID()</code>; older browsers fall back to <code>crypto.getRandomValues</code> with manual RFC 4122 v4 version bits (byte 6 = 0x40 mask) and variant bits (byte 8 = 0x80 mask). Up to 10,000 UUIDs in a single batch.
+        </p>
       </InfoSection>
 
       <InfoSection heading="Performance Budget">
