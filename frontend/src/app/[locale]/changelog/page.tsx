@@ -102,6 +102,84 @@ export default async function ChangelogPage({ params }: Props) {
   const releases: ReleaseEntry[] = isZh
     ? [
         {
+          version: "v1.3.0",
+          date: "2026-05-26",
+          tag: "新工具上线",
+          tagTone: "primary",
+          headline: "10 个新工具上线：文档转换、开发者工具与图像设计",
+          summary:
+            "一次性新增 10 款工具，覆盖文档转换、开发者工具与图像设计三大场景。除文档转换复用既有 Gotenberg/LibreOffice 后端外，其余全部为纯客户端实现，零上传、零追踪。导航栏与页脚已接入 toolRegistry，未来新增工具将自动出现在站点入口。",
+          groups: [
+            {
+              title: "文档转换",
+              items: [
+                "Excel → PDF：复用 Gotenberg + LibreOffice 后端管道，沿用 5 秒超时与 5 MB 上限策略；",
+                "PowerPoint → PDF：同上 LibreOffice 渲染管道，保留母版动画静态帧。",
+              ],
+            },
+            {
+              title: "开发者工具（全部纯前端，零上传）",
+              items: [
+                "JSON 格式化与压缩器；",
+                "Base64 编码 / 解码器；",
+                "哈希生成器：SHA-1 / SHA-256 / SHA-384 / SHA-512，基于 Web Crypto API；",
+                "密码生成器：基于 <code>crypto.getRandomValues()</code> CSPRNG，可配置长度与字符集；",
+                "UUID v4 生成器：批量生成、一键复制。",
+              ],
+            },
+            {
+              title: "图像与设计",
+              items: [
+                "图片格式转换器：PNG / JPEG / WebP 互转，浏览器内 Canvas 完成；",
+                "图片尺寸调整器：支持锁定纵横比与自定义像素；",
+                "颜色格式转换器：HEX / RGB / HSL 实时互转。",
+              ],
+            },
+            {
+              title: "SEO 与导航",
+              items: [
+                "为每个新工具页面配置中英双语 metadata 与 locale-aware JSON-LD 结构化数据；",
+                "Navbar 与 Footer 全面接入 toolRegistry，未来新增工具无需手动改导航。",
+              ],
+            },
+          ],
+        },
+        {
+          version: "v1.2.0",
+          date: "2026-05-25",
+          tag: "质量基线",
+          tagTone: "primary",
+          headline: "质量基线：测试框架、ESLint、CI 增强",
+          summary:
+            "为项目铺设工程质量基线：引入 Vitest、Playwright、pytest 三套测试框架，统一 ESLint flat config + Prettier，并在 CI 工作流中追加 lint、type-check、test、build 与 npm audit 步骤。零功能变更，专注地基。",
+          groups: [
+            {
+              title: "测试框架",
+              items: [
+                "Vitest 单元测试：覆盖前端工具函数与组件，全量接入 CI；",
+                "pytest 后端测试：覆盖 FastAPI 网关、限速器与文件校验，全量接入 CI；",
+                "Playwright E2E：覆盖全部 18 个工具页面，附加 sitemap.xml 完整性验证。",
+              ],
+            },
+            {
+              title: "代码风格与一致性",
+              items: [
+                "ESLint flat config 迁移完成，修复 7+ 处既有错误；",
+                "Prettier 统一格式化规则；",
+                "新增 <code>.editorconfig</code>，统一团队编辑器缩进、行尾与字符编码。",
+              ],
+            },
+            {
+              title: "CI 工作流增强",
+              items: [
+                "新增步骤：lint、type-check、test、build；",
+                "新增 <code>npm audit</code> 依赖安全扫描；",
+                "PR 合并前所有检查必须为绿。",
+              ],
+            },
+          ],
+        },
+        {
           version: "v1.1.0",
           date: "2026-05-23",
           tag: "新工具上线",
@@ -251,6 +329,84 @@ export default async function ChangelogPage({ params }: Props) {
         },
       ]
     : [
+        {
+          version: "v1.3.0",
+          date: "2026-05-26",
+          tag: "New tools",
+          tagTone: "primary",
+          headline: "10 new tools shipped: document conversion, developer utilities, image & design",
+          summary:
+            "Ten new tools landed in a single drop across three categories: document conversion, developer utilities, and image & design. Aside from document conversion, which reuses the existing Gotenberg/LibreOffice backend, every new tool runs entirely client-side — zero uploads, zero tracking. The navbar and footer now consume toolRegistry, so future tools surface automatically across the site.",
+          groups: [
+            {
+              title: "Document conversion",
+              items: [
+                "Excel → PDF: reuses the Gotenberg + LibreOffice backend pipeline with the same 5-second timeout and 5 MB cap;",
+                "PowerPoint → PDF: same LibreOffice rendering pipeline, preserving static frames for master animations.",
+              ],
+            },
+            {
+              title: "Developer tools (client-only, zero upload)",
+              items: [
+                "JSON formatter & minifier;",
+                "Base64 encoder / decoder;",
+                "Hash generator: SHA-1 / SHA-256 / SHA-384 / SHA-512 via the Web Crypto API;",
+                "Password generator: CSPRNG-backed via <code>crypto.getRandomValues()</code> with configurable length and character sets;",
+                "UUID v4 generator: batch generation and one-click copy.",
+              ],
+            },
+            {
+              title: "Image & design",
+              items: [
+                "Image format converter: PNG / JPEG / WebP conversions performed in-browser via Canvas;",
+                "Image resizer: aspect-ratio lock and custom pixel dimensions;",
+                "Color converter: real-time HEX / RGB / HSL interconversion.",
+              ],
+            },
+            {
+              title: "SEO & navigation",
+              items: [
+                "Bilingual metadata and locale-aware JSON-LD structured data for every new tool page;",
+                "Navbar & Footer fully consume toolRegistry — future tools surface automatically without manual nav edits.",
+              ],
+            },
+          ],
+        },
+        {
+          version: "v1.2.0",
+          date: "2026-05-25",
+          tag: "Quality baseline",
+          tagTone: "primary",
+          headline: "Quality baseline: test frameworks, ESLint, and CI hardening",
+          summary:
+            "Laid down the engineering quality baseline for the project: introduced three test frameworks (Vitest, Playwright, pytest), unified ESLint flat config with Prettier, and extended the CI workflow with lint, type-check, test, build, and npm audit steps. Zero feature changes — pure foundation work.",
+          groups: [
+            {
+              title: "Test frameworks",
+              items: [
+                "Vitest unit tests: covers frontend utility functions and components; fully wired into CI;",
+                "pytest backend tests: covers the FastAPI gateway, rate limiter, and file validation; fully wired into CI;",
+                "Playwright E2E: covers all 18 tool pages plus sitemap.xml integrity verification.",
+              ],
+            },
+            {
+              title: "Code style & consistency",
+              items: [
+                "Migrated to ESLint flat config and fixed 7+ pre-existing errors;",
+                "Prettier unifies formatting rules across the codebase;",
+                "Added <code>.editorconfig</code> to align team editor indentation, line endings, and character encoding.",
+              ],
+            },
+            {
+              title: "CI workflow hardening",
+              items: [
+                "New steps: lint, type-check, test, build;",
+                "Added <code>npm audit</code> dependency security scanning;",
+                "All checks must be green before any PR can merge.",
+              ],
+            },
+          ],
+        },
         {
           version: "v1.1.0",
           date: "2026-05-23",
@@ -410,7 +566,7 @@ export default async function ChangelogPage({ params }: Props) {
           ? "记录 All-in-One Toolbox 每一次有意义的迭代。我们承诺所有破坏性变更都会被显式标注，并附带迁移说明。"
           : "A record of every meaningful iteration to All-in-One Toolbox. We commit to flagging any breaking change explicitly, with migration notes."
       }
-      lastUpdated={isZh ? "2026 年 5 月 22 日" : "May 22, 2026"}
+      lastUpdated={isZh ? "2026 年 5 月 26 日" : "May 26, 2026"}
       lastUpdatedLabel={isZh ? "最近更新" : "Last updated"}
       backLabel={isZh ? "返回主页" : "Back to home"}
     >
