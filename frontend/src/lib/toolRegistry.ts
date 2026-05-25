@@ -44,7 +44,8 @@ export type ToolSlug =
   | "wechat-generator"
   | "json-formatter"
   | "base64"
-  | "hash-generator";
+  | "hash-generator"
+  | "image-converter";
 
 export type ToolCategory =
   | "digital-legal"
@@ -238,6 +239,16 @@ export const TOOLS: readonly ToolDescriptor[] = [
     runtime: "client",
     icon: Hash,
     schemaCategory: "UtilitiesApplication",
+  },
+  {
+    slug: "image-converter",
+    href: "/tools/image-converter",
+    intlKey: "tools.imageConverter",
+    navKey: "nav.imageConverter",
+    category: "pixel-image",
+    runtime: "client",
+    icon: ImageIcon,
+    schemaCategory: "MultimediaApplication",
   },
 ] as const;
 

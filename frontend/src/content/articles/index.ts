@@ -26,6 +26,7 @@ import dataSanitizer from "./data-sanitizer";
 import jsonFormatter from "./json-formatter";
 import base64 from "./base64";
 import hashGenerator from "./hash-generator";
+import imageConverter from "./image-converter";
 
 export type ArticleLocale = "en" | "zh";
 
@@ -45,6 +46,7 @@ const REGISTRY: Record<ToolSlug, BilingualArticle> = {
   "json-formatter": jsonFormatter,
   "base64": base64,
   "hash-generator": hashGenerator,
+  "image-converter": imageConverter,
 };
 
 export function getArticle(slug: ToolSlug, locale: ArticleLocale): ToolArticleContent {
