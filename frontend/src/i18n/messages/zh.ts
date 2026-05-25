@@ -88,6 +88,12 @@ export default {
       name: 'UUID 生成器',
       description: '在浏览器中生成密码学随机的 UUID（RFC 4122 v4）。一次最多 10,000 个。无上传、无追踪。',
     },
+    categories: {
+      documents: '文档与法律',
+      business: '商业与金融',
+      media: '媒体与设计',
+      developer: '开发者',
+    },
   },
   home: {
     brand: '全能工具箱',

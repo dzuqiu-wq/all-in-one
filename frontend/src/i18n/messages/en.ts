@@ -88,6 +88,12 @@ export default {
       name: 'UUID Generator',
       description: 'Generate cryptographically random UUIDs (RFC 4122 v4) in your browser. Up to 10,000 at once. No upload, no tracking.',
     },
+    categories: {
+      documents: 'Document & Legal',
+      business: 'Business & Finance',
+      media: 'Media & Design',
+      developer: 'Developer',
+    },
   },
   home: {
     brand: 'All-in-One Toolbox',

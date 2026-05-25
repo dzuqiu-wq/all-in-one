@@ -5,25 +5,39 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
-import { ToolIcons, tools } from "./ToolConfig";
+import { TOOLS, type ToolCategory } from "@/lib/toolRegistry";
 import LanguageSwitcher from "./LanguageSwitcher";
-import { useLocalizedHref } from "@/i18n/useLocalizedHref";
+import { useLocalizedHref, useCurrentLocale } from "@/i18n/useLocalizedHref";
+
+const CATEGORY_ORDER: ToolCategory[] = [
+  "digital-legal",
+  "crypto-financial",
+  "pixel-image",
+  "developer",
+];
+
+const CATEGORY_LABEL_KEY: Record<ToolCategory, string> = {
+  "digital-legal": "nav.categories.documents",
+  "crypto-financial": "nav.categories.business",
+  "pixel-image": "nav.categories.media",
+  developer: "nav.categories.developer",
+};
 
 export default function Navbar() {
   const t = useTranslations();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/";
+  const locale = useCurrentLocale();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  // Determine current locale from pathname
-  const _isZh = pathname.startsWith("/zh");
 
   const homeHref = useLocalizedHref("/");
   const aboutHref = useLocalizedHref("/about");
   const docsHref = useLocalizedHref("/docs");
   const ctaHref = useLocalizedHref("/tools/word-to-pdf");
 
-  const documentTools = tools.filter((tool) => tool.category === "document");
-  const utilityTools = tools.filter((tool) => tool.category === "utility");
+  const isActive = (path: string) =>
+    pathname === path || pathname.endsWith(path);
+
+  const localized = (href: string) => `/${locale}${href}`;
 
   return (
     <header className="sticky top-0 z-50 bg-canvas border-b border-hairline">
@@ -35,19 +49,27 @@ export default function Navbar() {
             className="flex items-center gap-2 text-ink hover:text-ink no-underline hover:no-underline"
           >
             <span className="spike-mark text-ink" />
-            <span className="font-sans text-title-md font-medium">All-in-One</span>
+            <span className="font-sans text-title-md font-medium">
+              All-in-One
+            </span>
           </Link>
 
           {/* Center Navigation */}
           <nav className="hidden md:flex items-center gap-1">
-            <div className="relative">
+            <div
+              className="relative"
+              onMouseEnter={() => setIsDropdownOpen(true)}
+              onMouseLeave={() => setIsDropdownOpen(false)}
+            >
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center gap-1.5 px-3 py-2 text-body-sm font-medium text-body hover:text-ink transition-colors"
               >
                 <span>{t("common.tools")}</span>
                 <ChevronDown
-                  className={`w-3.5 h-3.5 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`}
+                  className={`w-3.5 h-3.5 transition-transform ${
+                    isDropdownOpen ? "rotate-180" : ""
+                  }`}
                 />
               </button>
 
@@ -57,48 +79,61 @@ export default function Navbar() {
                     className="fixed inset-0 z-40"
                     onClick={() => setIsDropdownOpen(false)}
                   />
-                  <div className="absolute top-full mt-2 left-0 w-80 bg-canvas border border-hairline rounded-lg shadow-lg z-50 overflow-hidden">
-                    <div className="p-3">
-                      <div className="px-3 py-1.5 caption-upper text-muted-soft">
-                        {t("nav.documents")}
-                      </div>
-                      {documentTools.map((tool) => (
-                        <NavToolLink
-                          key={tool.name}
-                          tool={tool}
-                          localeKey={getLocaleToolKey(tool.href)}
-                          onSelect={() => setIsDropdownOpen(false)}
-                        />
-                      ))}
-
-                      <div className="px-3 py-1.5 mt-3 caption-upper text-muted-soft border-t border-hairline-soft pt-3">
-                        {t("nav.utilities")}
-                      </div>
-                      {utilityTools.map((tool) => (
-                        <NavToolLink
-                          key={tool.name}
-                          tool={tool}
-                          localeKey={getLocaleToolKey(tool.href)}
-                          onSelect={() => setIsDropdownOpen(false)}
-                        />
-                      ))}
-                    </div>
+                  <div className="absolute top-full left-0 mt-2 w-[680px] bg-canvas border border-hairline rounded-xl shadow-lg p-6 grid grid-cols-2 gap-x-6 gap-y-4 z-50">
+                    {CATEGORY_ORDER.map((category) => {
+                      const categoryTools = TOOLS.filter(
+                        (tool) => tool.category === category,
+                      );
+                      if (categoryTools.length === 0) return null;
+                      return (
+                        <div key={category}>
+                          <h5 className="caption-upper text-muted-soft mb-3 font-sans">
+                            {t(CATEGORY_LABEL_KEY[category])}
+                          </h5>
+                          <ul className="space-y-1.5">
+                            {categoryTools.map((tool) => {
+                              const Icon = tool.icon;
+                              return (
+                                <li key={tool.slug}>
+                                  <Link
+                                    href={localized(tool.href)}
+                                    onClick={() => setIsDropdownOpen(false)}
+                                    className="flex items-center gap-2 px-2 py-1.5 rounded-md text-body-sm text-ink hover:bg-surface-card hover:text-primary transition-colors no-underline"
+                                  >
+                                    <Icon className="w-4 h-4 text-primary flex-shrink-0" />
+                                    <span>{t(`${tool.navKey}.name`)}</span>
+                                  </Link>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      );
+                    })}
                   </div>
                 </>
               )}
             </div>
 
             <Link
-              href={aboutHref}
-              className="px-3 py-2 text-body-sm font-medium text-body hover:text-ink transition-colors no-underline"
-            >
-              {t("nav.about")}
-            </Link>
-            <Link
               href={docsHref}
-              className="px-3 py-2 text-body-sm font-medium text-body hover:text-ink transition-colors no-underline"
+              className={`px-3 py-2 text-body-sm font-medium transition-colors no-underline ${
+                isActive("/docs")
+                  ? "text-primary"
+                  : "text-body hover:text-ink"
+              }`}
             >
               {t("nav.docs")}
+            </Link>
+            <Link
+              href={aboutHref}
+              className={`px-3 py-2 text-body-sm font-medium transition-colors no-underline ${
+                isActive("/about")
+                  ? "text-primary"
+                  : "text-body hover:text-ink"
+              }`}
+            >
+              {t("nav.about")}
             </Link>
           </nav>
 
@@ -123,50 +158,5 @@ export default function Navbar() {
         </div>
       </div>
     </header>
-  );
-}
-
-function getLocaleToolKey(href: string): string {
-  // Map tool href to translation key
-  const hrefToKey: Record<string, string> = {
-    "/tools/word-to-pdf": "nav.wordPdf",
-    "/tools/pdf-merge-split": "nav.pdfMerge",
-    "/tools/pdf-watermark": "nav.pdfWatermark",
-    "/tools/invoice-generator": "nav.invoiceGenerator",
-    "/tools/image-optimizer": "nav.imageOptimizer",
-    "/tools/qrcode-generator": "nav.qrcode",
-    "/tools/data-sanitizer": "nav.dataSanitizer",
-    "/tools/wechat-generator": "nav.wechatGenerator",
-  };
-  return hrefToKey[href] || "";
-}
-
-interface NavToolLinkProps {
-  tool: (typeof tools)[number];
-  localeKey: string;
-  onSelect: () => void;
-}
-
-function NavToolLink({ tool, localeKey, onSelect }: NavToolLinkProps) {
-  const t = useTranslations();
-  const href = useLocalizedHref(tool.href);
-  const Icon = ToolIcons[tool.iconName];
-
-  // Get localized name and description
-  const localizedName = localeKey ? t(`${localeKey}.name`) : tool.name;
-  const localizedDesc = localeKey ? t(`${localeKey}.description`) : tool.description;
-
-  return (
-    <Link
-      href={href}
-      className="flex items-start gap-3 px-3 py-2.5 rounded-md hover:bg-surface-card transition-colors text-ink hover:text-ink no-underline hover:no-underline"
-      onClick={onSelect}
-    >
-      <Icon className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-      <div className="flex-1">
-        <div className="text-body-sm font-medium">{localizedName}</div>
-        <div className="text-xs text-muted mt-0.5">{localizedDesc}</div>
-      </div>
-    </Link>
   );
 }
