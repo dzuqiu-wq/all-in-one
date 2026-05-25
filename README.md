@@ -21,16 +21,43 @@
 
 ### 🎯 Features
 
+**Document conversion**
+
 | Tool | Description |
 |------|-------------|
 | **Word to PDF** | Server-side LibreOffice conversion. 5-second timeout, memory-only pipeline, zero disk writes. |
+| **Excel to PDF** | Convert .xlsx/.xls workbooks to PDF. Formulas evaluated, charts preserved. |
+| **PowerPoint to PDF** | Convert .pptx/.ppt decks to PDF. One slide per page; animations stripped. |
 | **PDF Merge/Split** | Client-side PDF operations using pdf-lib. No server upload required. |
-| **Image Optimizer** | Compress and optimize images directly in the browser. |
-| **QR Code Generator** | Generate QR codes instantly with customizable options. |
-| **WeChat Generator** | Create WeChat article cover images with custom templates. |
-| **Invoice Generator** | Generate professional invoices in PDF format. |
 | **PDF Watermark** | Add text or image watermarks to PDF documents. |
-| **Data Sanitizer** | Data sanitization tool for sensitive information. |
+| **Invoice Generator** | Generate professional invoices in PDF format. |
+
+**Developer tools**
+
+| Tool | Description |
+|------|-------------|
+| **JSON Formatter** | Format, minify, and validate JSON via native JSON.parse. |
+| **Base64 Encoder** | Encode/decode Base64 with URL-safe variant. UTF-8 friendly. |
+| **Hash Generator** | SHA-1/256/384/512 via Web Crypto API. No MD5 (cryptographically broken). |
+| **Password Generator** | Cryptographically secure passwords via crypto.getRandomValues. |
+| **UUID Generator** | RFC 4122 v4 UUIDs, up to 10,000 in a batch. |
+
+**Image & design**
+
+| Tool | Description |
+|------|-------------|
+| **Image Optimizer** | Compress and optimize images directly in the browser. |
+| **Image Converter** | Convert PNG ↔ JPEG ↔ WebP via Canvas. |
+| **Image Resizer** | Resize images with aspect-ratio lock. |
+| **Color Converter** | Convert HEX/RGB/HSL with live preview. |
+| **QR Code Generator** | Generate QR codes with customizable options. |
+| **WeChat Generator** | Create WeChat article cover images with custom templates. |
+
+**Data utilities**
+
+| Tool | Description |
+|------|-------------|
+| **Data Sanitizer** | Auto-detect and fix CSV/Excel encoding issues. |
 
 ---
 
@@ -167,16 +194,43 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 ### 🎯 功能列表
 
+**文档转换**
+
 | 工具 | 描述 |
 |------|------|
-| **Word 转 PDF** | 服务端 LibreOffice 转换。5秒超时，纯内存管道，零磁盘写入。 |
-| **PDF 合并/拆分** | 客户端 PDF 操作，使用 pdf-lib，无需上传服务器。 |
-| **图片优化器** | 直接在浏览器中压缩和优化图片。 |
-| **二维码生成器** | 快速生成自定义选项的二维码。 |
-| **微信封面生成器** | 使用自定义模板创建微信文章封面图片。 |
+| **Word 转 PDF** | 服务端 LibreOffice 转换。5秒超时，纯内存管道。 |
+| **Excel 转 PDF** | 转换 .xlsx/.xls 表格为 PDF。公式被计算，图表保留。 |
+| **PowerPoint 转 PDF** | 转换 .pptx/.ppt 演示文稿为 PDF。每页一张幻灯片，动画被剥离。 |
+| **PDF 合并/拆分** | 基于 pdf-lib 的客户端 PDF 操作，无需上传。 |
+| **PDF 水印** | 为 PDF 添加文字或图片水印。 |
 | **发票生成器** | 生成专业 PDF 格式发票。 |
-| **PDF 水印** | 为 PDF 文档添加文字或图片水印。 |
-| **数据脱敏器** | 快速处理敏感数据脱敏。 |
+
+**开发者工具**
+
+| 工具 | 描述 |
+|------|------|
+| **JSON 格式化** | 通过原生 JSON.parse 格式化、压缩、验证 JSON。 |
+| **Base64 编解码** | Base64 编解码，支持 URL-safe 变体，UTF-8 友好。 |
+| **哈希生成器** | SHA-1/256/384/512 via Web Crypto API。不提供 MD5（已被破解）。 |
+| **密码生成器** | 通过 crypto.getRandomValues 生成密码学安全的密码。 |
+| **UUID 生成器** | RFC 4122 v4 UUID，一次最多 10,000 个。 |
+
+**图片与设计**
+
+| 工具 | 描述 |
+|------|------|
+| **图片优化器** | 直接在浏览器中压缩和优化图片。 |
+| **图片格式转换** | 通过 Canvas 转换 PNG ↔ JPEG ↔ WebP。 |
+| **图片尺寸调整** | 调整图片尺寸，支持锁定纵横比。 |
+| **颜色转换器** | HEX/RGB/HSL 双向转换，实时预览。 |
+| **二维码生成器** | 生成自定义选项的二维码。 |
+| **微信封面生成器** | 使用自定义模板创建微信文章封面图片。 |
+
+**数据工具**
+
+| 工具 | 描述 |
+|------|------|
+| **数据脱敏器** | 自动检测并修复 CSV/Excel 编码问题。 |
 
 ---
 
