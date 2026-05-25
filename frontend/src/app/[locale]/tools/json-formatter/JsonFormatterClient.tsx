@@ -52,7 +52,11 @@ const SAMPLE_ZH = JSON.stringify(
   0,
 );
 
-function StructuredDataEN() {
+// Structured data for SEO - uses useLocale to detect which version to show
+function StructuredData() {
+  const locale = useLocale();
+  const isZh = locale === "zh";
+
   return (
     <>
       <script
@@ -61,13 +65,16 @@ function StructuredDataEN() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            name: "JSON Formatter & Validator",
+            name: isZh ? "JSON 格式化与验证器" : "JSON Formatter & Validator",
             operatingSystem: "All",
             applicationCategory: "UtilitiesApplication",
             browserRequirements: "Requires a modern browser with JSON.parse support",
-            url: "https://333654.xyz/tools/json-formatter",
-            description:
-              "Format, validate, and minify JSON entirely client-side via the native JSON.parse engine. ECMA-404 compliant, zero upload.",
+            url: isZh
+              ? "https://333654.xyz/zh/tools/json-formatter"
+              : "https://333654.xyz/tools/json-formatter",
+            description: isZh
+              ? "在浏览器内完成 JSON 的格式化、校验与压缩，调用原生 JSON.parse 引擎。符合 ECMA-404 标准，零上传、零落盘。"
+              : "Format, validate, and minify JSON entirely client-side via the native JSON.parse engine. ECMA-404 compliant, zero upload.",
           }),
         }}
       />
@@ -146,7 +153,7 @@ export default function JsonFormatterClient() {
 
   return (
     <div className="min-h-screen bg-canvas">
-      <StructuredDataEN />
+      <StructuredData />
 
       <div className="max-w-5xl mx-auto px-6 py-section">
         <ToolBreadcrumb slug="json-formatter" />
