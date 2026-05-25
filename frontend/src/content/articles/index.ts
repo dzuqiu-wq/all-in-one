@@ -14,6 +14,7 @@ import type { ToolArticleContent } from "@/components/ToolArticle";
 import type { ToolSlug } from "@/lib/toolRegistry";
 
 import wordToPdf from "./word-to-pdf";
+import excelToPdf from "./excel-to-pdf";
 import pdfMergeSplit from "./pdf-merge-split";
 import pdfWatermark from "./pdf-watermark";
 import invoiceGenerator from "./invoice-generator";
@@ -28,6 +29,7 @@ export type BilingualArticle = Record<ArticleLocale, ToolArticleContent>;
 
 const REGISTRY: Record<ToolSlug, BilingualArticle> = {
   "word-to-pdf": wordToPdf,
+  "excel-to-pdf": excelToPdf,
   "pdf-merge-split": pdfMergeSplit,
   "pdf-watermark": pdfWatermark,
   "invoice-generator": invoiceGenerator,

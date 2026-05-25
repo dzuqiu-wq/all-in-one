@@ -12,6 +12,7 @@
 import type { ComponentType } from "react";
 import {
   FileText,
+  FileSpreadsheet,
   Image as ImageIcon,
   QrCode,
   Merge,
@@ -27,6 +28,7 @@ import {
 
 export type ToolSlug =
   | "word-to-pdf"
+  | "excel-to-pdf"
   | "pdf-merge-split"
   | "pdf-watermark"
   | "invoice-generator"
@@ -99,6 +101,16 @@ export const TOOLS: readonly ToolDescriptor[] = [
     category: "digital-legal",
     runtime: "server",
     icon: FileText,
+    schemaCategory: "BusinessApplication",
+  },
+  {
+    slug: "excel-to-pdf",
+    href: "/tools/excel-to-pdf",
+    intlKey: "tools.excelPdf",
+    navKey: "nav.excelPdf",
+    category: "digital-legal",
+    runtime: "server",
+    icon: FileSpreadsheet,
     schemaCategory: "BusinessApplication",
   },
   {
