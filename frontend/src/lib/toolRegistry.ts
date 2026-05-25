@@ -13,6 +13,7 @@ import type { ComponentType } from "react";
 import {
   FileText,
   FileSpreadsheet,
+  Presentation,
   Image as ImageIcon,
   QrCode,
   Merge,
@@ -29,6 +30,7 @@ import {
 export type ToolSlug =
   | "word-to-pdf"
   | "excel-to-pdf"
+  | "powerpoint-to-pdf"
   | "pdf-merge-split"
   | "pdf-watermark"
   | "invoice-generator"
@@ -111,6 +113,16 @@ export const TOOLS: readonly ToolDescriptor[] = [
     category: "digital-legal",
     runtime: "server",
     icon: FileSpreadsheet,
+    schemaCategory: "BusinessApplication",
+  },
+  {
+    slug: "powerpoint-to-pdf",
+    href: "/tools/powerpoint-to-pdf",
+    intlKey: "tools.powerpointPdf",
+    navKey: "nav.powerpointPdf",
+    category: "digital-legal",
+    runtime: "server",
+    icon: Presentation,
     schemaCategory: "BusinessApplication",
   },
   {
