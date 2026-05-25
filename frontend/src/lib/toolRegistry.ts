@@ -27,6 +27,7 @@ import {
   MessageCircle,
   Code,
   Braces,
+  FileCode2,
 } from "lucide-react";
 
 export type ToolSlug =
@@ -40,7 +41,8 @@ export type ToolSlug =
   | "qrcode-generator"
   | "data-sanitizer"
   | "wechat-generator"
-  | "json-formatter";
+  | "json-formatter"
+  | "base64";
 
 export type ToolCategory =
   | "digital-legal"
@@ -213,6 +215,16 @@ export const TOOLS: readonly ToolDescriptor[] = [
     category: "developer",
     runtime: "client",
     icon: Braces,
+    schemaCategory: "UtilitiesApplication",
+  },
+  {
+    slug: "base64",
+    href: "/tools/base64",
+    intlKey: "tools.base64",
+    navKey: "nav.base64",
+    category: "developer",
+    runtime: "client",
+    icon: FileCode2,
     schemaCategory: "UtilitiesApplication",
   },
 ] as const;
