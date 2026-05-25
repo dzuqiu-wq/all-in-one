@@ -56,6 +56,10 @@ export default {
       name: '微信聊天记录生成器',
       description: '生成像素级精准的微信聊天截图，用于设计稿、产品演示与编辑配图——纯浏览器渲染，零上传。',
     },
+    jsonFormatter: {
+      name: 'JSON 格式化与校验',
+      description: '在浏览器里完成 JSON 的美化、压缩与合法性校验。直接调用原生 JSON.parse，零上传、零网络往返。',
+    },
   },
   home: {
     brand: '全能工具箱',
@@ -115,6 +119,12 @@ export default {
         title: '像素：压缩、编码、即时分发。',
         description:
           '基于 Canvas 的无损与有损图像压缩，加上 SVG / Canvas 双模式二维码生成。拖一张图、输入一段 payload，浏览器自己干完——无云端往返、无 EXIF 泄漏。',
+      },
+      developer: {
+        label: '开发者工具集',
+        title: '负载：解析、规范化、可调试。',
+        description:
+          '一组面向日常开发的小而精的零网络工具：JSON 美化与压缩、API 响应的可视化、坏数据的规范化、严格语法的快速校验。每一次解析都跑在你当前的标签页里，调用平台原生引擎，零字节流出。',
       },
     },
     related: {
@@ -420,10 +430,31 @@ export default {
       faq5A: '此工具生成的静态二维码永远不会过期——编码的数据永久嵌入在 QR 图案本身中。二维码存储的是编码后的数据，而不是对外部服务器的引用。这意味着即使我们的网站下线或服务停止，您生成的二维码仍然可以正常工作，只要它们编码的数据仍然有效。但是，如果您编码的是网址，那个外部网页可能会随着时间变化或被删除，使二维码链接失效。为了最大程度地延长二维码的有效性，建议定期测试您的二维码，特别是那些编码重要链接的二维码。对于长期使用的二维码，考虑使用 URL 缩短服务，它通常提供重定向功能以保持链接有效。',
     },
     jsonFormatter: {
-      title: 'JSON 格式化工具',
-      description: '格式化、验证和压缩 JSON 数据，支持语法高亮。',
+      name: 'JSON 格式化与校验',
+      description: '在浏览器里完成 JSON 的美化、压缩与合法性校验。直接调用 tab 内置的 JSON.parse 引擎——既不上传，也不走网络。',
+      title: 'JSON 格式化与校验工具',
       tag: '纯客户端',
       browserLocal: '浏览器本地',
+      lead:
+        '把任意 JSON 粘贴进来，按指定缩进美化、校验是否符合 ECMA-404 语法，或者反过来压成一行用于传输。整个过程都在这个标签页里完成，不会有任何字节离开你的机器。',
+      inputLabel: 'JSON 输入',
+      outputLabel: '处理结果',
+      placeholder: '在这里粘贴 JSON，例如：{"hello":"world","count":42}',
+      indent: '缩进',
+      indent2: '2 空格',
+      indent4: '4 空格',
+      format: '美化',
+      minify: '压缩',
+      validate: '校验',
+      copy: '复制结果',
+      copied: '已复制',
+      clear: '清空',
+      loadSample: '加载示例',
+      validOk: 'JSON 合法 —— 已成功按 ECMA-404 解析。',
+      validFail: 'JSON 不合法',
+      errorHeading: '解析错误',
+      emptyHint: '在上方粘贴 JSON，结果会显示在这里。',
+      stats: '输入 · {chars} 字符 / {lines} 行',
     },
     urlEncoder: {
       title: 'URL 编码/解码',

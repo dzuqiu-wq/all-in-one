@@ -23,6 +23,7 @@ import imageOptimizer from "./image-optimizer";
 import qrcodeGenerator from "./qrcode-generator";
 import wechatGenerator from "./wechat-generator";
 import dataSanitizer from "./data-sanitizer";
+import jsonFormatter from "./json-formatter";
 
 export type ArticleLocale = "en" | "zh";
 
@@ -39,6 +40,7 @@ const REGISTRY: Record<ToolSlug, BilingualArticle> = {
   "qrcode-generator": qrcodeGenerator,
   "wechat-generator": wechatGenerator,
   "data-sanitizer": dataSanitizer,
+  "json-formatter": jsonFormatter,
 };
 
 export function getArticle(slug: ToolSlug, locale: ArticleLocale): ToolArticleContent {

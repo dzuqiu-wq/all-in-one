@@ -25,6 +25,8 @@ import {
   Coins,
   Image as PixelIcon,
   MessageCircle,
+  Code,
+  Braces,
 } from "lucide-react";
 
 export type ToolSlug =
@@ -37,12 +39,14 @@ export type ToolSlug =
   | "image-optimizer"
   | "qrcode-generator"
   | "data-sanitizer"
-  | "wechat-generator";
+  | "wechat-generator"
+  | "json-formatter";
 
 export type ToolCategory =
   | "digital-legal"
   | "crypto-financial"
-  | "pixel-image";
+  | "pixel-image"
+  | "developer";
 
 export interface ToolDescriptor {
   slug: ToolSlug;
@@ -91,6 +95,12 @@ export const CATEGORIES: readonly CategoryDescriptor[] = [
     intlKey: "home.categories.pixelImage",
     icon: PixelIcon,
     accent: "muted",
+  },
+  {
+    id: "developer",
+    intlKey: "home.categories.developer",
+    icon: Code,
+    accent: "ink",
   },
 ] as const;
 
@@ -195,6 +205,16 @@ export const TOOLS: readonly ToolDescriptor[] = [
     icon: MessageCircle,
     schemaCategory: "DesignApplication",
   },
+  {
+    slug: "json-formatter",
+    href: "/tools/json-formatter",
+    intlKey: "tools.jsonFormatter",
+    navKey: "nav.jsonFormatter",
+    category: "developer",
+    runtime: "client",
+    icon: Braces,
+    schemaCategory: "UtilitiesApplication",
+  },
 ] as const;
 
 export function getTool(slug: ToolSlug): ToolDescriptor {
@@ -226,5 +246,6 @@ export const CategoryIcon = {
   digitalLegal: ShieldCheck,
   cryptoFinancial: Coins,
   pixelImage: PixelIcon,
+  developer: Code,
   spark: Sparkles,
 };

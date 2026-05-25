@@ -56,6 +56,10 @@ export default {
       name: 'WeChat Chat Generator',
       description: 'Build pixel-perfect WeChat chat mockups for talks, design reviews, and editorial illustration — all rendered inside your browser.',
     },
+    jsonFormatter: {
+      name: 'JSON Formatter & Validator',
+      description: 'Format, validate, and minify JSON entirely inside your browser. Native JSON.parse, no upload, no network round-trip.',
+    },
   },
   home: {
     brand: 'All-in-One Toolbox',
@@ -115,6 +119,12 @@ export default {
         title: 'Pixels — compressed, encoded, shipped.',
         description:
           'Lossless and lossy image compression via Canvas, plus QR generation through dual SVG/Canvas renderers. Drop a photo or a payload string — processed instantly inside your browser, 100% cloud-free, zero data footprint.',
+      },
+      developer: {
+        label: 'Developer Utilities',
+        title: 'Payloads — parsed, normalised, debugged.',
+        description:
+          'A small, opinionated set of zero-network tools for the day-to-day of writing software: format JSON, eyeball API responses, normalise broken payloads, and verify text against strict grammars. Every parse runs in your tab against the platform-native engine — nothing is sent over the wire.',
       },
     },
     related: {
@@ -422,10 +432,31 @@ export default {
       faq5A: 'Static QR codes generated here never expire — the encoded data is permanently embedded in the pattern itself. Even if this website goes offline, the codes you have already generated continue to work as long as the data they encode remains valid. However, if you encode a URL, the external page itself may change or be deleted, in which case the link inside the code becomes stale. For long-lived codes, periodically test them — especially those pointing to important destinations. Consider routing through a URL shortener you control so you can update the redirect target without re-issuing the code.',
     },
     jsonFormatter: {
-      title: 'JSON Formatter',
-      description: 'Format, validate and minify JSON data with syntax highlighting.',
+      name: 'JSON Formatter & Validator',
+      description: 'Format, validate, and minify JSON entirely inside your browser. No upload — every parse runs through the native JSON.parse engine of your tab.',
+      title: 'JSON Formatter & Validator',
       tag: 'CLIENT-SIDE PURE',
       browserLocal: 'Browser Local',
+      lead:
+        'Paste any JSON payload, pretty-print it with a configurable indent, validate it against the ECMA-404 grammar, or strip every byte of whitespace for transport. Everything happens in this tab; nothing leaves your machine.',
+      inputLabel: 'JSON input',
+      outputLabel: 'Result',
+      placeholder: 'Paste JSON here, for example: {"hello":"world","count":42}',
+      indent: 'Indent',
+      indent2: '2 spaces',
+      indent4: '4 spaces',
+      format: 'Format',
+      minify: 'Minify',
+      validate: 'Validate',
+      copy: 'Copy result',
+      copied: 'Copied',
+      clear: 'Clear',
+      loadSample: 'Load sample',
+      validOk: 'Valid JSON — parsed successfully against ECMA-404.',
+      validFail: 'Invalid JSON',
+      errorHeading: 'Parse error',
+      emptyHint: 'Paste JSON above to see the formatted output here.',
+      stats: 'Input · {chars} characters / {lines} lines',
     },
     urlEncoder: {
       title: 'URL Encoder/Decoder',
