@@ -28,6 +28,7 @@ import {
   Code,
   Braces,
   FileCode2,
+  Hash,
 } from "lucide-react";
 
 export type ToolSlug =
@@ -42,7 +43,8 @@ export type ToolSlug =
   | "data-sanitizer"
   | "wechat-generator"
   | "json-formatter"
-  | "base64";
+  | "base64"
+  | "hash-generator";
 
 export type ToolCategory =
   | "digital-legal"
@@ -225,6 +227,16 @@ export const TOOLS: readonly ToolDescriptor[] = [
     category: "developer",
     runtime: "client",
     icon: FileCode2,
+    schemaCategory: "UtilitiesApplication",
+  },
+  {
+    slug: "hash-generator",
+    href: "/tools/hash-generator",
+    intlKey: "tools.hashGenerator",
+    navKey: "nav.hashGenerator",
+    category: "developer",
+    runtime: "client",
+    icon: Hash,
     schemaCategory: "UtilitiesApplication",
   },
 ] as const;

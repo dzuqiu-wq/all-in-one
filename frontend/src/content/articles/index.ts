@@ -25,6 +25,7 @@ import wechatGenerator from "./wechat-generator";
 import dataSanitizer from "./data-sanitizer";
 import jsonFormatter from "./json-formatter";
 import base64 from "./base64";
+import hashGenerator from "./hash-generator";
 
 export type ArticleLocale = "en" | "zh";
 
@@ -43,6 +44,7 @@ const REGISTRY: Record<ToolSlug, BilingualArticle> = {
   "data-sanitizer": dataSanitizer,
   "json-formatter": jsonFormatter,
   "base64": base64,
+  "hash-generator": hashGenerator,
 };
 
 export function getArticle(slug: ToolSlug, locale: ArticleLocale): ToolArticleContent {
