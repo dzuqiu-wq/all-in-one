@@ -31,6 +31,7 @@ import {
   Hash,
   Crop,
   Key,
+  Palette,
 } from "lucide-react";
 
 export type ToolSlug =
@@ -49,7 +50,8 @@ export type ToolSlug =
   | "hash-generator"
   | "image-converter"
   | "image-resizer"
-  | "password-generator";
+  | "password-generator"
+  | "color-converter";
 
 export type ToolCategory =
   | "digital-legal"
@@ -273,6 +275,16 @@ export const TOOLS: readonly ToolDescriptor[] = [
     runtime: "client",
     icon: Key,
     schemaCategory: "UtilitiesApplication",
+  },
+  {
+    slug: "color-converter",
+    href: "/tools/color-converter",
+    intlKey: "tools.colorConverter",
+    navKey: "nav.colorConverter",
+    category: "pixel-image",
+    runtime: "client",
+    icon: Palette,
+    schemaCategory: "DesignApplication",
   },
 ] as const;
 
