@@ -29,6 +29,7 @@ import {
   Braces,
   FileCode2,
   Hash,
+  Crop,
 } from "lucide-react";
 
 export type ToolSlug =
@@ -45,7 +46,8 @@ export type ToolSlug =
   | "json-formatter"
   | "base64"
   | "hash-generator"
-  | "image-converter";
+  | "image-converter"
+  | "image-resizer";
 
 export type ToolCategory =
   | "digital-legal"
@@ -248,6 +250,16 @@ export const TOOLS: readonly ToolDescriptor[] = [
     category: "pixel-image",
     runtime: "client",
     icon: ImageIcon,
+    schemaCategory: "MultimediaApplication",
+  },
+  {
+    slug: "image-resizer",
+    href: "/tools/image-resizer",
+    intlKey: "tools.imageResizer",
+    navKey: "nav.imageResizer",
+    category: "pixel-image",
+    runtime: "client",
+    icon: Crop,
     schemaCategory: "MultimediaApplication",
   },
 ] as const;
