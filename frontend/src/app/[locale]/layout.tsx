@@ -7,6 +7,7 @@ import Script from "next/script";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { GrainOverlay } from "@/components/GrainOverlay";
+import { CustomCursor } from "@/components/CustomCursor";
 import "../globals.css";
 import { Metadata } from "next";
 
@@ -112,6 +113,7 @@ export default async function LocaleLayout({
             </main>
             <Footer />
             <GrainOverlay />
+            <CustomCursor />
           </SmoothScrollProvider>
         </NextIntlClientProvider>
       </body>
