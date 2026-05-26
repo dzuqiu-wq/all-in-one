@@ -951,5 +951,7 @@ export default {
     changelog: '更新日志',
     thirdPartyAds: '第三方广告有助于抵消服务器成本。',
     learnMore: '了解更多',
+    more: '更多',
+    legal: '法律信息',
   },
 };

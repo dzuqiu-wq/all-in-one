@@ -980,5 +980,7 @@ From a compliance standpoint, the client-side-only architecture eliminates any o
     changelog: 'Changelog',
     thirdPartyAds: 'Third-party ads help offset server costs.',
     learnMore: 'Learn more',
+    more: 'More',
+    legal: 'Legal',
   },
 };

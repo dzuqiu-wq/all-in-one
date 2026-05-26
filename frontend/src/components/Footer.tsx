@@ -26,7 +26,7 @@ export default function Footer() {
 
   const footerTools = useMemo(
     () =>
-      TOOLS.slice(0, 5).map((tool) => ({
+      TOOLS.map((tool) => ({
         slug: tool.slug,
         navKey: tool.navKey,
         localizedHref: buildLocalizedHref(tool.href, locale),
@@ -34,10 +34,12 @@ export default function Footer() {
     [locale],
   );
 
+  const half = Math.ceil(TOOLS.length / 2);
+
   return (
     <footer className="bg-canvas border-t border-hairline">
       <div className="max-w-[1280px] mx-auto px-6 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href={homeHref} className="inline-flex items-center gap-2 mb-4 no-underline">
@@ -51,11 +53,28 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Tools Links */}
+          {/* Tools Links — Group 1 */}
           <div>
             <h4 className="text-sm font-medium text-ink mb-3">{t("common.tools")}</h4>
             <ul className="space-y-2">
-              {footerTools.map((tool) => (
+              {footerTools.slice(0, half).map((tool) => (
+                <li key={tool.slug}>
+                  <Link
+                    href={tool.localizedHref}
+                    className="text-xs text-ink-mute hover:text-ink transition-colors no-underline"
+                  >
+                    {t(`${tool.navKey}.name`)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Tools Links — Group 2 */}
+          <div>
+            <h4 className="text-sm font-medium text-ink mb-3 opacity-0">{t("common.tools")}</h4>
+            <ul className="space-y-2">
+              {footerTools.slice(half).map((tool) => (
                 <li key={tool.slug}>
                   <Link
                     href={tool.localizedHref}
