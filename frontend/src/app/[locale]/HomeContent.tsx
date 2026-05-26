@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
 import {
   ArrowRight,
   Shield,
@@ -26,13 +24,6 @@ import { SOCIAL } from "@/lib/constants";
 
 export default function HomeContent() {
   const t = useTranslations();
-  const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-  const _terminalY = useTransform(scrollYProgress, [0, 1], [0, -100]);
-  const _terminalOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const wordPdfHref = useLocalizedHref("/tools/word-to-pdf");
   const aboutHref = useLocalizedHref("/about");
 
@@ -66,69 +57,72 @@ export default function HomeContent() {
   return (
     <div className="bg-canvas">
       {/* ---------- Hero ---------- */}
-      <section className="pt-8 pb-section">
-        <div className="max-w-[1200px] mx-auto px-6">
-          <div className="glass p-8 lg:p-12 rounded-3xl">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              {/* 左侧：标题 */}
-              <div>
-                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-lavender/50 text-ink-soft text-sm mb-6">
-                  <span className="w-2 h-2 rounded-full bg-mint animate-pulse" />
-                  {t("home.brand")}
-                </span>
-                <h1 className="font-serif text-4xl lg:text-5xl xl:text-6xl text-ink leading-tight mb-6">
-                  {t("home.headline")}
-                  <br />
-                  <span className="bg-gradient-to-r from-mint to-lavender bg-clip-text text-transparent">
-                    {t("home.headlineAccent")}
-                  </span>
-                </h1>
-                <p className="text-lg text-body mb-8 max-w-md leading-relaxed">
-                  {t("home.subtitle")}
-                </p>
-                <div className="flex flex-wrap items-center gap-4">
-                  <Link
-                    href={wordPdfHref}
-                    className="btn-primary"
-                  >
-                    {t("home.startWithWordPdf")}
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                  <a
-                    href="#category-digital-legal"
-                    className="btn-secondary"
-                  >
-                    {t("home.browseAll")}
-                  </a>
-                </div>
-              </div>
+      <section className="max-w-[1280px] mx-auto px-6 py-section">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-canvas-soft rounded-full text-sm text-ink-mute mb-6">
+              <span className="w-2 h-2 bg-primary rounded-full" />
+              <span>{t("home.brand")}</span>
+            </div>
+            <h1
+              className="text-ink mb-6"
+              style={{
+                fontSize: "clamp(40px, 6vw, 64px)",
+                fontWeight: 500,
+                lineHeight: 1.1,
+                letterSpacing: "-1.92px",
+              }}
+            >
+              {t("home.headline")}
+              <span className="text-primary">{t("home.headlineAccent")}</span>.
+            </h1>
+            <p className="text-lg text-body mb-8 leading-relaxed max-w-xl">
+              {t("home.subtitle")}
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href={wordPdfHref}
+                className="btn-primary inline-flex items-center gap-2 no-underline"
+              >
+                {t("home.startWithWordPdf")}
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <a
+                href="#category-digital-legal"
+                className="btn-secondary inline-flex items-center gap-2 no-underline"
+              >
+                {t("home.browseAll")}
+              </a>
+            </div>
+          </div>
 
-              {/* 右侧：视觉元素 - 终端模拟 */}
-              <div className="relative">
-                <div className="glass p-6 rounded-2xl">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-3 h-3 rounded-full bg-mint/60" />
-                    <div className="w-3 h-3 rounded-full bg-lavender/60" />
-                    <div className="w-3 h-3 rounded-full bg-ink-soft/30" />
-                    <span className="ml-3 text-xs font-mono text-ink-soft">
-                      all-in-one.toolbox
-                    </span>
-                  </div>
-                  <div className="space-y-2 font-mono text-sm">
-                    <div className="flex gap-3">
-                      <span className="text-ink-soft">$</span>
-                      <span className="text-ink">{t("home.terminal.convert")}</span>
-                    </div>
-                    <div className="text-mint">{t("home.terminal.processing")}</div>
-                    <div className="text-ink-soft">{t("home.terminal.memoryOnly")}</div>
-                    <div className="text-ink-soft">{t("home.terminal.streamResponse")}</div>
-                    <div className="text-mint">{t("home.terminal.ready")}</div>
-                    <div className="flex gap-3 pt-2">
-                      <span className="text-ink-soft">$</span>
-                      <span className="inline-block w-2 h-4 bg-mint animate-pulse" />
-                    </div>
-                  </div>
-                </div>
+          <div className="surface-night rounded-lg p-6 shadow-md">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-3 h-3 rounded-full bg-error opacity-80" />
+              <div className="w-3 h-3 rounded-full bg-warning opacity-80" />
+              <div className="w-3 h-3 rounded-full bg-success opacity-80" />
+              <span className="ml-3 text-xs font-mono text-on-dark-soft">
+                all-in-one.toolbox
+              </span>
+            </div>
+            <div className="space-y-3 font-mono text-sm">
+              <div className="flex gap-3">
+                <span className="text-on-dark-soft">$</span>
+                <span className="text-on-dark">
+                  {t("home.terminal.convert")}
+                </span>
+              </div>
+              <div className="text-success">{t("home.terminal.processing")}</div>
+              <div className="text-on-dark-soft">
+                {t("home.terminal.memoryOnly")}
+              </div>
+              <div className="text-on-dark-soft">
+                {t("home.terminal.streamResponse")}
+              </div>
+              <div className="text-success">{t("home.terminal.ready")}</div>
+              <div className="flex gap-3 pt-2">
+                <span className="text-on-dark-soft">$</span>
+                <span className="inline-block w-2 h-4 bg-on-dark animate-pulse" />
               </div>
             </div>
           </div>
