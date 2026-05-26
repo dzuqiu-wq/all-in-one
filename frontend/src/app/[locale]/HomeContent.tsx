@@ -316,21 +316,34 @@ function CategoryMatrix({ category }: CategoryMatrixProps) {
   const categoryTools = TOOLS.filter((tool) => tool.category === category.id);
 
   return (
-    <section className="mb-section" id={`category-${category.id}`}>
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
-        <div className="flex-1">
-          <div className="inline-flex items-center gap-2 text-sm text-mint mb-3">
-            <Icon className="w-4 h-4" strokeWidth={2} />
+    <section
+      id={`category-${category.id}`}
+      className="scroll-mt-24"
+      aria-labelledby={`category-${category.id}-title`}
+    >
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8 pb-6 border-b border-hairline">
+        <div className="flex-1 max-w-2xl">
+          <div className="inline-flex items-center gap-2 text-sm text-ink-mute mb-3">
+            <Icon className="w-3.5 h-3.5" strokeWidth={2} />
             <span>{t(`${category.intlKey}.label`)}</span>
           </div>
-          <h2 className="font-serif text-3xl lg:text-4xl text-ink mb-3">
+          <h3
+            id={`category-${category.id}-title`}
+            className="text-ink mb-3"
+            style={{
+              fontSize: "clamp(26px, 3.2vw, 34px)",
+              lineHeight: 1.15,
+              letterSpacing: "-0.4px",
+              fontWeight: 500,
+            }}
+          >
             {t(`${category.intlKey}.title`)}
-          </h2>
-          <p className="text-body max-w-xl">
+          </h3>
+          <p className="text-body leading-relaxed">
             {t(`${category.intlKey}.description`)}
           </p>
         </div>
-        <div className="text-sm font-mono text-ink-soft">
+        <div className="text-xs font-medium text-ink-mute uppercase tracking-wider font-mono whitespace-nowrap">
           {String(categoryTools.length).padStart(2, "0")} {t("common.tools")}
         </div>
       </div>
@@ -356,27 +369,28 @@ function ToolMatrixCard({ tool }: ToolMatrixCardProps) {
   return (
     <Link
       href={href}
-      className="glass glass-hover p-6 group block"
+      className="card-feature group block no-underline hover:no-underline"
     >
-      <div className="flex items-start justify-between mb-4">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-lavender/40 to-mint/30 flex items-center justify-center">
+      <div className="flex items-start justify-between mb-6">
+        <div className="w-10 h-10 bg-canvas-soft rounded-sm flex items-center justify-center">
           <Icon className="w-6 h-6 text-ink" strokeWidth={1.5} />
         </div>
-        <span className="text-xs font-medium text-ink-soft px-3 py-1 bg-white/20 rounded-full">
+        <span className="text-xs font-medium text-ink-mute px-3 py-1 bg-canvas-soft rounded-full">
           {tool.runtime === "server" ? t("tools.server") : t("tools.browser")}
         </span>
       </div>
 
-      <h4 className="font-serif text-xl text-ink mb-2">
+      <h4 className="text-lg font-medium text-ink mb-2"
+        style={{ marginBottom: "8px" }}>
         {t(`${tool.intlKey}.name`)}
       </h4>
-      <p className="text-body text-sm mb-4 line-clamp-2">
+      <p className="text-sm text-ink-mute mb-4 leading-relaxed line-clamp-2">
         {t(`${tool.intlKey}.description`)}
       </p>
 
-      <div className="flex items-center gap-2 text-mint text-sm font-medium group-hover:gap-3 transition-all">
+      <div className="flex items-center gap-2 text-sm font-medium text-primary group-hover:gap-3 transition-all">
         {t("home.tryItNow")}
-        <ArrowRight className="w-4 h-4" />
+        <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
       </div>
     </Link>
   );
