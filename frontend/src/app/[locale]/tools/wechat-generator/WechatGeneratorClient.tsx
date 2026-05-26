@@ -598,7 +598,7 @@ export default function WechatGeneratorClient({ locale }: WechatGeneratorClientP
       </div>
 
       {/* Action Bar - View Toggle + Actions */}
-      <div className="border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]/80 backdrop-blur-sm sticky top-0 z-50">
+      <div className="border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]/80 backdrop-blur-sm sticky top-16 z-40">
         <div className="max-w-[1600px] mx-auto px-6">
           <div className="flex items-center justify-between h-12">
             {/* Left: Breadcrumb hint */}
