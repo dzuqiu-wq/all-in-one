@@ -3,75 +3,51 @@
 @tailwind utilities;
 
 @layer base {
-  /*
-   * Supabase-Inspired Design System
-   * Emerald green primary + clean neutral surfaces
-   */
   :root {
-    /* Brand Primary */
-    --primary: #3ecf8e;
-    --primary-deep: #24b47e;
-    --primary-soft: #4ade80;
+    /* 柔和配色系统 */
+    --mint: #7DD3C0;
+    --mint-soft: #B8E8DE;
+    --mint-deep: #5BBFA8;
+    --lavender: #E8D5F2;
+    --lavender-soft: #F5EFF9;
+    --cream: #FDFBF7;
+    --cream-deep: #F5F0E8;
 
-    /* Text */
-    --ink: #171717;
-    --ink-secondary: #212121;
-    --body: #3d3d3a;
-    --ink-mute: #707070;
-    --ink-mute-2: #9a9a9a;
+    /* 文字颜色 */
+    --ink: #1A1A2E;
+    --ink-soft: #4A4A5A;
+    --body: #6B6B7B;
 
-    /* Surfaces */
-    --canvas: #ffffff;
-    --canvas-soft: #fafafa;
-    --canvas-night: #1c1c1c;
-    --canvas-night-soft: #202020;
+    /* 玻璃效果 */
+    --glass-bg: rgba(255, 255, 255, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --glass-shadow: rgba(0, 0, 0, 0.05);
 
-    /* Borders */
-    --hairline: #dfdfdf;
-    --hairline-strong: #c7c7c7;
+    /* 间距 */
+    --space-section: 80px;
+    --space-lg: 48px;
+    --space-md: 24px;
+    --space-sm: 12px;
 
-    /* On Surfaces */
-    --on-primary: #171717;
-    --on-dark: #ffffff;
-    --on-dark-soft: #a0a0a0;
-
-    /* Semantic */
-    --success: #3ecf8e;
-    --warning: #f5a623;
-    --error: #ee0000;
-
-    /* Spacing */
-    --space-xxs: 2px;
-    --space-xs: 4px;
-    --space-sm: 8px;
-    --space-md: 12px;
-    --space-lg: 16px;
-    --space-xl: 24px;
-    --space-xxl: 32px;
-    --space-section: 96px;
-
-    /* Radius */
-    --radius-xs: 4px;
-    --radius-sm: 6px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
-    --radius-xl: 16px;
-    --radius-pill: 9999px;
-
-    /* Theme Tokens (Linear/Stripe) */
-    --bg-primary: #F4F4F5;
-    --bg-surface: #FFFFFF;
-    --bg-elevated: #FAFAFA;
-    --border-subtle: #E4E4E7;
-    --border-default: #D4D4D8;
-    --text-primary: #18181B;
-    --text-secondary: #71717A;
-    --accent-green: #10B981;
-    --accent-violet: #8B5CF6;
+    /* 圆角 */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
   }
 
-  * {
-    border-color: var(--hairline);
+  /* 暗色模式 */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #F5F5F7;
+      --ink-soft: #A0A0B0;
+      --body: #C0C0D0;
+      --cream: #0F0F1A;
+      --cream-deep: #1A1A2E;
+      --glass-bg: rgba(30, 30, 50, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --glass-shadow: rgba(0, 0, 0, 0.3);
+    }
   }
 
   html {
@@ -81,254 +57,152 @@
   }
 
   body {
-    background-color: var(--canvas);
+    background-color: var(--cream);
     color: var(--ink);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    line-height: 1.5;
-    font-size: 16px;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-weight: 500;
-    color: var(--ink);
-  }
-
-  h1 {
-    font-size: 64px;
-    line-height: 1.1;
-    letter-spacing: -1.92px;
-  }
-
-  h2 {
-    font-size: 48px;
-    line-height: 1.1;
-    letter-spacing: -1.44px;
-  }
-
-  h3 {
-    font-size: 36px;
-    line-height: 1.15;
-    letter-spacing: -0.72px;
-  }
-
-  h4, h5, h6 {
-    font-weight: 500;
-    letter-spacing: 0;
-  }
-
-  h4 { font-size: 22px; line-height: 1.3; }
-  h5 { font-size: 18px; line-height: 1.4; }
-  h6 { font-size: 16px; line-height: 1.4; }
-
-  p {
-    color: var(--body);
-    line-height: 1.55;
-  }
-
-  code, pre, kbd, samp {
-    font-family: 'JetBrains Mono', 'Roboto Mono', ui-monospace, monospace;
-    font-size: 14px;
     line-height: 1.6;
   }
 
-  code:not([class*="language-"]) {
-    background-color: var(--canvas-soft);
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
     color: var(--ink);
-    padding: 2px 6px;
-    border-radius: var(--radius-xs);
-    font-size: 0.875em;
+    line-height: 1.2;
   }
+}
 
-  pre {
-    background-color: var(--canvas-night);
-    color: var(--on-dark);
+/* 玻璃拟态组件类 */
+@layer components {
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
-    padding: var(--space-lg);
-    overflow-x: auto;
+    box-shadow: 0 8px 32px var(--glass-shadow);
   }
 
-  a {
-    color: var(--primary);
-    transition: color 0.2s;
+  .glass-hover {
+    transition: all 0.3s ease;
   }
 
-  a:hover {
-    color: var(--primary-deep);
+  .glass-hover:hover {
+    background: rgba(255, 255, 255, 0.75);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 12px 48px var(--glass-shadow);
+    transform: translateY(-2px);
   }
 
-  button, [role="button"] {
-    cursor: pointer;
-    font-family: 'Inter', sans-serif;
-  }
-
-  ::selection {
-    background-color: var(--primary);
-    color: var(--on-primary);
-  }
-
-  /* Dark mode - uses media query for automatic system detection */
+  /* 暗色模式玻璃效果 */
   @media (prefers-color-scheme: dark) {
-    :root {
-      --canvas: #0a0a0a;
-      --canvas-soft: #171717;
-      --canvas-night: #1c1c1c;
-      --ink: #fafafa;
-      --body: #d4d4d4;
-      --ink-mute: #a0a0a0;
-      --hairline: #2a2a2a;
-      --hairline-strong: #3a3a3a;
-      --bg-primary: #09090B;
-      --bg-surface: #18181B;
-      --bg-elevated: #27272A;
-      --border-subtle: #27272A;
-      --border-default: #3F3F46;
-      --text-primary: #FAFAFA;
-      --text-secondary: #A1A1AA;
-      --accent-violet: #A78BFA;
+    .glass-hover:hover {
+      background: rgba(40, 40, 60, 0.8);
     }
   }
-}
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
+  /* 居中容器 */
+  .container-custom {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
 
-::-webkit-scrollbar-track {
-  background: var(--canvas);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--hairline);
-  border-radius: var(--radius-pill);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--ink-mute-2);
-}
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--hairline) var(--canvas);
-}
-
-/* Utility Classes */
-@layer utilities {
-  /* Surface Modes */
-  .surface-canvas { background-color: var(--canvas); }
-  .surface-soft { background-color: var(--canvas-soft); }
-  .surface-night { background-color: var(--canvas-night); color: var(--on-dark); }
-  .surface-night-soft { background-color: var(--canvas-night-soft); color: var(--on-dark); }
-
-  /* Hairline border */
-  .hairline { border: 1px solid var(--hairline); }
-  .hairline-bottom { border-bottom: 1px solid var(--hairline); }
-
-  /* Primary button styles */
+  /* 按钮样式 */
   .btn-primary {
-    background-color: var(--primary);
-    color: var(--on-primary);
-    padding: 8px 16px;
-    border-radius: var(--radius-sm);
-    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--mint) 0%, var(--mint-deep) 100%);
+    color: var(--ink);
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
     font-weight: 500;
-    transition: background-color 0.2s;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
   }
 
   .btn-primary:hover {
-    background-color: var(--primary-deep);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(125, 211, 192, 0.3);
   }
 
   .btn-secondary {
-    background-color: var(--canvas);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
     color: var(--ink);
-    border: 1px solid var(--hairline-strong);
-    padding: 8px 16px;
-    border-radius: var(--radius-sm);
-    font-size: 14px;
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
     font-weight: 500;
-    transition: background-color 0.2s;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    border: 1px solid var(--glass-border);
+    cursor: pointer;
   }
 
   .btn-secondary:hover {
-    background-color: var(--canvas-soft);
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
   }
 
-  /* Focus visible */
-  .focus-primary:focus-visible {
-    outline: 3px solid rgba(62, 207, 142, 0.3);
-    outline-offset: 2px;
-  }
-
-  /* Bento Grid */
-  .bento-grid {
+  /* 自适应工具网格 */
+  .tool-grid {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
-    gap: 1.5rem;
+    gap: 24px;
   }
 
-  @media (min-width: 768px) {
-    .bento-grid {
+  @media (min-width: 640px) {
+    .tool-grid {
       grid-template-columns: repeat(2, 1fr);
     }
   }
 
-  .bento-card-lead {
-    grid-column: span 2;
-  }
-
-  @media (max-width: 767px) {
-    .bento-card-lead {
-      grid-column: span 1;
-    }
-  }
-
-  /* Glassmorphism */
-  .glass-card {
-    background: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    transition: all 0.3s ease;
-  }
-
-  .glass-card:hover {
-    background: rgba(255, 255, 255, 0.7);
-    transform: translateY(-2px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  }
-
-  /* Dark mode glassmorphism */
-  @media (prefers-color-scheme: dark) {
-    .glass-card {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .glass-card:hover {
-      background: rgba(0, 0, 0, 0.6);
+  @media (min-width: 1024px) {
+    .tool-grid {
+      grid-template-columns: repeat(3, 1fr);
     }
   }
 }
 
-/* Selection focus */
+/* 暗色模式玻璃按钮 */
+@media (prefers-color-scheme: dark) {
+  .btn-secondary:hover {
+    background: rgba(40, 40, 60, 0.8);
+  }
+}
+
+/* 选中样式 */
+::selection {
+  background-color: var(--mint);
+  color: var(--ink);
+}
+
+/* 焦点样式 */
 :focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--mint);
   outline-offset: 2px;
 }
 
-:focus:not(:focus-visible) {
-  outline: none;
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-/* AdSense */
-ins.adsbygoogle {
-  display: block;
-  min-height: 90px;
+::-webkit-scrollbar-track {
+  background: var(--cream);
 }
 
-ins.adsbygoogle[data-ad-status="unfilled"] {
-  display: none;
+::-webkit-scrollbar-thumb {
+  background: var(--ink-soft);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink);
 }
