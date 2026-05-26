@@ -14,6 +14,7 @@ import AdBanner from "@/components/AdBanner";
 import SystemStatus, { type StatusEntry } from "@/components/SystemStatus";
 import ShareButtons from "@/components/ShareButtons";
 import { useLocalizedHref } from "@/i18n/useLocalizedHref";
+import { useMagneticEffect } from "@/hooks/useMagneticEffect";
 import {
   CATEGORIES,
   TOOLS,
@@ -72,13 +73,13 @@ export default function HomeContent() {
               {t("home.subtitle")}
             </p>
             <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href={wordPdfHref}
-                className="btn-primary inline-flex items-center gap-2 no-underline"
-              >
-                {t("home.startWithWordPdf")}
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+              <MagneticLink
+              href={wordPdfHref}
+              className="btn-primary inline-flex items-center gap-2 no-underline"
+            >
+              {t("home.startWithWordPdf")}
+              <ArrowRight className="w-4 h-4" />
+            </MagneticLink>
               <a
                 href="#category-digital-legal"
                 className="btn-secondary inline-flex items-center gap-2 no-underline"
@@ -274,6 +275,35 @@ export default function HomeContent() {
         />
       </section>
     </div>
+  );
+}
+
+function MagneticLink({
+  href,
+  children,
+  className,
+}: {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const { ref, style, handlers } = useMagneticEffect({ strength: 0.4 });
+
+  return (
+    <Link
+      href={href}
+      ref={ref as React.RefObject<HTMLAnchorElement>}
+      style={{
+        ...style,
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "0.5rem",
+      }}
+      {...handlers}
+      className={className}
+    >
+      {children}
+    </Link>
   );
 }
 
