@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import {
   ArrowRight,
@@ -16,7 +16,6 @@ import AdBanner from "@/components/AdBanner";
 import SystemStatus, { type StatusEntry } from "@/components/SystemStatus";
 import ShareButtons from "@/components/ShareButtons";
 import { useLocalizedHref } from "@/i18n/useLocalizedHref";
-import { useMagneticEffect } from "@/hooks/useMagneticEffect";
 import {
   CATEGORIES,
   TOOLS,
@@ -32,8 +31,8 @@ export default function HomeContent() {
     target: heroRef,
     offset: ["start start", "end start"],
   });
-  const terminalY = useTransform(scrollYProgress, [0, 1], [0, -100]);
-  const terminalOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const _terminalY = useTransform(scrollYProgress, [0, 1], [0, -100]);
+  const _terminalOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const wordPdfHref = useLocalizedHref("/tools/word-to-pdf");
   const aboutHref = useLocalizedHref("/about");
 
@@ -292,34 +291,6 @@ export default function HomeContent() {
   );
 }
 
-function MagneticLink({
-  href,
-  children,
-  className,
-}: {
-  href: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  const { ref, style, handlers } = useMagneticEffect({ strength: 0.4 });
-
-  return (
-    <Link
-      href={href}
-      ref={ref as React.RefObject<HTMLAnchorElement>}
-      style={{
-        ...style,
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "0.5rem",
-      }}
-      {...handlers}
-      className={className}
-    >
-      {children}
-    </Link>
-  );
-}
 
 interface ValueCardProps {
   icon: React.ElementType;

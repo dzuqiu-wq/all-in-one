@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Github, Twitter } from "lucide-react";
+import { Github } from "lucide-react";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { TOOLS } from "@/lib/toolRegistry";
 import { SOCIAL } from "@/lib/constants";
