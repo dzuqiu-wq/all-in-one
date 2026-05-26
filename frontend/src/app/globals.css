@@ -261,6 +261,56 @@
     outline: 3px solid rgba(62, 207, 142, 0.3);
     outline-offset: 2px;
   }
+
+  /* Bento Grid */
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .bento-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .bento-card-lead {
+    grid-column: span 2;
+  }
+
+  @media (max-width: 767px) {
+    .bento-card-lead {
+      grid-column: span 1;
+    }
+  }
+
+  /* Glassmorphism */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .glass-card:hover {
+    background: rgba(255, 255, 255, 0.7);
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Dark mode glassmorphism */
+  @media (prefers-color-scheme: dark) {
+    .glass-card {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .glass-card:hover {
+      background: rgba(0, 0, 0, 0.6);
+    }
+  }
 }
 
 /* Selection focus */

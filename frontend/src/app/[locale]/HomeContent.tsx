@@ -339,9 +339,11 @@ function CategoryMatrix({ category }: CategoryMatrixProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {categoryTools.map((tool) => (
-          <ToolMatrixCard key={tool.slug} tool={tool} />
+      <div className="bento-grid">
+        {categoryTools.map((tool, index) => (
+          <div key={tool.slug} className={index === 0 ? "bento-card-lead" : ""}>
+            <ToolMatrixCard tool={tool} />
+          </div>
         ))}
       </div>
     </section>
@@ -360,13 +362,13 @@ function ToolMatrixCard({ tool }: ToolMatrixCardProps) {
   return (
     <Link
       href={href}
-      className="group block bg-canvas border border-hairline rounded-lg p-6 hover:border-primary hover:shadow-sm transition-all duration-300 no-underline hover:no-underline"
+      className="glass-card rounded-xl p-6 group block no-underline hover:no-underline"
     >
       <div className="flex items-start justify-between mb-6">
-        <div className="w-10 h-10 bg-canvas-soft rounded-md flex items-center justify-center">
+        <div className="w-12 h-12 bg-canvas-soft rounded-lg flex items-center justify-center">
           <Icon className="w-6 h-6 text-ink" strokeWidth={1.5} />
         </div>
-        <span className="text-xs font-medium text-ink-mute px-3 py-1 bg-canvas-soft rounded-pill">
+        <span className="text-xs font-medium text-ink-mute px-3 py-1 bg-canvas-soft rounded-full">
           {tool.runtime === "server" ? t("tools.server") : t("tools.browser")}
         </span>
       </div>
