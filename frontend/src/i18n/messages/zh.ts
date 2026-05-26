@@ -59,7 +59,7 @@ export default {
     jsonFormatter: {
       name: 'JSON 格式化与校验',
       description: '在浏览器里完成 JSON 的美化、压缩与合法性校验。直接调用原生 JSON.parse，零上传、零网络往返。',
-      placeholder: '在这里粘贴 JSON，例如：{"hello":"world","count":42}',
+      placeholder: "在这里粘贴 JSON，例如：{{'hello':'world','count':42}}",
     },
     base64: {
       name: 'Base64',
@@ -474,7 +474,7 @@ export default {
         '把任意 JSON 粘贴进来，按指定缩进美化、校验是否符合 ECMA-404 语法，或者反过来压成一行用于传输。整个过程都在这个标签页里完成，不会有任何字节离开你的机器。',
       inputLabel: 'JSON 输入',
       outputLabel: '处理结果',
-      placeholder: '在这里粘贴 JSON，例如：{"hello":"world","count":42}',
+      placeholder: "在这里粘贴 JSON，例如：{{'hello':'world','count':42}}",
       indent: '缩进',
       indent2: '2 空格',
       indent4: '4 空格',

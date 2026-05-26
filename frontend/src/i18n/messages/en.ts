@@ -59,7 +59,7 @@ export default {
     jsonFormatter: {
       name: 'JSON Formatter & Validator',
       description: 'Format, validate, and minify JSON entirely inside your browser. Native JSON.parse, no upload, no network round-trip.',
-      placeholder: 'Paste JSON here, for example: {"hello":"world","count":42}',
+      placeholder: "Paste JSON here, for example: {{'hello':'world','count':42}}",
     },
     base64: {
       name: 'Base64',
@@ -476,7 +476,7 @@ export default {
         'Paste any JSON payload, pretty-print it with a configurable indent, validate it against the ECMA-404 grammar, or strip every byte of whitespace for transport. Everything happens in this tab; nothing leaves your machine.',
       inputLabel: 'JSON input',
       outputLabel: 'Result',
-      placeholder: 'Paste JSON here, for example: {"hello":"world","count":42}',
+      placeholder: "Paste JSON here, for example: {{'hello':'world','count':42}}",
       indent: 'Indent',
       indent2: '2 spaces',
       indent4: '4 spaces',
