@@ -64,12 +64,9 @@ export default function HomeContent() {
               <span className="w-2 h-2 bg-primary rounded-full" />
               <span>{t("home.brand")}</span>
             </div>
-            <h1
-              className="text-display-xl text-ink mb-6"
-              style={{ fontSize: "clamp(40px, 6vw, 64px)" }}
-            >
+            <h1 className="text-[clamp(3rem,10vw,10rem)] font-light leading-[0.9] tracking-tight mb-6">
               {t("home.headline")}
-              <span className="italic text-primary">{t("home.headlineAccent")}</span>.
+              <span className="font-bold text-primary italic">{t("home.headlineAccent")}</span>.
             </h1>
             <p className="text-title-md text-body mb-8 leading-relaxed max-w-xl">
               {t("home.subtitle")}
