@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 import {
   ArrowRight,
   Shield,
@@ -25,6 +27,13 @@ import { SOCIAL } from "@/lib/constants";
 
 export default function HomeContent() {
   const t = useTranslations();
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const terminalY = useTransform(scrollYProgress, [0, 1], [0, -100]);
+  const terminalOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const wordPdfHref = useLocalizedHref("/tools/word-to-pdf");
   const aboutHref = useLocalizedHref("/about");
 
@@ -89,7 +98,11 @@ export default function HomeContent() {
             </div>
           </div>
 
-          <div className="surface-dark rounded-xl p-xl">
+          <div ref={heroRef} className="lg:col-span-1">
+            <motion.div
+              className="surface-dark rounded-xl p-xl"
+              style={{ y: terminalY, opacity: terminalOpacity }}
+            >
             <div className="flex items-center gap-2 mb-6">
               <div className="w-3 h-3 rounded-full bg-error opacity-80" />
               <div className="w-3 h-3 rounded-full bg-warning opacity-80" />
@@ -118,6 +131,7 @@ export default function HomeContent() {
                 <span className="inline-block w-2 h-4 bg-on-dark animate-pulse" />
               </div>
             </div>
+            </motion.div>
           </div>
         </div>
       </section>
