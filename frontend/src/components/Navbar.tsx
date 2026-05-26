@@ -40,115 +40,112 @@ export default function Navbar() {
   const localized = (href: string) => `/${locale}${href}`;
 
   return (
-    <header className="sticky top-0 z-50">
-      <div className="glass mx-4 mt-4">
-        <div className="max-w-[1200px] mx-auto px-6">
-          <div className="flex items-center justify-between h-16">
-            {/* Brand */}
-            <Link
-              href={homeHref}
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+    <header className="sticky top-0 z-50 bg-canvas border-b border-hairline">
+      <div className="max-w-[1280px] mx-auto px-6">
+        <div className="flex items-center justify-between h-16">
+          {/* Brand — Supabase style: green dot + wordmark */}
+          <Link
+            href={homeHref}
+            className="flex items-center gap-2 text-ink hover:text-primary transition-colors no-underline"
+          >
+            <span className="w-6 h-6 bg-primary rounded-sm flex items-center justify-center">
+              <span className="text-[10px] font-bold text-on-primary">A1</span>
+            </span>
+            <span className="font-medium text-lg">All-in-One</span>
+          </Link>
+
+          {/* Center Navigation — clean text links */}
+          <nav className="hidden md:flex items-center gap-1">
+            <div
+              className="relative"
+              onMouseEnter={() => setIsDropdownOpen(true)}
+              onMouseLeave={() => setIsDropdownOpen(false)}
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-mint to-mint-deep flex items-center justify-center">
-                <span className="text-ink font-bold text-lg">A1</span>
-              </div>
-              <span className="font-serif text-xl text-ink hidden sm:block">
-                All-in-One
-              </span>
-            </Link>
-
-            {/* Center Navigation */}
-            <nav className="hidden md:flex items-center gap-2">
-              <div
-                className="relative"
-                onMouseEnter={() => setIsDropdownOpen(true)}
-                onMouseLeave={() => setIsDropdownOpen(false)}
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm text-ink-mute hover:text-ink transition-colors font-medium"
               >
-                <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="glass-hover flex items-center gap-1.5 px-4 py-2 rounded-lg text-ink-soft hover:text-ink transition-all"
-                >
-                  <span>{t("common.tools")}</span>
-                  <ChevronDown
-                    className={`w-4 h-4 transition-transform ${
-                      isDropdownOpen ? "rotate-180" : ""
-                    }`}
+                <span>{t("common.tools")}</span>
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform ${
+                    isDropdownOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {isDropdownOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsDropdownOpen(false)}
                   />
-                </button>
-
-                {isDropdownOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setIsDropdownOpen(false)}
-                    />
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[600px] glass p-6 z-50">
-                      <div className="grid grid-cols-2 gap-6">
-                        {CATEGORY_ORDER.map((category) => {
-                          const categoryTools = TOOLS.filter(
-                            (tool) => tool.category === category,
-                          );
-                          if (categoryTools.length === 0) return null;
-                          return (
-                            <div key={category}>
-                              <h5 className="text-xs font-medium text-mint uppercase tracking-wider mb-3">
-                                {t(CATEGORY_LABEL_KEY[category])}
-                              </h5>
-                              <ul className="space-y-1">
-                                {categoryTools.map((tool) => {
-                                  const Icon = tool.icon;
-                                  return (
-                                    <li key={tool.slug}>
-                                      <Link
-                                        href={localized(tool.href)}
-                                        onClick={() => setIsDropdownOpen(false)}
-                                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-ink-soft hover:text-ink hover:bg-white/10 transition-all"
-                                      >
-                                        <Icon className="w-4 h-4" />
-                                        <span>{t(`${tool.navKey}.name`)}</span>
-                                      </Link>
-                                    </li>
-                                  );
-                                })}
-                              </ul>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <Link
-                href={docsHref}
-                className={`glass-hover px-4 py-2 rounded-lg transition-all ${
-                  isActive("/docs")
-                    ? "text-ink bg-white/20"
-                    : "text-ink-soft hover:text-ink"
-                }`}
-              >
-                {t("nav.docs")}
-              </Link>
-              <Link
-                href={aboutHref}
-                className={`glass-hover px-4 py-2 rounded-lg transition-all ${
-                  isActive("/about")
-                    ? "text-ink bg-white/20"
-                    : "text-ink-soft hover:text-ink"
-                }`}
-              >
-                {t("nav.about")}
-              </Link>
-            </nav>
-
-            {/* Right Side */}
-            <div className="flex items-center gap-3">
-              <LanguageSwitcher />
-              <Link href={ctaHref} className="btn-primary">
-                {t("common.tryIt")}
-              </Link>
+                  <div className="absolute top-full left-0 mt-2 w-[640px] bg-canvas border border-hairline rounded-lg shadow-lg p-6 grid grid-cols-2 gap-6 z-50">
+                    {CATEGORY_ORDER.map((category) => {
+                      const categoryTools = TOOLS.filter(
+                        (tool) => tool.category === category,
+                      );
+                      if (categoryTools.length === 0) return null;
+                      return (
+                        <div key={category}>
+                          <h5 className="text-xs font-medium text-ink-mute uppercase tracking-wider mb-3">
+                            {t(CATEGORY_LABEL_KEY[category])}
+                          </h5>
+                          <ul className="space-y-1">
+                            {categoryTools.map((tool) => {
+                              const Icon = tool.icon;
+                              return (
+                                <li key={tool.slug}>
+                                  <Link
+                                    href={localized(tool.href)}
+                                    onClick={() => setIsDropdownOpen(false)}
+                                    className="flex items-center gap-2 px-2 py-1.5 rounded-sm text-sm text-ink hover:bg-canvas-soft hover:text-primary transition-colors no-underline"
+                                  >
+                                    <Icon className="w-4 h-4 text-ink-mute" />
+                                    <span>{t(`${tool.navKey}.name`)}</span>
+                                  </Link>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </div>
+
+            <Link
+              href={docsHref}
+              className={`px-3 py-2 text-sm font-medium transition-colors no-underline ${
+                isActive("/docs")
+                  ? "text-primary"
+                  : "text-ink-mute hover:text-ink"
+              }`}
+            >
+              {t("nav.docs")}
+            </Link>
+            <Link
+              href={aboutHref}
+              className={`px-3 py-2 text-sm font-medium transition-colors no-underline ${
+                isActive("/about")
+                  ? "text-primary"
+                  : "text-ink-mute hover:text-ink"
+              }`}
+            >
+              {t("nav.about")}
+            </Link>
+          </nav>
+
+          {/* Right Side — Emerald CTA */}
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher />
+            <Link
+              href={ctaHref}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-sm bg-primary text-on-primary text-sm font-medium hover:bg-primary-deep transition-colors no-underline"
+            >
+              {t("common.tryIt")}
+            </Link>
           </div>
         </div>
       </div>

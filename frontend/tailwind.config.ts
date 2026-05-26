@@ -10,40 +10,54 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // 柔和配色
-        mint: {
-          DEFAULT: '#7DD3C0',
-          soft: '#B8E8DE',
-          deep: '#5BBFA8',
-        },
-        lavender: {
-          DEFAULT: '#E8D5F2',
-          soft: '#F5EFF9',
-        },
-        cream: {
-          DEFAULT: '#FDFBF7',
-          deep: '#F5F0E8',
+        // Supabase design tokens — mapped to CSS custom properties
+        canvas: {
+          DEFAULT: "var(--canvas)",
+          soft: "var(--canvas-soft)",
+          night: "var(--canvas-night)",
+          "night-soft": "var(--canvas-night-soft)",
         },
         ink: {
-          DEFAULT: '#1A1A2E',
-          soft: '#4A4A5A',
+          DEFAULT: "var(--ink)",
+          secondary: "var(--ink-secondary)",
+          mute: "var(--ink-mute)",
+          "mute-2": "var(--ink-mute-2)",
+          faint: "var(--ink-faint)",
+          body: "var(--body)",
         },
-        body: '#6B6B7B',
+        primary: {
+          DEFAULT: "var(--primary)",
+          deep: "var(--primary-deep)",
+          soft: "var(--primary-soft)",
+        },
+        hairline: {
+          DEFAULT: "var(--hairline)",
+          strong: "var(--hairline-strong)",
+          cool: "var(--hairline-cool)",
+        },
+        "on-primary": "var(--on-primary)",
+        "on-dark": {
+          DEFAULT: "var(--on-dark)",
+          soft: "var(--on-dark-soft)",
+        },
+        success: "var(--success)",
+        warning: "var(--warning)",
+        error: "var(--error)",
       },
       fontFamily: {
-        serif: ['Cormorant Garamond', 'Georgia', 'serif'],
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        serif: ["Cormorant Garamond", "Georgia", "serif"],
+        sans: ["Inter", "system-ui", "sans-serif"],
       },
       borderRadius: {
-        '2xl': '16px',
-        '3xl': '20px',
-        '4xl': '28px',
+        "2xl": "16px",
+        "3xl": "20px",
+        "4xl": "28px",
       },
       spacing: {
-        'section': '80px',
+        section: "80px",
       },
       backdropBlur: {
-        'xs': '4px',
+        xs: "4px",
       },
     },
   },
