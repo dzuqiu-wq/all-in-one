@@ -59,6 +59,7 @@ export default {
     jsonFormatter: {
       name: 'JSON Formatter & Validator',
       description: 'Format, validate, and minify JSON entirely inside your browser. Native JSON.parse, no upload, no network round-trip.',
+      placeholder: 'Paste JSON here, for example: {"hello":"world","count":42}',
     },
     base64: {
       name: 'Base64',

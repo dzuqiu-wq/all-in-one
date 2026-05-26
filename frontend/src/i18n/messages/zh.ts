@@ -59,6 +59,7 @@ export default {
     jsonFormatter: {
       name: 'JSON 格式化与校验',
       description: '在浏览器里完成 JSON 的美化、压缩与合法性校验。直接调用原生 JSON.parse，零上传、零网络往返。',
+      placeholder: '在这里粘贴 JSON，例如：{"hello":"world","count":42}',
     },
     base64: {
       name: 'Base64',
