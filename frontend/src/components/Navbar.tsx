@@ -79,7 +79,7 @@ export default function Navbar() {
                     className="fixed inset-0 z-40"
                     onClick={() => setIsDropdownOpen(false)}
                   />
-                  <div className="absolute top-full left-0 mt-2 w-[640px] bg-canvas border border-hairline rounded-lg shadow-lg p-6 grid grid-cols-2 gap-6 z-50">
+                  <div className="absolute top-full left-0 mt-2 w-[640px] bg-canvas border border-hairline rounded-lg shadow-lg p-6 grid grid-cols-2 gap-6 z-[10000]">
                     {CATEGORY_ORDER.map((category) => {
                       const categoryTools = TOOLS.filter(
                         (tool) => tool.category === category,
