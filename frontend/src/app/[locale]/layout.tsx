@@ -1,4 +1,5 @@
 import { SmoothScrollProvider } from "@/components/SmoothScrollProvider";
+import { PageTransition } from "@/animations/PageTransition";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { Inter, Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
@@ -105,7 +106,9 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <SmoothScrollProvider>
             <Navbar />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1">
+              <PageTransition>{children}</PageTransition>
+            </main>
             <Footer />
           </SmoothScrollProvider>
         </NextIntlClientProvider>
