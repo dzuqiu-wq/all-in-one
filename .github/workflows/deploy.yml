@@ -30,6 +30,10 @@ on:
         required: false
         default: false
 
+# Required by actions/checkout to clone the repository with GITHUB_TOKEN
+permissions:
+  contents: read
+
 # Only one deploy may run at a time against the production environment;
 # back-to-back pushes will queue rather than race for the SSH socket.
 concurrency:

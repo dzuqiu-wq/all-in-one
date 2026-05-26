@@ -21,6 +21,10 @@ on:
   workflow_dispatch:
   workflow_call:
 
+# Required by actions/checkout to clone the repository with GITHUB_TOKEN
+permissions:
+  contents: read
+
 # Cancel duplicate runs on the same ref so a fresh push supersedes the
 # in-flight run instead of queueing behind it.
 concurrency:
