@@ -2,93 +2,127 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 import { Github } from "lucide-react";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { TOOLS } from "@/lib/toolRegistry";
 import { SOCIAL } from "@/lib/constants";
-import { useLocalizedHref } from "@/i18n/useLocalizedHref";
+import {
+  useLocalizedHref,
+  useCurrentLocale,
+  buildLocalizedHref,
+} from "@/i18n/useLocalizedHref";
 
 export default function Footer() {
   const t = useTranslations();
   const currentYear = new Date().getFullYear();
-  const localizedHref = useLocalizedHref;
+  const locale = useCurrentLocale();
+  const homeHref = useLocalizedHref("/");
+  const aboutHref = useLocalizedHref("/about");
+  const docsHref = useLocalizedHref("/docs");
+  const privacyHref = useLocalizedHref("/privacy");
+  const termsHref = useLocalizedHref("/terms");
+  const cookieHref = useLocalizedHref("/cookie");
 
-  const toolGroups = [
-    { title: t("footer.tools"), tools: TOOLS.slice(0, 6) },
-    { title: t("footer.more"), tools: TOOLS.slice(6) },
-  ];
+  const footerTools = useMemo(
+    () =>
+      TOOLS.slice(0, 5).map((tool) => ({
+        slug: tool.slug,
+        navKey: tool.navKey,
+        localizedHref: buildLocalizedHref(tool.href, locale),
+      })),
+    [locale],
+  );
 
   return (
-    <footer className="mt-section">
-      <div className="max-w-[1200px] mx-auto px-6">
-        <div className="glass p-8 lg:p-12 rounded-3xl">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {/* Brand Column */}
-            <div className="md:col-span-2">
-              <Link
-                href={localizedHref("/")}
-                className="inline-flex items-center gap-3 mb-4"
-              >
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-mint to-mint-deep flex items-center justify-center">
-                  <span className="text-ink font-bold text-lg">A1</span>
-                </div>
-                <span className="font-serif text-xl text-ink">All-in-One</span>
-              </Link>
-              <p className="text-body text-sm max-w-xs mb-4">
-                {t("footer.description")}
-              </p>
-              <div className="flex items-center gap-4">
-                <a
-                  href={SOCIAL.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 glass-hover rounded-lg flex items-center justify-center"
-                >
-                  <Github className="w-4 h-4 text-ink-soft" />
-                </a>
-              </div>
-            </div>
-
-            {/* Tools Links */}
-            {toolGroups.map((group) => (
-              <div key={group.title}>
-                <h4 className="font-medium text-ink mb-4">{group.title}</h4>
-                <ul className="space-y-2">
-                  {group.tools.map((tool) => (
-                    <li key={tool.slug}>
-                      <Link
-                        href={localizedHref(tool.href)}
-                        className="text-body text-sm hover:text-mint transition-colors"
-                      >
-                        {t(`${tool.navKey}.name`)}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+    <footer className="bg-canvas border-t border-hairline">
+      <div className="max-w-[1280px] mx-auto px-6 py-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          {/* Brand */}
+          <div className="col-span-2 md:col-span-1">
+            <Link href={homeHref} className="inline-flex items-center gap-2 mb-4 no-underline">
+              <span className="w-6 h-6 bg-primary rounded-sm flex items-center justify-center">
+                <span className="text-[10px] font-bold text-on-primary">A1</span>
+              </span>
+              <span className="font-medium text-ink">All-in-One</span>
+            </Link>
+            <p className="text-xs text-ink-mute leading-relaxed max-w-xs">
+              Privacy-first browser tools. No upload, no tracking.
+            </p>
           </div>
 
-          {/* Bottom Bar */}
-          <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-body text-sm">
-              © {currentYear} All-in-One. MIT License.
-            </p>
-            <div className="flex items-center gap-6 text-sm">
-              <Link
-                href={localizedHref("/privacy")}
-                className="text-body hover:text-ink transition-colors"
-              >
-                {t("footer.privacy")}
-              </Link>
-              <Link
-                href={localizedHref("/terms")}
-                className="text-body hover:text-ink transition-colors"
-              >
-                {t("footer.terms")}
-              </Link>
-              <LanguageSwitcher />
-            </div>
+          {/* Tools Links */}
+          <div>
+            <h4 className="text-sm font-medium text-ink mb-3">{t("common.tools")}</h4>
+            <ul className="space-y-2">
+              {footerTools.map((tool) => (
+                <li key={tool.slug}>
+                  <Link
+                    href={tool.localizedHref}
+                    className="text-xs text-ink-mute hover:text-ink transition-colors no-underline"
+                  >
+                    {t(`${tool.navKey}.name`)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* More Links */}
+          <div>
+            <h4 className="text-sm font-medium text-ink mb-3">{t("footer.more")}</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href={docsHref} className="text-xs text-ink-mute hover:text-ink transition-colors no-underline">
+                  {t("nav.docs")}
+                </Link>
+              </li>
+              <li>
+                <Link href={aboutHref} className="text-xs text-ink-mute hover:text-ink transition-colors no-underline">
+                  {t("footer.about")}
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal Links */}
+          <div>
+            <h4 className="text-sm font-medium text-ink mb-3">{t("footer.legal")}</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href={privacyHref} className="text-xs text-ink-mute hover:text-ink transition-colors no-underline">
+                  {t("footer.privacy")}
+                </Link>
+              </li>
+              <li>
+                <Link href={termsHref} className="text-xs text-ink-mute hover:text-ink transition-colors no-underline">
+                  {t("footer.terms")}
+                </Link>
+              </li>
+              <li>
+                <Link href={cookieHref} className="text-xs text-ink-mute hover:text-ink transition-colors no-underline">
+                  Cookies
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="mt-12 pt-6 border-t border-hairline-cool flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-ink-mute">
+            &copy; {currentYear} All-in-One. MIT License.
+          </p>
+          <div className="flex items-center gap-6">
+            <a
+              href={SOCIAL.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-ink-mute hover:text-ink transition-colors"
+            >
+              <Github className="w-4 h-4" />
+            </a>
+            <LanguageSwitcher />
           </div>
         </div>
       </div>
