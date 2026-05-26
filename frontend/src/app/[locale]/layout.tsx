@@ -6,6 +6,7 @@ import { Inter, Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { GrainOverlay } from "@/components/GrainOverlay";
 import "../globals.css";
 import { Metadata } from "next";
 
@@ -110,6 +111,7 @@ export default async function LocaleLayout({
               <PageTransition>{children}</PageTransition>
             </main>
             <Footer />
+            <GrainOverlay />
           </SmoothScrollProvider>
         </NextIntlClientProvider>
       </body>
