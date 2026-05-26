@@ -62,19 +62,23 @@ export default function ToolArticle({ content }: ToolArticleProps) {
   return (
     <article className="mt-section pt-xl border-t border-hairline">
       <header className="mb-12 max-w-3xl">
-        <div className="caption-upper text-muted mb-4">{content.eyebrow}</div>
+        <div
+          className="text-xs font-medium text-ink-mute uppercase tracking-wider mb-4"
+        >
+          {content.eyebrow}
+        </div>
         <h2
-          className="font-serif text-ink mb-6"
+          className="text-ink mb-6"
           style={{
             fontSize: "clamp(28px, 4vw, 40px)",
+            fontWeight: 500,
             lineHeight: 1.15,
-            letterSpacing: "-0.5px",
-            fontWeight: 400,
+            letterSpacing: "-0.72px",
           }}
         >
           {content.title}
         </h2>
-        <p className="text-title-md text-body leading-relaxed">{content.lead}</p>
+        <p className="text-body leading-relaxed">{content.lead}</p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-12">
@@ -84,21 +88,21 @@ export default function ToolArticle({ content }: ToolArticleProps) {
           className="hidden lg:block"
         >
           <div className="sticky top-24">
-            <div className="caption-upper text-muted-soft mb-4">
+            <div className="text-xs font-medium text-ink-mute uppercase tracking-wider mb-4">
               {t("article.tableOfContents")}
             </div>
-            <ol className="space-y-3 text-body-sm">
+            <ol className="space-y-1">
               {content.sections.map((section, idx) => {
                 const Icon = sectionIcons[section.id];
                 return (
                   <li key={section.id}>
                     <a
                       href={`#article-${section.id}`}
-                      className="flex items-start gap-2 text-muted hover:text-ink transition-colors no-underline"
+                      className="flex items-start gap-2 px-3 py-2 rounded-sm text-sm text-ink-mute hover:text-ink hover:bg-canvas-soft transition-all no-underline"
                     >
-                      <Icon className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" strokeWidth={1.75} />
+                      <Icon className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-ink-faint" strokeWidth={1.75} />
                       <span>
-                        <span className="font-mono text-xs text-muted-soft mr-1.5">
+                        <span className="font-mono text-xs text-ink-faint mr-1.5">
                           0{idx + 1}
                         </span>
                         {section.heading}
@@ -112,14 +116,14 @@ export default function ToolArticle({ content }: ToolArticleProps) {
         </nav>
 
         {/* Main column */}
-        <div className="info-prose space-y-16 max-w-3xl">
+        <div className="space-y-16 max-w-3xl">
           {content.sections.map((section, idx) => (
             <section
               key={section.id}
               id={`article-${section.id}`}
               className="scroll-mt-24"
             >
-              <div className="caption-upper text-muted-soft mb-3 font-mono">
+              <div className="text-xs font-mono font-medium text-ink-faint mb-3 border-b border-hairline-cool pb-3">
                 {`0${idx + 1} · ${
                   section.id === "industry"
                     ? t("article.industry")
@@ -129,26 +133,26 @@ export default function ToolArticle({ content }: ToolArticleProps) {
                 }`}
               </div>
               <h3
-                className="font-serif text-ink mb-5"
+                className="text-ink mb-5"
                 style={{
                   fontSize: "clamp(24px, 3vw, 30px)",
+                  fontWeight: 500,
                   lineHeight: 1.2,
-                  letterSpacing: "-0.3px",
-                  fontWeight: 400,
+                  letterSpacing: "-0.42px",
                 }}
               >
                 {section.heading}
               </h3>
-              <p className="text-body-md text-body leading-relaxed mb-6">
+              <p className="text-body leading-relaxed mb-6">
                 {section.lead}
               </p>
 
               {section.subsections.map((sub) => (
                 <div key={sub.heading} className="mt-8">
-                  <h4 className="text-title-md font-sans font-medium text-ink mb-3">
+                  <h4 className="text-base font-medium text-ink mb-3">
                     {sub.heading}
                   </h4>
-                  <div className="space-y-3 text-body-md text-body leading-relaxed">
+                  <div className="space-y-3 text-body leading-relaxed">
                     {sub.paragraphs.map((p, i) => (
                       <p key={i}>{p}</p>
                     ))}
@@ -157,7 +161,7 @@ export default function ToolArticle({ content }: ToolArticleProps) {
               ))}
 
               {section.bullets && section.bullets.length > 0 && (
-                <ul className="mt-6 space-y-2 list-disc pl-6 text-body-md text-body leading-relaxed">
+                <ul className="mt-6 space-y-2 list-disc pl-6 text-body leading-relaxed">
                   {section.bullets.map((b, i) => (
                     <li key={i}>{b}</li>
                   ))}
