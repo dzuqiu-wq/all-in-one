@@ -1,5 +1,4 @@
 "use client";
-
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import {
@@ -10,7 +9,6 @@ import {
   Github,
   Sparkles,
 } from "lucide-react";
-import AdBanner from "@/components/AdBanner";
 import SystemStatus, { type StatusEntry } from "@/components/SystemStatus";
 import ShareButtons from "@/components/ShareButtons";
 import { useLocalizedHref } from "@/i18n/useLocalizedHref";
@@ -21,12 +19,10 @@ import {
   type ToolDescriptor,
 } from "@/lib/toolRegistry";
 import { SOCIAL } from "@/lib/constants";
-
 export default function HomeContent() {
   const t = useTranslations();
   const wordPdfHref = useLocalizedHref("/tools/word-to-pdf");
   const aboutHref = useLocalizedHref("/about");
-
   const statusEntries: readonly StatusEntry[] = [
     {
       label: t("home.status.gotenberg.label"),
@@ -53,7 +49,6 @@ export default function HomeContent() {
       level: "operational",
     },
   ];
-
   return (
     <div className="bg-canvas">
       {/* ---------- Hero ---------- */}
@@ -95,7 +90,6 @@ export default function HomeContent() {
               </a>
             </div>
           </div>
-
           <div className="surface-night rounded-lg p-6 shadow-md">
             <div className="flex items-center gap-2 mb-6">
               <div className="w-3 h-3 rounded-full bg-error opacity-80" />
@@ -128,7 +122,6 @@ export default function HomeContent() {
           </div>
         </div>
       </section>
-
       {/* ---------- Values ---------- */}
       <section className="bg-canvas-soft border-y border-hairline">
         <div className="max-w-6xl mx-auto px-6 py-xxl">
@@ -151,7 +144,6 @@ export default function HomeContent() {
           </div>
         </div>
       </section>
-
       {/* ---------- Industrial Category Matrix ---------- */}
       <section id="tools" className="max-w-6xl mx-auto px-6 py-section">
         <div className="mb-16 max-w-3xl">
@@ -165,23 +157,12 @@ export default function HomeContent() {
             {t("home.tools.description")}
           </p>
         </div>
-
         <div className="space-y-section">
           {CATEGORIES.map((category) => (
             <CategoryMatrix key={category.id} category={category} />
           ))}
         </div>
       </section>
-
-      {/* ---------- Mid Ad ---------- */}
-      <section className="max-w-6xl mx-auto px-6 pb-section">
-        <AdBanner
-          slot="home-mid-rectangle"
-          format="rectangle"
-          className="mx-auto max-w-[728px]"
-        />
-      </section>
-
       {/* ---------- Indie Hacker Philosophy ---------- */}
       <section className="max-w-6xl mx-auto px-6 pb-section">
         <div className="bg-canvas border border-hairline rounded-xl p-section">
@@ -226,7 +207,6 @@ export default function HomeContent() {
           </div>
         </div>
       </section>
-
       {/* ---------- System Status ---------- */}
       <section className="max-w-6xl mx-auto px-6 pb-section">
         <SystemStatus
@@ -238,7 +218,6 @@ export default function HomeContent() {
           entries={statusEntries}
         />
       </section>
-
       {/* ---------- CTA ---------- */}
       <section className="max-w-6xl mx-auto px-6 pb-section">
         <div className="bg-ink rounded-xl p-section text-center">
@@ -266,7 +245,6 @@ export default function HomeContent() {
           </div>
         </div>
       </section>
-
       {/* ---------- Footer share strip ---------- */}
       <section className="max-w-6xl mx-auto px-6 pb-section">
         <ShareButtons
@@ -284,14 +262,11 @@ export default function HomeContent() {
     </div>
   );
 }
-
-
 interface ValueCardProps {
   icon: React.ElementType;
   title: string;
   description: string;
 }
-
 function ValueCard({ icon: Icon, title, description }: ValueCardProps) {
   return (
     <div className="flex gap-4">
@@ -305,16 +280,13 @@ function ValueCard({ icon: Icon, title, description }: ValueCardProps) {
     </div>
   );
 }
-
 interface CategoryMatrixProps {
   category: CategoryDescriptor;
 }
-
 function CategoryMatrix({ category }: CategoryMatrixProps) {
   const t = useTranslations();
   const Icon = category.icon;
   const categoryTools = TOOLS.filter((tool) => tool.category === category.id);
-
   return (
     <section
       id={`category-${category.id}`}
@@ -347,7 +319,6 @@ function CategoryMatrix({ category }: CategoryMatrixProps) {
           {String(categoryTools.length).padStart(2, "0")} {t("common.tools")}
         </div>
       </div>
-
       <div className="tool-grid">
         {categoryTools.map((tool) => (
           <ToolMatrixCard key={tool.slug} tool={tool} />
@@ -356,16 +327,13 @@ function CategoryMatrix({ category }: CategoryMatrixProps) {
     </section>
   );
 }
-
 interface ToolMatrixCardProps {
   tool: ToolDescriptor;
 }
-
 function ToolMatrixCard({ tool }: ToolMatrixCardProps) {
   const t = useTranslations();
   const href = useLocalizedHref(tool.href);
   const Icon = tool.icon;
-
   return (
     <Link
       href={href}
@@ -379,7 +347,6 @@ function ToolMatrixCard({ tool }: ToolMatrixCardProps) {
           {tool.runtime === "server" ? t("tools.server") : t("tools.browser")}
         </span>
       </div>
-
       <h4 className="text-lg font-medium text-ink mb-2"
         style={{ marginBottom: "8px" }}>
         {t(`${tool.intlKey}.name`)}
@@ -387,7 +354,6 @@ function ToolMatrixCard({ tool }: ToolMatrixCardProps) {
       <p className="text-sm text-ink-mute mb-4 leading-relaxed line-clamp-2">
         {t(`${tool.intlKey}.description`)}
       </p>
-
       <div className="flex items-center gap-2 text-sm font-medium text-primary group-hover:gap-3 transition-all">
         {t("home.tryItNow")}
         <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />

@@ -1,22 +1,17 @@
 "use client";
-
 import { useCallback, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Crop, Download, Image as ImageIcon, RotateCcw, Wand2 } from "lucide-react";
-import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import ShareButtons from "@/components/ShareButtons";
 import { resizeImage, type Dimensions } from "@/lib/tools/imageResizer";
-
 const ACCEPTED_MIME = ["image/png", "image/jpeg", "image/webp"] as const;
 const MAX_SIZE_BYTES = 10 * 1024 * 1024;
-
 // Structured data for SEO - locale-aware
 function StructuredData() {
   const locale = useLocale();
   const isZh = locale === "zh";
-
   return (
     <script
       type="application/ld+json"
@@ -40,16 +35,13 @@ function StructuredData() {
     />
   );
 }
-
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 }
-
 export default function ImageResizerClient() {
   const t = useTranslations("tools.imageResizer");
-
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [originalDimensions, setOriginalDimensions] =
@@ -61,9 +53,7 @@ export default function ImageResizerClient() {
   const [resultBlob, setResultBlob] = useState<Blob | null>(null);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const handleFileSelect = useCallback(
     async (f: File) => {
       setError(null);
@@ -84,7 +74,6 @@ export default function ImageResizerClient() {
       const reader = new FileReader();
       reader.onload = (e) => setPreview(e.target?.result as string);
       reader.readAsDataURL(f);
-
       // Read source dimensions and seed width/height.
       try {
         const bitmap = await createImageBitmap(f);
@@ -102,7 +91,6 @@ export default function ImageResizerClient() {
     },
     [t, resultUrl],
   );
-
   const onWidthChange = useCallback(
     (w: number) => {
       setWidth(w);
@@ -114,7 +102,6 @@ export default function ImageResizerClient() {
     },
     [lockAspect, originalDimensions],
   );
-
   const onHeightChange = useCallback(
     (h: number) => {
       setHeight(h);
@@ -126,7 +113,6 @@ export default function ImageResizerClient() {
     },
     [lockAspect, originalDimensions],
   );
-
   const handleResize = useCallback(async () => {
     if (!file || width <= 0 || height <= 0) return;
     setIsResizing(true);
@@ -142,7 +128,6 @@ export default function ImageResizerClient() {
       setIsResizing(false);
     }
   }, [file, width, height, resultUrl, t]);
-
   const handleReset = useCallback(() => {
     setFile(null);
     setPreview(null);
@@ -157,7 +142,6 @@ export default function ImageResizerClient() {
     setError(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }, [resultUrl]);
-
   const handleDownload = useCallback(() => {
     if (!resultBlob || !file) return;
     const url = URL.createObjectURL(resultBlob);
@@ -171,20 +155,16 @@ export default function ImageResizerClient() {
     a.click();
     URL.revokeObjectURL(url);
   }, [resultBlob, file, width, height]);
-
   const faqs: { q: string; a: string }[] = [
     { q: t("faq1Q"), a: t("faq1A") },
     { q: t("faq2Q"), a: t("faq2A") },
     { q: t("faq3Q"), a: t("faq3A") },
   ];
-
   return (
     <div className="min-h-screen bg-canvas">
       <StructuredData />
-
       <div className="max-w-4xl mx-auto px-6 py-section">
         <ToolBreadcrumb slug="image-resizer" />
-
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4 inline-flex items-center gap-2">
             <Crop className="w-3.5 h-3.5" strokeWidth={2} />
@@ -200,11 +180,8 @@ export default function ImageResizerClient() {
             {t("description")}
           </p>
         </div>
-
         <div className="mb-8">
-          <AdBanner slot="imageresizer-top" format="auto" />
         </div>
-
         {/* Upload Zone */}
         <div
           onDrop={(e) => {
@@ -234,7 +211,6 @@ export default function ImageResizerClient() {
           </h4>
           <p className="text-body-sm text-muted">{t("supported")}</p>
         </div>
-
         {error && (
           <div className="mt-4 surface-card rounded-lg p-md border border-hairline">
             <div className="caption-upper text-muted-soft mb-1">
@@ -243,7 +219,6 @@ export default function ImageResizerClient() {
             <p className="text-body-sm text-ink">{error}</p>
           </div>
         )}
-
         {/* Preview & Controls */}
         {preview && file && originalDimensions && (
           <div className="mt-6 space-y-6">
@@ -279,7 +254,6 @@ export default function ImageResizerClient() {
                 </div>
               )}
             </div>
-
             <div className="surface-card rounded-lg p-lg grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label
@@ -298,7 +272,6 @@ export default function ImageResizerClient() {
                   className="w-full px-3 py-2 surface-card border border-hairline rounded-md text-ink text-body-sm font-mono focus:border-primary focus:outline-none"
                 />
               </div>
-
               <div>
                 <label
                   htmlFor="height"
@@ -316,7 +289,6 @@ export default function ImageResizerClient() {
                   className="w-full px-3 py-2 surface-card border border-hairline rounded-md text-ink text-body-sm font-mono focus:border-primary focus:outline-none"
                 />
               </div>
-
               <div className="flex items-end">
                 <label className="flex items-center gap-2 text-body-sm text-ink cursor-pointer">
                   <input
@@ -329,7 +301,6 @@ export default function ImageResizerClient() {
                 </label>
               </div>
             </div>
-
             <div className="flex gap-2">
               <button
                 type="button"
@@ -349,7 +320,6 @@ export default function ImageResizerClient() {
                 {t("reset")}
               </button>
             </div>
-
             {resultBlob && (
               <button
                 type="button"
@@ -362,7 +332,6 @@ export default function ImageResizerClient() {
             )}
           </div>
         )}
-
         {/* Share strip */}
         <div className="mt-8">
           <ShareButtons
@@ -377,7 +346,6 @@ export default function ImageResizerClient() {
             hashtags={["ImageResizer", "Canvas", "AllInOneToolbox"]}
           />
         </div>
-
         {/* FAQ */}
         <section className="mt-section pt-xl border-t border-hairline">
           <h2 className="text-display-md font-serif text-ink mb-8">
@@ -399,7 +367,6 @@ export default function ImageResizerClient() {
             ))}
           </div>
         </section>
-
         <ToolPageFooter slug="image-resizer" />
       </div>
     </div>

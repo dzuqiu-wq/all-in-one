@@ -1,16 +1,13 @@
 "use client";
-
 import { useState, useRef, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import imageCompression from "browser-image-compression";
 import { Download, Image as ImageIcon, Zap } from "lucide-react";
-import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import SampleButton from "@/components/SampleButton";
 import ShareButtons from "@/components/ShareButtons";
 import { buildSampleImageFile } from "@/lib/sampleData";
-
 interface CompressionResult {
   originalSize: number;
   compressedSize: number;
@@ -19,7 +16,6 @@ interface CompressionResult {
   aspectRatio: string;
   histogram: { r: number; g: number; b: number };
 }
-
 // Structured data for SEO
 function StructuredDataEN() {
   return (
@@ -93,7 +89,6 @@ function StructuredDataEN() {
     </>
   );
 }
-
 function _StructuredDataZH() {
   return (
     <>
@@ -166,7 +161,6 @@ function _StructuredDataZH() {
     </>
   );
 }
-
 export default function ImageOptimizerPage() {
   const t = useTranslations("tools.imageOptimizer");
   const [file, setFile] = useState<File | null>(null);
@@ -177,7 +171,6 @@ export default function ImageOptimizerPage() {
   const [quality, setQuality] = useState(80);
   const [convertedBlob, setConvertedBlob] = useState<Blob | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const handleFileSelect = useCallback((f: File) => {
     if (!f.type.startsWith("image/")) {
       alert(t("errorInvalid"));
@@ -190,12 +183,10 @@ export default function ImageOptimizerPage() {
     reader.onload = (e) => setPreview(e.target?.result as string);
     reader.readAsDataURL(f);
   }, [t]);
-
   const handleLoadSample = useCallback(async () => {
     const sample = await buildSampleImageFile();
     handleFileSelect(sample);
   }, [handleFileSelect]);
-
   const extractHistogram = (img: HTMLImageElement) => {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
@@ -213,7 +204,6 @@ export default function ImageOptimizerPage() {
     }
     return { r: Math.round(r / count), g: Math.round(g / count), b: Math.round(b / count) };
   };
-
   const handleProcess = useCallback(async () => {
     if (!file || !preview) return;
     setIsProcessing(true);
@@ -226,10 +216,8 @@ export default function ImageOptimizerPage() {
         useWebWorker: true,
         initialQuality: quality / 100,
       });
-
       const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b);
       const divisor = gcd(img.width, img.height);
-
       const canvas = document.createElement("canvas");
       canvas.width = img.width;
       canvas.height = img.height;
@@ -240,7 +228,6 @@ export default function ImageOptimizerPage() {
         const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), mime, quality / 100));
         setConvertedBlob(blob);
       }
-
       setResult({
         originalSize: file.size,
         compressedSize: compressed.size,
@@ -253,7 +240,6 @@ export default function ImageOptimizerPage() {
     };
     img.src = preview;
   }, [file, preview, quality, outputFormat]);
-
   const handleDownload = useCallback(() => {
     if (!convertedBlob) return;
     const url = URL.createObjectURL(convertedBlob);
@@ -263,19 +249,14 @@ export default function ImageOptimizerPage() {
     a.click();
     URL.revokeObjectURL(url);
   }, [convertedBlob, outputFormat]);
-
   const formatBytes = (b: number) => b < 1024 ? `${b} B` : b < 1024 * 1024 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1024 / 1024).toFixed(2)} MB`;
-
   const compressionRatio = result ? ((result.originalSize - result.compressedSize) / result.originalSize * 100).toFixed(1) : "0";
-
   return (
     <div className="min-h-screen bg-canvas">
       {/* SEO Structured Data */}
       <StructuredDataEN />
-      
       <div className="max-w-4xl mx-auto px-6 py-section">
         <ToolBreadcrumb slug="image-optimizer" />
-
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4">{t("tag")}</div>
           <h1 className="text-display-lg font-serif text-ink mb-4" style={{ fontSize: "clamp(36px, 5vw, 48px)" }}>
@@ -285,11 +266,8 @@ export default function ImageOptimizerPage() {
             {t("description")}
           </p>
         </div>
-
         <div className="mb-8">
-          <AdBanner slot="image-tool-top" format="auto" />
         </div>
-
         {/* Upload Zone */}
         <div
           onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFileSelect(f); }}
@@ -310,20 +288,17 @@ export default function ImageOptimizerPage() {
           </h4>
           <p className="text-body-sm text-muted">{t("supportedFormats")}</p>
         </div>
-
         {!preview && (
           <div className="mt-4">
             <SampleButton onLoad={handleLoadSample} layout="block" />
           </div>
         )}
-
         {/* Preview & Options */}
         {preview && (
           <div className="mt-6 space-y-6">
             <div className="rounded-lg overflow-hidden border border-hairline">
               <img src={preview} alt="Preview" className="w-full max-h-96 object-contain bg-surface-card" />
             </div>
-
             <div className="surface-card rounded-lg p-lg grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="caption-upper text-muted-soft block mb-3">{t("outputFormat")}</label>
@@ -343,7 +318,6 @@ export default function ImageOptimizerPage() {
                   ))}
                 </div>
               </div>
-
               <div>
                 <label className="caption-upper text-muted-soft block mb-3">{t("quality")}: {quality}%</label>
                 <input
@@ -355,7 +329,6 @@ export default function ImageOptimizerPage() {
                   className="w-full accent-primary"
                 />
               </div>
-
               <div className="flex items-end">
                 <button
                   onClick={handleProcess}
@@ -369,7 +342,6 @@ export default function ImageOptimizerPage() {
             </div>
           </div>
         )}
-
         {/* Results */}
         {result && (
           <div className="mt-8 space-y-6">
@@ -388,7 +360,6 @@ export default function ImageOptimizerPage() {
                 </div>
               ))}
             </div>
-
             {/* Histogram */}
             <div className="surface-card rounded-lg p-lg">
               <div className="caption-upper text-muted-soft mb-4">Color Density</div>
@@ -409,7 +380,6 @@ export default function ImageOptimizerPage() {
               </div>
               <p className="mt-3 text-body-sm text-muted">Aspect Ratio: {result.aspectRatio}</p>
             </div>
-
             <button
               onClick={handleDownload}
               className="w-full py-3 bg-primary text-on-primary text-body-sm font-medium rounded-md hover:bg-primary-active transition-colors flex items-center justify-center gap-2"
@@ -417,11 +387,8 @@ export default function ImageOptimizerPage() {
               <Download className="w-4 h-4" />
               {t("download")}
             </button>
-
-            <AdBanner slot="image-tool-mid" format="rectangle" className="mx-auto max-w-[336px]" />
           </div>
         )}
-
         {/* Share strip */}
         <div className="mt-8">
           <ShareButtons
@@ -436,7 +403,6 @@ export default function ImageOptimizerPage() {
             hashtags={["ImageOptimizer", "WebP", "AllInOneToolbox"]}
           />
         </div>
-
         {/* FAQ */}
         <section className="mt-section pt-xl border-t border-hairline">
           <h2 className="text-display-md font-serif text-ink mb-8">{t("faqTitle")}</h2>
@@ -455,7 +421,6 @@ export default function ImageOptimizerPage() {
             ))}
           </div>
         </section>
-
         <ToolPageFooter slug="image-optimizer" />
       </div>
     </div>

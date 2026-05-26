@@ -1,19 +1,15 @@
 "use client";
-
 import { useCallback, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Hash, Check, Copy, Eraser, Wand2 } from "lucide-react";
-import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import ShareButtons from "@/components/ShareButtons";
 import { hashText, type HashAlgorithm } from "@/lib/tools/hash";
-
 // Structured data for SEO - uses useLocale to detect which version to show
 function StructuredData() {
   const locale = useLocale();
   const isZh = locale === "zh";
-
   return (
     <>
       <script
@@ -41,27 +37,22 @@ function StructuredData() {
     </>
   );
 }
-
 const ALGORITHMS: HashAlgorithm[] = [
   "SHA-1",
   "SHA-256",
   "SHA-384",
   "SHA-512",
 ];
-
 export default function HashGeneratorClient() {
   const t = useTranslations("tools.hashGenerator");
-
   const [input, setInput] = useState("");
   const [algorithm, setAlgorithm] = useState<HashAlgorithm>("SHA-256");
   const [output, setOutput] = useState("");
   const [copied, setCopied] = useState(false);
-
   const handleGenerate = useCallback(async () => {
     const digest = await hashText(input, algorithm);
     setOutput(digest);
   }, [input, algorithm]);
-
   const handleCopy = useCallback(async () => {
     if (!output) return;
     try {
@@ -72,25 +63,20 @@ export default function HashGeneratorClient() {
       // Clipboard write can fail in non-secure contexts; degrade silently.
     }
   }, [output]);
-
   const handleClear = useCallback(() => {
     setInput("");
     setOutput("");
   }, []);
-
   const faqs: { q: string; a: string }[] = [
     { q: t("faq1Q"), a: t("faq1A") },
     { q: t("faq2Q"), a: t("faq2A") },
     { q: t("faq3Q"), a: t("faq3A") },
   ];
-
   return (
     <div className="min-h-screen bg-canvas">
       <StructuredData />
-
       <div className="max-w-5xl mx-auto px-6 py-section">
         <ToolBreadcrumb slug="hash-generator" />
-
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4 inline-flex items-center gap-2">
             <Hash className="w-3.5 h-3.5" strokeWidth={2} />
@@ -106,11 +92,8 @@ export default function HashGeneratorClient() {
             {t("description")}
           </p>
         </div>
-
         <div className="mb-8">
-          <AdBanner slot="hashgen-top" format="auto" />
         </div>
-
         {/* ---------------- Controls ---------------- */}
         <div className="surface-card hairline rounded-lg p-6 mb-6 flex flex-wrap items-center gap-3">
           <label className="inline-flex items-center gap-2">
@@ -127,9 +110,7 @@ export default function HashGeneratorClient() {
               ))}
             </select>
           </label>
-
           <div className="flex-1" />
-
           <button
             type="button"
             onClick={handleGenerate}
@@ -140,7 +121,6 @@ export default function HashGeneratorClient() {
             {t("generate")}
           </button>
         </div>
-
         {/* ---------------- Editor ---------------- */}
         <div className="grid grid-cols-1 gap-6">
           {/* Input pane */}
@@ -171,7 +151,6 @@ export default function HashGeneratorClient() {
               className="w-full px-4 py-3 surface-card border border-hairline rounded-md text-ink font-mono text-body-sm resize-y focus:border-primary focus:outline-none"
             />
           </div>
-
           {/* Output pane */}
           <div className="flex flex-col">
             <div className="flex items-center justify-between mb-2">
@@ -192,7 +171,6 @@ export default function HashGeneratorClient() {
                 {t("copy")}
               </button>
             </div>
-
             {output ? (
               <pre className="w-full min-h-[120px] px-4 py-3 surface-card border border-hairline rounded-md text-ink font-mono text-body-sm overflow-auto whitespace-pre-wrap break-all">
                 {output}
@@ -204,7 +182,6 @@ export default function HashGeneratorClient() {
             )}
           </div>
         </div>
-
         {/* FAQ */}
         <div className="mt-16">
           <h2 className="text-display-md font-serif text-ink mb-6">
@@ -221,7 +198,6 @@ export default function HashGeneratorClient() {
             ))}
           </div>
         </div>
-
         <div className="mt-12">
           <ShareButtons
             title={{
@@ -235,7 +211,6 @@ export default function HashGeneratorClient() {
             hashtags={["HashGenerator", "AllInOneToolbox", "PrivacyTools"]}
           />
         </div>
-
         <ToolPageFooter slug="hash-generator" />
       </div>
     </div>

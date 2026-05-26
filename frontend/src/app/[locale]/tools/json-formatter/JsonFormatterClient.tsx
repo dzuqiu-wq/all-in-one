@@ -1,5 +1,4 @@
 "use client";
-
 import { useCallback, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -13,20 +12,16 @@ import {
   ShieldCheck,
   AlertTriangle,
 } from "lucide-react";
-import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import ShareButtons from "@/components/ShareButtons";
 import { formatJson, minifyJson, validateJson } from "@/lib/tools/jsonFormatter";
-
 type Indent = 2 | 4;
-
 interface FormatterState {
   output: string;
   error: string | null;
   ok: boolean | null;
 }
-
 const SAMPLE_EN = JSON.stringify(
   {
     project: "all-in-one-toolbox",
@@ -38,7 +33,6 @@ const SAMPLE_EN = JSON.stringify(
   null,
   0,
 );
-
 const SAMPLE_ZH = JSON.stringify(
   {
     项目: "all-in-one-toolbox",
@@ -51,12 +45,10 @@ const SAMPLE_ZH = JSON.stringify(
   null,
   0,
 );
-
 // Structured data for SEO - uses useLocale to detect which version to show
 function StructuredData() {
   const locale = useLocale();
   const isZh = locale === "zh";
-
   return (
     <>
       <script
@@ -81,11 +73,9 @@ function StructuredData() {
     </>
   );
 }
-
 export default function JsonFormatterClient() {
   const t = useTranslations("tools.jsonFormatter");
   const locale = useLocale();
-
   const [input, setInput] = useState("");
   const [indent, setIndent] = useState<Indent>(2);
   const [state, setState] = useState<FormatterState>({
@@ -94,13 +84,11 @@ export default function JsonFormatterClient() {
     ok: null,
   });
   const [copied, setCopied] = useState(false);
-
   const stats = useMemo(() => {
     const chars = input.length;
     const lines = input.length === 0 ? 0 : input.split("\n").length;
     return t("stats", { chars: String(chars), lines: String(lines) });
   }, [input, t]);
-
   const handleFormat = useCallback(() => {
     try {
       const output = formatJson(input, indent);
@@ -110,7 +98,6 @@ export default function JsonFormatterClient() {
       setState({ output: "", error: message, ok: false });
     }
   }, [input, indent]);
-
   const handleMinify = useCallback(() => {
     try {
       const output = minifyJson(input);
@@ -120,7 +107,6 @@ export default function JsonFormatterClient() {
       setState({ output: "", error: message, ok: false });
     }
   }, [input]);
-
   const handleValidate = useCallback(() => {
     const result = validateJson(input);
     if (result.ok) {
@@ -129,7 +115,6 @@ export default function JsonFormatterClient() {
       setState({ output: "", error: result.error ?? "", ok: false });
     }
   }, [input, t]);
-
   const handleCopy = useCallback(async () => {
     if (!state.output) return;
     try {
@@ -140,24 +125,19 @@ export default function JsonFormatterClient() {
       // Clipboard write can fail in non-secure contexts; degrade silently.
     }
   }, [state.output]);
-
   const handleClear = useCallback(() => {
     setInput("");
     setState({ output: "", error: null, ok: null });
   }, []);
-
   const handleLoadSample = useCallback(() => {
     setInput(locale === "zh" ? SAMPLE_ZH : SAMPLE_EN);
     setState({ output: "", error: null, ok: null });
   }, [locale]);
-
   return (
     <div className="min-h-screen bg-canvas">
       <StructuredData />
-
       <div className="max-w-5xl mx-auto px-6 py-section">
         <ToolBreadcrumb slug="json-formatter" />
-
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4 inline-flex items-center gap-2">
             <Braces className="w-3.5 h-3.5" strokeWidth={2} />
@@ -173,11 +153,8 @@ export default function JsonFormatterClient() {
             {t("lead")}
           </p>
         </div>
-
         <div className="mb-8">
-          <AdBanner slot="json-formatter-top" format="auto" />
         </div>
-
         {/* ---------------- Controls ---------------- */}
         <div className="surface-card hairline rounded-lg p-6 mb-6 flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
@@ -209,9 +186,7 @@ export default function JsonFormatterClient() {
               </button>
             </div>
           </div>
-
           <div className="flex-1" />
-
           <button
             type="button"
             onClick={handleFormat}
@@ -240,7 +215,6 @@ export default function JsonFormatterClient() {
             {t("validate")}
           </button>
         </div>
-
         {/* ---------------- Editor grid ---------------- */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Input pane */}
@@ -285,7 +259,6 @@ export default function JsonFormatterClient() {
               {stats}
             </div>
           </div>
-
           {/* Output pane */}
           <div className="flex flex-col">
             <div className="flex items-center justify-between mb-2">
@@ -306,7 +279,6 @@ export default function JsonFormatterClient() {
                 {copied ? t("copied") : t("copy")}
               </button>
             </div>
-
             {state.ok === false && state.error !== null ? (
               <div
                 role="alert"
@@ -331,7 +303,6 @@ export default function JsonFormatterClient() {
             )}
           </div>
         </div>
-
         <div className="mt-12">
           <ShareButtons
             title={{
@@ -345,7 +316,6 @@ export default function JsonFormatterClient() {
             hashtags={["JSONFormatter", "AllInOneToolbox", "PrivacyTools"]}
           />
         </div>
-
         <ToolPageFooter slug="json-formatter" />
       </div>
     </div>

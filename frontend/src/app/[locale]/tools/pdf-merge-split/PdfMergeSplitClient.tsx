@@ -1,16 +1,13 @@
 "use client";
-
 import { useState, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { PDFDocument } from "pdf-lib";
 import { Download, FileText, Merge, Scissors, X, GripVertical, CheckCircle } from "lucide-react";
-import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import SampleButton from "@/components/SampleButton";
 import ShareButtons from "@/components/ShareButtons";
 import { buildSamplePdfFile } from "@/lib/sampleData";
-
 interface PDFFile {
   id: string;
   file: File;
@@ -18,9 +15,7 @@ interface PDFFile {
   pageCount: number;
   version: string;
 }
-
 type Mode = "merge" | "split";
-
 // Structured data for SEO
 function StructuredDataEN() {
   return (
@@ -94,7 +89,6 @@ function StructuredDataEN() {
     </>
   );
 }
-
 function _StructuredDataZH() {
   return (
     <>
@@ -167,7 +161,6 @@ function _StructuredDataZH() {
     </>
   );
 }
-
 export default function PDFMergeSplitPage() {
   const t = useTranslations("tools.pdfMerge");
   const [mode, setMode] = useState<Mode>("merge");
@@ -178,7 +171,6 @@ export default function PDFMergeSplitPage() {
   const [splitRanges, setSplitRanges] = useState("1");
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const parsePDF = async (file: File): Promise<PDFFile> => {
     const buf = await file.arrayBuffer();
     const doc = await PDFDocument.load(buf, { ignoreEncryption: true });
@@ -195,7 +187,6 @@ export default function PDFMergeSplitPage() {
       version: ver ? `1.${ver[0].split(".")[1]}` : "1.7",
     };
   };
-
   const handleFilesAdd = useCallback(async (selected: FileList | null) => {
     if (!selected) return;
     const newFiles: PDFFile[] = [];
@@ -207,7 +198,6 @@ export default function PDFMergeSplitPage() {
     setFiles((prev) => [...prev, ...newFiles]);
     setResult(null);
   }, []);
-
   const handleLoadSample = useCallback(async () => {
     const samples =
       mode === "merge"
@@ -221,7 +211,6 @@ export default function PDFMergeSplitPage() {
     setResult(null);
     if (mode === "split") setSplitRanges("1-3");
   }, [mode]);
-
   const moveFile = (from: number, to: number) => {
     setFiles((prev) => {
       const arr = [...prev];
@@ -230,7 +219,6 @@ export default function PDFMergeSplitPage() {
       return arr;
     });
   };
-
   const handleMerge = async () => {
     if (files.length < 2) return;
     setIsProcessing(true);
@@ -250,19 +238,16 @@ export default function PDFMergeSplitPage() {
     } catch (e) { console.error(e); }
     setIsProcessing(false);
   };
-
   const handleSplit = async () => {
     if (files.length !== 1) return;
     setIsProcessing(true);
     setSplitError(null); // Clear previous errors
-
     try {
       const f = files[0];
       const buf = await f.file.arrayBuffer();
       const doc = await PDFDocument.load(buf, { ignoreEncryption: true });
       const total = doc.getPageCount();
       const pages: number[] = [];
-
       // Parse page ranges with proper NaN validation
       for (const p of splitRanges.split(",").map(s => s.trim())) {
         if (p.includes("-")) {
@@ -270,48 +255,38 @@ export default function PDFMergeSplitPage() {
           if (parts.length !== 2) {
             throw new Error(`Invalid range format: "${p}". Use format like "1-5".`);
           }
-
           const start = parseInt(parts[0]);
           const end = parseInt(parts[1]);
-
           // CRITICAL: Explicit NaN check
           if (isNaN(start) || isNaN(end)) {
             throw new Error(`Invalid page number in range "${p}". Please enter valid page numbers.`);
           }
-
           // Validate range bounds
           if (start < 1 || end < 1 || start > total || end > total) {
             throw new Error(`Page range "${p}" is out of bounds. Document has ${total} pages. Valid range: 1-${total}.`);
           }
-
           if (start > end) {
             throw new Error(`Invalid range "${p}": start page must be less than or equal to end page.`);
           }
-
           for (let i = start; i <= Math.min(end, total); i++) {
             pages.push(i - 1);
           }
         } else {
           const n = parseInt(p);
-
           // CRITICAL: Explicit NaN check - reject invalid input
           if (isNaN(n)) {
             throw new Error(`Invalid page number "${p}". Please enter a valid page number (1-${total}).`);
           }
-
           // Validate bounds
           if (n < 1 || n > total) {
             throw new Error(`Page ${n} is out of bounds. Document has ${total} pages.`);
           }
-
           pages.push(n - 1);
         }
       }
-
       if (pages.length === 0) {
         throw new Error("No valid pages specified. Please enter page numbers within the document range.");
       }
-
       const unique = [...new Set(pages)].sort((a, b) => a - b);
       const newDoc = await PDFDocument.create();
       const copied = await newDoc.copyPages(doc, unique);
@@ -325,7 +300,6 @@ export default function PDFMergeSplitPage() {
     }
     setIsProcessing(false);
   };
-
   const handleDownload = () => {
     if (!result) return;
     const url = URL.createObjectURL(result);
@@ -335,15 +309,12 @@ export default function PDFMergeSplitPage() {
     a.click();
     URL.revokeObjectURL(url);
   };
-
   return (
     <div className="min-h-screen bg-canvas">
       {/* SEO Structured Data */}
       <StructuredDataEN />
-      
       <div className="max-w-4xl mx-auto px-6 py-section">
         <ToolBreadcrumb slug="pdf-merge-split" />
-
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4">{t("tag")}</div>
           <h1 className="text-display-lg font-serif text-ink mb-4" style={{ fontSize: "clamp(36px, 5vw, 48px)" }}>
@@ -353,11 +324,8 @@ export default function PDFMergeSplitPage() {
             {t("description")}
           </p>
         </div>
-
         <div className="mb-8">
-          <AdBanner slot="pdf-tool-top" format="auto" />
         </div>
-
         {/* Mode Selector */}
         <div className="flex gap-2 mb-6">
           <button
@@ -383,7 +351,6 @@ export default function PDFMergeSplitPage() {
             {t("split")}
           </button>
         </div>
-
         {/* Upload Zone */}
         <div
           onDrop={(e) => { e.preventDefault(); handleFilesAdd(e.dataTransfer.files); }}
@@ -407,13 +374,11 @@ export default function PDFMergeSplitPage() {
             {mode === "merge" ? t("selectMerge") : t("selectSplit")}
           </p>
         </div>
-
         {files.length === 0 && (
           <div className="mt-4">
             <SampleButton onLoad={handleLoadSample} layout="block" />
           </div>
         )}
-
         {/* File List */}
         {files.length > 0 && (
           <div className="mt-6 space-y-4">
@@ -450,7 +415,6 @@ export default function PDFMergeSplitPage() {
                 ))}
               </div>
             </div>
-
             {mode === "split" && (
               <div className="surface-card rounded-lg p-lg">
                 <label className="caption-upper text-muted-soft block mb-3">
@@ -476,7 +440,6 @@ export default function PDFMergeSplitPage() {
                 </p>
               </div>
             )}
-
             <button
               onClick={mode === "merge" ? handleMerge : handleSplit}
               disabled={isProcessing || (mode === "merge" ? files.length < 2 : files.length !== 1)}
@@ -487,7 +450,6 @@ export default function PDFMergeSplitPage() {
             </button>
           </div>
         )}
-
         {/* Result */}
         {result && (
           <div className="mt-8 surface-card rounded-xl p-xl">
@@ -504,13 +466,10 @@ export default function PDFMergeSplitPage() {
             </button>
           </div>
         )}
-
         {result && (
           <div className="mt-6">
-            <AdBanner slot="pdf-tool-mid" format="rectangle" className="mx-auto max-w-[336px]" />
           </div>
         )}
-
         {/* Share strip */}
         <div className="mt-8">
           <ShareButtons
@@ -525,7 +484,6 @@ export default function PDFMergeSplitPage() {
             hashtags={["PDFTools", "AllInOneToolbox", "BrowserPDF"]}
           />
         </div>
-
         {/* FAQ */}
         <section className="mt-section pt-xl border-t border-hairline">
           <h2 className="text-display-md font-serif text-ink mb-8">{t("faqTitle")}</h2>
@@ -544,7 +502,6 @@ export default function PDFMergeSplitPage() {
             ))}
           </div>
         </section>
-
         <ToolPageFooter slug="pdf-merge-split" />
       </div>
     </div>

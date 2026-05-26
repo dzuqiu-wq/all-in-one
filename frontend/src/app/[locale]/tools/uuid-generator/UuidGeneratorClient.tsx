@@ -1,19 +1,15 @@
 "use client";
-
 import { useCallback, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Fingerprint, Check, Copy, Eraser, Wand2 } from "lucide-react";
-import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import ShareButtons from "@/components/ShareButtons";
 import { generateMany } from "@/lib/tools/uuidGenerator";
-
 // Structured data for SEO - locale-aware
 function StructuredData() {
   const locale = useLocale();
   const isZh = locale === "zh";
-
   return (
     <script
       type="application/ld+json"
@@ -39,19 +35,15 @@ function StructuredData() {
     />
   );
 }
-
 const MIN_COUNT = 1;
 const MAX_COUNT = 10000;
 const DEFAULT_COUNT = 10;
-
 export default function UuidGeneratorClient() {
   const t = useTranslations("tools.uuidGenerator");
-
   const [count, setCount] = useState<number>(DEFAULT_COUNT);
   const [ids, setIds] = useState<string[]>([]);
   const [copied, setCopied] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-
   const handleGenerate = useCallback(() => {
     setError("");
     try {
@@ -68,7 +60,6 @@ export default function UuidGeneratorClient() {
       }
     }
   }, [count, t]);
-
   const handleCopy = useCallback(async () => {
     if (ids.length === 0) return;
     try {
@@ -79,13 +70,11 @@ export default function UuidGeneratorClient() {
       // Clipboard write can fail in non-secure contexts; degrade silently.
     }
   }, [ids]);
-
   const handleClear = useCallback(() => {
     setIds([]);
     setError("");
     setCopied(false);
   }, []);
-
   const handleCountChange = useCallback((raw: string) => {
     const parsed = Number.parseInt(raw, 10);
     if (Number.isNaN(parsed)) {
@@ -94,20 +83,16 @@ export default function UuidGeneratorClient() {
     }
     setCount(Math.max(MIN_COUNT, Math.min(MAX_COUNT, parsed)));
   }, []);
-
   const faqs: { q: string; a: string }[] = [
     { q: t("faq1Q"), a: t("faq1A") },
     { q: t("faq2Q"), a: t("faq2A") },
     { q: t("faq3Q"), a: t("faq3A") },
   ];
-
   return (
     <div className="min-h-screen bg-canvas">
       <StructuredData />
-
       <div className="max-w-5xl mx-auto px-6 py-section">
         <ToolBreadcrumb slug="uuid-generator" />
-
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4 inline-flex items-center gap-2">
             <Fingerprint className="w-3.5 h-3.5" strokeWidth={2} />
@@ -123,11 +108,8 @@ export default function UuidGeneratorClient() {
             {t("description")}
           </p>
         </div>
-
         <div className="mb-8">
-          <AdBanner slot="uuidgen-top" format="auto" />
         </div>
-
         {/* ---------------- Controls ---------------- */}
         <div className="surface-card hairline rounded-lg p-6 mb-6 space-y-5">
           <div>
@@ -147,7 +129,6 @@ export default function UuidGeneratorClient() {
               className="w-32 px-3 py-2 surface-card border border-hairline rounded-md text-ink font-mono text-body-sm focus:outline-none focus:border-primary"
             />
           </div>
-
           {/* Action row */}
           <div className="flex flex-wrap items-center gap-3">
             <button
@@ -181,14 +162,12 @@ export default function UuidGeneratorClient() {
               {t("clear")}
             </button>
           </div>
-
           {error && (
             <p className="text-body-sm text-red-500" role="alert">
               {error}
             </p>
           )}
         </div>
-
         {/* ---------------- Output ---------------- */}
         <div className="flex flex-col">
           <textarea
@@ -199,7 +178,6 @@ export default function UuidGeneratorClient() {
             aria-label="UUID output"
           />
         </div>
-
         {/* FAQ */}
         <div className="mt-16">
           <h2 className="text-display-md font-serif text-ink mb-6">
@@ -216,7 +194,6 @@ export default function UuidGeneratorClient() {
             ))}
           </div>
         </div>
-
         <div className="mt-12">
           <ShareButtons
             title={{
@@ -230,7 +207,6 @@ export default function UuidGeneratorClient() {
             hashtags={["UUIDGenerator", "AllInOneToolbox", "DeveloperTools"]}
           />
         </div>
-
         <ToolPageFooter slug="uuid-generator" />
       </div>
     </div>

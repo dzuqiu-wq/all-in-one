@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useRef, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import {
@@ -11,7 +10,6 @@ import {
 } from "lucide-react";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
-import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import SampleButton from "@/components/SampleButton";
@@ -31,16 +29,12 @@ import {
   generateInvoiceNumber,
   validateInvoice,
 } from "@/lib/invoice-generator/invoiceCalculator";
-
 interface InvoiceGeneratorClientProps {
   locale: string;
 }
-
 const CURRENCIES: Currency[] = ['USD', 'EUR', 'GBP', 'CNY', 'JPY'];
-
 export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClientProps) {
   const t = useTranslations("tools.invoiceGenerator");
-
   const [invoice, setInvoice] = useState<InvoiceData>(() => ({
     ...DEFAULT_INVOICE,
     invoiceNumber: generateInvoiceNumber(),
@@ -48,12 +42,9 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
   const [errors, setErrors] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-
   const previewRef = useRef<HTMLDivElement>(null);
-
   // Calculate totals in real-time
   const totals = useMemo(() => calculateInvoiceTotals(invoice), [invoice]);
-
   // Currency locale for formatting
   const currencyLocale = useMemo(() => {
     const locales: Record<Currency, string> = {
@@ -65,7 +56,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
     };
     return locales[invoice.currency];
   }, [invoice.currency]);
-
   // Update invoice field
   const updateField = useCallback(<K extends keyof InvoiceData>(
     field: K,
@@ -74,7 +64,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
     setInvoice(prev => ({ ...prev, [field]: value }));
     setErrors([]);
   }, []);
-
   // Add new line item
   const addItem = useCallback(() => {
     const newItem: InvoiceItem = {
@@ -85,7 +74,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
     };
     setInvoice(prev => ({ ...prev, items: [...prev.items, newItem] }));
   }, []);
-
   // Remove line item
   const removeItem = useCallback((id: string) => {
     setInvoice(prev => ({
@@ -93,7 +81,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
       items: prev.items.filter(item => item.id !== id),
     }));
   }, []);
-
   // Update line item
   const updateItem = useCallback((id: string, field: keyof InvoiceItem, value: string | number) => {
     setInvoice(prev => ({
@@ -103,7 +90,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
       ),
     }));
   }, []);
-
   // Generate PDF
   const handleGeneratePDF = useCallback(async () => {
     const validationErrors = validateInvoice(invoice);
@@ -111,12 +97,9 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
       setErrors(validationErrors);
       return;
     }
-
     if (!previewRef.current) return;
-
     setIsGenerating(true);
     setErrors([]);
-
     try {
       // Capture the invoice preview as canvas
       const canvas = await html2canvas(previewRef.current, {
@@ -125,28 +108,22 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
         logging: false,
         backgroundColor: '#ffffff',
       });
-
       // Calculate A4 dimensions at 72 DPI
       const imgWidth = 210; // mm
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
       // Create PDF with A4 dimensions
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
       });
-
       // Add image to PDF
       const imgData = canvas.toDataURL('image/png');
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-
       // Generate filename
       const filename = `${invoice.invoiceNumber || 'invoice'}.pdf`;
-
       // Trigger download
       pdf.save(filename);
-
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
     } catch (err) {
@@ -155,7 +132,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
       setIsGenerating(false);
     }
   }, [invoice]);
-
   // Reset form
   const handleReset = useCallback(() => {
     setInvoice({
@@ -166,7 +142,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
     setErrors([]);
     setShowSuccess(false);
   }, []);
-
   const handleLoadSample = useCallback(() => {
     const sample = getSampleInvoice(locale === "zh" ? "zh" : "en");
     setInvoice({
@@ -199,32 +174,25 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
     setErrors([]);
     setShowSuccess(false);
   }, [locale]);
-
   const symbol = CURRENCY_SYMBOLS[invoice.currency];
-
   return (
     <div className="min-h-screen bg-canvas">
       <div className="max-w-7xl mx-auto px-6 py-section">
         <ToolBreadcrumb slug="invoice-generator" />
-
         {/* Hero */}
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4">{t("tag")}</div>
           <h1 className="text-display-lg font-serif text-ink mb-4">{t("title")}</h1>
           <p className="text-title-md text-body max-w-2xl leading-relaxed">{t("description")}</p>
         </div>
-
         <div className="mb-8">
-          <AdBanner slot="invoice-top" format="auto" />
         </div>
-
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           {/* Left Panel - Form */}
           <div className="space-y-6">
             {/* Invoice Details */}
             <div className="surface-card rounded-xl p-lg">
               <h3 className="text-title-sm font-sans font-medium text-ink mb-4">{t("invoiceDetails")}</h3>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-body-sm text-muted mb-1">{t("invoiceNumber")}</label>
@@ -267,11 +235,9 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
                 </div>
               </div>
             </div>
-
             {/* Company Info */}
             <div className="surface-card rounded-xl p-lg">
               <h3 className="text-title-sm font-sans font-medium text-ink mb-4">{t("from")}</h3>
-
               <div className="space-y-3">
                 <div>
                   <label className="block text-body-sm text-muted mb-1">{t("companyName")}</label>
@@ -333,11 +299,9 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
                 </div>
               </div>
             </div>
-
             {/* Client Info */}
             <div className="surface-card rounded-xl p-lg">
               <h3 className="text-title-sm font-sans font-medium text-ink mb-4">{t("billTo")}</h3>
-
               <div className="space-y-3">
                 <div>
                   <label className="block text-body-sm text-muted mb-1">{t("clientName")}</label>
@@ -388,7 +352,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
                 </div>
               </div>
             </div>
-
             {/* Line Items */}
             <div className="surface-card rounded-xl p-lg">
               <div className="flex items-center justify-between mb-4">
@@ -401,7 +364,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
                   {t("addItem")}
                 </button>
               </div>
-
               <div className="space-y-3">
                 {/* Header */}
                 <div className="grid grid-cols-12 gap-2 text-body-xs text-muted font-medium">
@@ -411,7 +373,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
                   <div className="col-span-2 text-right">{t("total")}</div>
                   <div className="col-span-1"></div>
                 </div>
-
                 {/* Items */}
                 {invoice.items.map((item) => (
                   <div key={item.id} className="grid grid-cols-12 gap-2 items-center">
@@ -452,11 +413,9 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
                 ))}
               </div>
             </div>
-
             {/* Financial Settings */}
             <div className="surface-card rounded-xl p-lg">
               <h3 className="text-title-sm font-sans font-medium text-ink mb-4">{t("financialSettings")}</h3>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-body-sm text-muted mb-1">{t("taxRate")} (%)</label>
@@ -482,7 +441,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
                   />
                 </div>
               </div>
-
               <div className="mt-4">
                 <label className="block text-body-sm text-muted mb-1">{t("paymentTerms")}</label>
                 <input
@@ -492,7 +450,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
                   className="w-full px-3 py-2 bg-canvas border border-hairline rounded-md text-body-sm text-ink focus:outline-none focus:border-primary"
                 />
               </div>
-
               <div className="mt-4">
                 <label className="block text-body-sm text-muted mb-1">{t("notes")}</label>
                 <textarea
@@ -504,12 +461,10 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
               </div>
             </div>
           </div>
-
           {/* Right Panel - Preview */}
           <div className="space-y-6">
             <div className="surface-card rounded-xl p-lg">
               <h3 className="text-title-sm font-sans font-medium text-ink mb-4">{t("preview")}</h3>
-
               {/* A4 Invoice Preview */}
               <div
                 ref={previewRef}
@@ -536,7 +491,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
                       ].filter(Boolean).join('\n')}</p>
                     </div>
                   </div>
-
                   {/* Dates */}
                   <div className="flex justify-between mb-6 text-sm">
                     <div>
@@ -552,7 +506,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
                       ].filter(Boolean).join('\n')}</p>
                     </div>
                   </div>
-
                   {/* Items Table */}
                   <div className="flex-1">
                     <table className="w-full text-sm mb-6">
@@ -578,7 +531,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
                       </tbody>
                     </table>
                   </div>
-
                   {/* Totals */}
                   <div className="flex justify-end">
                     <div className="w-64">
@@ -604,7 +556,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
                       </div>
                     </div>
                   </div>
-
                   {/* Footer */}
                   {(invoice.notes || invoice.paymentTerms) && (
                     <div className="mt-6 pt-4 border-t border-hairline text-sm">
@@ -619,7 +570,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
                 </div>
               </div>
             </div>
-
             {/* Actions */}
             <div className="space-y-3">
               {errors.length > 0 && (
@@ -637,7 +587,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
                   </div>
                 </div>
               )}
-
               {showSuccess && (
                 <div className="surface-card border border-success/30 rounded-lg p-lg">
                   <div className="flex items-center gap-3">
@@ -646,7 +595,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
                   </div>
                 </div>
               )}
-
               <button
                 onClick={handleGeneratePDF}
                 disabled={isGenerating}
@@ -659,21 +607,16 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
                 <Download className="w-4 h-4" />
                 {isGenerating ? t("generating") : t("generatePDF")}
               </button>
-
               <button
                 onClick={handleReset}
                 className="w-full py-3 bg-canvas border border-hairline text-ink text-body-sm font-medium rounded-md hover:bg-surface-card transition-colors"
               >
                 {t("reset")}
               </button>
-
               <SampleButton onLoad={handleLoadSample} layout="block" />
             </div>
-
-            <AdBanner slot="invoice-bottom" format="rectangle" className="mx-auto max-w-[336px]" />
           </div>
         </div>
-
         {/* Share strip */}
         <div className="mt-8">
           <ShareButtons
@@ -688,7 +631,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
             hashtags={["InvoiceGenerator", "Freelance", "AllInOneToolbox"]}
           />
         </div>
-
         {/* FAQ */}
         <section className="mt-section pt-xl border-t border-hairline">
           <h2 className="text-display-md font-serif text-ink mb-8">{t("faqTitle")}</h2>
@@ -706,7 +648,6 @@ export default function InvoiceGeneratorClient({ locale }: InvoiceGeneratorClien
             ))}
           </div>
         </section>
-
         <ToolPageFooter slug="invoice-generator" />
       </div>
     </div>

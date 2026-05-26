@@ -1,30 +1,24 @@
 "use client";
-
 import { useState, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { QRCodeSVG } from "qrcode.react";
 import { Download, RefreshCw, Copy, Check, QrCode, Palette } from "lucide-react";
-import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import SampleButton from "@/components/SampleButton";
 import ShareButtons from "@/components/ShareButtons";
 import { getSampleQrPayload } from "@/lib/sampleData";
-
 // Strict hex color allowlist: #RGB or #RRGGBB only.
 // Any other character class (e.g. "<", "javascript:", quotes) is rejected so
 // the color value can never act as a vector for stored / reflected XSS.
 const HEX_COLOR_REGEX = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-
 const DEFAULT_FG = "#181715";
 const DEFAULT_BG = "#faf9f5";
-
 interface ColorPreset {
   name: string;
   fg: string;
   bg: string;
 }
-
 const PRESETS: ColorPreset[] = [
   { name: "Claude", fg: "#cc785c", bg: "#faf9f5" },
   { name: "Editorial", fg: "#181715", bg: "#faf9f5" },
@@ -32,7 +26,6 @@ const PRESETS: ColorPreset[] = [
   { name: "Deep Ink", fg: "#faf9f5", bg: "#181715" },
   { name: "Teal", fg: "#5db8a6", bg: "#faf9f5" },
 ];
-
 // Structured data for SEO
 function StructuredDataEN() {
   return (
@@ -106,7 +99,6 @@ function StructuredDataEN() {
     </>
   );
 }
-
 function _StructuredDataZH() {
   return (
     <>
@@ -179,7 +171,6 @@ function _StructuredDataZH() {
     </>
   );
 }
-
 export default function QRCodeGeneratorPage() {
   const t = useTranslations("tools.qrcode");
   const locale = useLocale();
@@ -195,7 +186,6 @@ export default function QRCodeGeneratorPage() {
   const [size, setSize] = useState(256);
   const [level, setLevel] = useState<"L" | "M" | "Q" | "H">("M");
   const [copied, setCopied] = useState(false);
-
   // Strict validator: commits a value to the live color state only if it
   // matches the hex allowlist. Invalid input keeps the rendered color
   // pinned to the last known-good value and surfaces an error.
@@ -220,7 +210,6 @@ export default function QRCodeGeneratorPage() {
     },
     [],
   );
-
   const handleFgChange = useCallback(
     (raw: string) => applyColor(raw, setFg, setFgInput, setFgError, DEFAULT_FG),
     [applyColor],
@@ -229,7 +218,6 @@ export default function QRCodeGeneratorPage() {
     (raw: string) => applyColor(raw, setBg, setBgInput, setBgError, DEFAULT_BG),
     [applyColor],
   );
-
   const applyPreset = useCallback((preset: ColorPreset) => {
     setFg(preset.fg);
     setBg(preset.bg);
@@ -238,7 +226,6 @@ export default function QRCodeGeneratorPage() {
     setFgError(null);
     setBgError(null);
   }, []);
-
   const resetAll = useCallback(() => {
     setText("");
     setFg(DEFAULT_FG);
@@ -248,11 +235,9 @@ export default function QRCodeGeneratorPage() {
     setFgError(null);
     setBgError(null);
   }, []);
-
   const handleLoadSample = useCallback(() => {
     setText(getSampleQrPayload(locale === "zh" ? "zh" : "en"));
   }, [locale]);
-
   const handleDownload = useCallback(() => {
     const qrCanvas = document.querySelector("#qr-canvas canvas") as HTMLCanvasElement;
     if (!qrCanvas) {
@@ -284,7 +269,6 @@ export default function QRCodeGeneratorPage() {
     a.download = `qrcode-${Date.now()}.png`;
     a.click();
   }, [size, bg]);
-
   const handleCopy = useCallback(async () => {
     const svg = document.querySelector("#qr-canvas svg") as SVGElement;
     if (!svg) return;
@@ -310,15 +294,12 @@ export default function QRCodeGeneratorPage() {
       img.src = "data:image/svg+xml;base64," + btoa(svgData);
     } catch {}
   }, [size, bg]);
-
   return (
     <div className="min-h-screen bg-canvas">
       {/* SEO Structured Data */}
       <StructuredDataEN />
-      
       <div className="max-w-5xl mx-auto px-6 py-section">
         <ToolBreadcrumb slug="qrcode-generator" />
-
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4">{t("tag")}</div>
           <h1 className="text-display-lg font-serif text-ink mb-4" style={{ fontSize: "clamp(36px, 5vw, 48px)" }}>
@@ -328,11 +309,8 @@ export default function QRCodeGeneratorPage() {
             {t("description")}
           </p>
         </div>
-
         <div className="mb-8">
-          <AdBanner slot="qr-tool-top" format="auto" />
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Input Panel */}
           <div className="space-y-6">
@@ -352,7 +330,6 @@ export default function QRCodeGeneratorPage() {
                 </div>
               )}
             </div>
-
             <div>
               <label className="caption-upper text-muted-soft block mb-3">{t("size")}: {size}px</label>
               <input
@@ -365,7 +342,6 @@ export default function QRCodeGeneratorPage() {
                 className="w-full accent-primary"
               />
             </div>
-
             <div>
               <label className="caption-upper text-muted-soft block mb-3">{t("errorCorrection")}</label>
               <div className="flex gap-2">
@@ -384,7 +360,6 @@ export default function QRCodeGeneratorPage() {
                 ))}
               </div>
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="caption-upper text-muted-soft block mb-3">{t("foreground")}</label>
@@ -425,7 +400,6 @@ export default function QRCodeGeneratorPage() {
                 )}
               </div>
             </div>
-
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Palette className="w-4 h-4 text-muted" />
@@ -446,7 +420,6 @@ export default function QRCodeGeneratorPage() {
               </div>
             </div>
           </div>
-
           {/* Preview Panel */}
           <div className="space-y-6">
             <div className="surface-card rounded-xl p-lg">
@@ -473,7 +446,6 @@ export default function QRCodeGeneratorPage() {
                   </button>
                 </div>
               </div>
-
               <div id="qr-canvas" className="flex items-center justify-center p-8 rounded-lg" style={{ backgroundColor: bg }}>
                 {text ? (
                   <QRCodeSVG value={text} size={size} fgColor={fg} bgColor={bg} level={level} includeMargin={false} />
@@ -484,7 +456,6 @@ export default function QRCodeGeneratorPage() {
                 )}
               </div>
             </div>
-
             <button
               onClick={handleDownload}
               disabled={!text}
@@ -493,11 +464,8 @@ export default function QRCodeGeneratorPage() {
               <Download className="w-4 h-4" />
               {t("download")}
             </button>
-
-            <AdBanner slot="qr-tool-mid" format="rectangle" className="mx-auto max-w-[336px]" />
           </div>
         </div>
-
         {/* Share strip */}
         <div className="mt-8">
           <ShareButtons
@@ -512,7 +480,6 @@ export default function QRCodeGeneratorPage() {
             hashtags={["QRCode", "AllInOneToolbox", "BrowserTools"]}
           />
         </div>
-
         {/* FAQ */}
         <section className="mt-section pt-xl border-t border-hairline">
           <h2 className="text-display-md font-serif text-ink mb-8">{t("faqTitle")}</h2>
@@ -531,7 +498,6 @@ export default function QRCodeGeneratorPage() {
             ))}
           </div>
         </section>
-
         <ToolPageFooter slug="qrcode-generator" />
       </div>
     </div>

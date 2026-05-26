@@ -65,3 +65,4 @@ decision.json
 
 # Allow markdown docs that live under .github/ (deployment runbooks, issue templates, etc.)
 !.github/**/*.md
+.gstack/

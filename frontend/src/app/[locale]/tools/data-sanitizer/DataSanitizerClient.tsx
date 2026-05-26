@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useRef, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import {
@@ -11,7 +10,6 @@ import {
   FileCode,
   FileJson,
 } from "lucide-react";
-import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import SampleButton from "@/components/SampleButton";
@@ -25,11 +23,9 @@ import type {
   ExportFormat,
   ProcessingState,
 } from "@/lib/data-sanitizer/types";
-
 interface DataSanitizerClientProps {
   locale: string;
 }
-
 const ENCODING_OPTIONS: { value: EncodingType; label: string }[] = [
   { value: 'auto', label: 'Auto Detect' },
   { value: 'utf-8', label: 'UTF-8' },
@@ -37,18 +33,14 @@ const ENCODING_OPTIONS: { value: EncodingType; label: string }[] = [
   { value: 'gb2312', label: 'GB2312' },
   { value: 'windows-1252', label: 'Windows-1252' },
 ];
-
 const PREVIEW_ROWS = 20;
-
 export default function DataSanitizerClient({ locale }: DataSanitizerClientProps) {
   const t = useTranslations("tools.dataSanitizer");
   // Locale prop is reserved for future per-locale sample assets and is
   // consumed by the next-intl provider; explicit `void` so eslint stays quiet.
   void locale;
-
   const encodingDecoder = useMemo(() => new EncodingDecoder(), []);
   const dataTransformer = useMemo(() => new DataTransformer(encodingDecoder), [encodingDecoder]);
-
   const [file, setFile] = useState<File | null>(null);
   const [parseResult, setParseResult] = useState<ParseResult | null>(null);
   const [selectedEncoding, setSelectedEncoding] = useState<EncodingType>('auto');
@@ -62,40 +54,30 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
   });
   const [error, setError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const isValidFile = (file: File): boolean => {
     const validExtensions = ['.csv', '.xlsx', '.xls'];
     const ext = '.' + file.name.split('.').pop()?.toLowerCase();
     return validExtensions.includes(ext);
   };
-
   const handleFile = useCallback(async (selectedFile: File) => {
     if (!isValidFile(selectedFile)) {
       setError(t("errorInvalidFile"));
       return;
     }
-
     setFile(selectedFile);
     setError(null);
     setProcessingState({ status: 'reading', percent: 10, message: t("processing") });
-
     try {
       setProcessingState({ status: 'detecting', percent: 30, message: t("detectingEncoding") });
-
       const bytes = new Uint8Array(await selectedFile.arrayBuffer());
       const detected = encodingDecoder.autoDetect(bytes);
       setDetectedEncoding(detected.encoding);
       setConfidence(detected.confidence);
-
       const encodingToUse = selectedEncoding === 'auto' ? detected.encoding : selectedEncoding;
-
       setProcessingState({ status: 'parsing', percent: 50, message: t("parsing") });
-
       const result = await dataTransformer.parse(selectedFile, encodingToUse);
       const rate = encodingDecoder.calculateFixRate(result.rawText);
-
       setFixedRate(rate);
       setParseResult(result);
       setProcessingState({
@@ -111,47 +93,36 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
       setProcessingState({ status: 'error', percent: 0, message: t("error") });
     }
   }, [selectedEncoding, encodingDecoder, dataTransformer, t]);
-
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-
     const droppedFile = e.dataTransfer.files[0];
     if (droppedFile) {
       handleFile(droppedFile);
     }
   }, [handleFile]);
-
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
   }, []);
-
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
   }, []);
-
   const handleLoadSample = useCallback(async () => {
     const sample = buildSampleSanitizerFile();
     await handleFile(sample);
   }, [handleFile]);
-
   const handleReDecode = useCallback(async () => {
     if (!file) return;
-
     setProcessingState({ status: 'detecting', percent: 30, message: t("reDecoding") });
-
     try {
       const _bytes = new Uint8Array(await file.arrayBuffer());
       const encodingToUse = selectedEncoding === 'auto' ? 'utf-8' : selectedEncoding;
-
       const result = await dataTransformer.parse(file, encodingToUse);
       const rate = encodingDecoder.calculateFixRate(result.rawText);
-
       setFixedRate(rate);
       setParseResult(result);
-
       setProcessingState({
         status: 'success',
         percent: 100,
@@ -163,14 +134,11 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
       setError(err instanceof Error ? err.message : t("errorParseFailed"));
     }
   }, [file, selectedEncoding, dataTransformer, encodingDecoder, t]);
-
   const handleExport = useCallback(async (format: ExportFormat) => {
     if (!parseResult) return;
-
     try {
       const blob = await dataTransformer.export(parseResult, format);
       const fileName = dataTransformer.getFileName(parseResult.fileName, format);
-
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -183,7 +151,6 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
       setError(err instanceof Error ? err.message : t("error"));
     }
   }, [parseResult, dataTransformer, t]);
-
   const handleReset = useCallback(() => {
     setFile(null);
     setParseResult(null);
@@ -193,26 +160,21 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
     setError(null);
     setProcessingState({ status: 'idle', percent: 0, message: '' });
   }, []);
-
   const previewData = useMemo(() => {
     if (!parseResult) return null;
     return dataTransformer.getPreview(parseResult, PREVIEW_ROWS);
   }, [parseResult, dataTransformer]);
-
   const isProcessing = processingState.status !== 'idle' && processingState.status !== 'success' && processingState.status !== 'error';
-
   const formatPercent = (value: number): string => `${Math.round(value * 100)}%`;
   const formatBytes = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
-
   return (
     <div className="min-h-screen bg-canvas">
       <div className="max-w-6xl mx-auto px-6 py-section">
         <ToolBreadcrumb slug="data-sanitizer" />
-
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4">{t("tag")}</div>
           <h1 className="text-display-lg font-serif text-ink mb-4">
@@ -222,11 +184,8 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
             {t("description")}
           </p>
         </div>
-
         <div className="mb-8">
-          <AdBanner slot="datasanitizer-top" format="auto" />
         </div>
-
         <div
           onDrop={handleDrop}
           onDragOver={handleDragOver}
@@ -261,7 +220,6 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
               pointerEvents: 'none',
             }}
           />
-
           <input
             ref={fileInputRef}
             type="file"
@@ -269,7 +227,6 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
             onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
             className="hidden"
           />
-
           <div className="relative z-10">
             <FileText
               className={`w-16 h-16 mx-auto mb-4 transition-colors ${
@@ -277,11 +234,9 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
               }`}
               strokeWidth={1.5}
             />
-
             <h3 className="text-title-md font-sans text-ink mb-2">
               {file ? file.name : t("dropzone")}
             </h3>
-
             <p className="text-body-sm text-muted">
               {file
                 ? formatBytes(file.size)
@@ -290,13 +245,11 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
             </p>
           </div>
         </div>
-
         {!file && (
           <div className="mt-4">
             <SampleButton onLoad={handleLoadSample} layout="block" />
           </div>
         )}
-
         {file && (
           <div className="mt-6 surface-card rounded-xl p-lg">
             <div className="flex flex-wrap items-center gap-4">
@@ -308,7 +261,6 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
                   </span>
                 </div>
               )}
-
               <div className="flex items-center gap-2">
                 <span className="caption-upper text-muted">{t("encoding")}:</span>
                 <select
@@ -323,7 +275,6 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
                   ))}
                 </select>
               </div>
-
               <button
                 onClick={handleReDecode}
                 disabled={isProcessing}
@@ -333,7 +284,6 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
                 {t("reDecode")}
               </button>
             </div>
-
             {fixedRate < 1 && (
               <div className="mt-4 flex items-center gap-4">
                 <div className="flex-1">
@@ -356,7 +306,6 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
             )}
           </div>
         )}
-
         {isProcessing && (
           <div className="mt-6 surface-card rounded-xl p-lg">
             <div className="flex items-center gap-3 mb-2">
@@ -372,7 +321,6 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
             </div>
           </div>
         )}
-
         {error && (
           <div className="mt-6 surface-card border border-error/30 rounded-lg p-lg">
             <div className="flex items-start gap-3">
@@ -384,7 +332,6 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
             </div>
           </div>
         )}
-
         {previewData && previewData.rowCount > 0 && (
           <div className="mt-8">
             <div className="flex items-center justify-between mb-4">
@@ -395,7 +342,6 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
                 {t("showingRows", { shown: Math.min(previewData.rowCount, PREVIEW_ROWS), total: parseResult?.rowCount || 0 })}
               </span>
             </div>
-
             <div className="surface-card rounded-xl overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-body-sm">
@@ -439,13 +385,11 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
             </div>
           </div>
         )}
-
         {parseResult && (
           <div className="mt-8">
             <h2 className="text-title-md font-sans text-ink mb-4">
               {t("exportAs")}
             </h2>
-
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <button
                 onClick={() => handleExport('xlsx')}
@@ -454,7 +398,6 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
                 <FileSpreadsheet className="w-8 h-8" strokeWidth={1.5} />
                 <span className="text-body-sm font-medium">{t("downloadExcel")}</span>
               </button>
-
               <button
                 onClick={() => handleExport('csv')}
                 className="flex flex-col items-center gap-3 p-6 rounded-xl bg-gradient-to-br from-[#FF6B6B] to-[#FF4757] text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-[#FF6B6B]/20"
@@ -462,7 +405,6 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
                 <FileText className="w-8 h-8" strokeWidth={1.5} />
                 <span className="text-body-sm font-medium">{t("downloadCSV")}</span>
               </button>
-
               <button
                 onClick={() => handleExport('json')}
                 className="flex flex-col items-center gap-3 p-6 rounded-xl bg-gradient-to-br from-[#FF8C42] to-[#FF7F50] text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-[#FF8C42]/20"
@@ -470,7 +412,6 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
                 <FileJson className="w-8 h-8" strokeWidth={1.5} />
                 <span className="text-body-sm font-medium">{t("downloadJSON")}</span>
               </button>
-
               <button
                 onClick={() => handleExport('markdown')}
                 className="flex flex-col items-center gap-3 p-6 rounded-xl bg-gradient-to-br from-[#FF7F50] to-[#FF6347] text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-[#FF7F50]/20"
@@ -481,7 +422,6 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
             </div>
           </div>
         )}
-
         {processingState.status === 'success' && parseResult && (
           <div className="mt-6 surface-card rounded-xl p-lg">
             <div className="flex items-center gap-3">
@@ -495,7 +435,6 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
             </div>
           </div>
         )}
-
         {parseResult && (
           <div className="mt-6 flex justify-center">
             <button
@@ -506,11 +445,8 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
             </button>
           </div>
         )}
-
         <div className="mt-8">
-          <AdBanner slot="datasanitizer-bottom" format="rectangle" className="mx-auto max-w-[336px]" />
         </div>
-
         <div className="mt-8">
           <ShareButtons
             title={{
@@ -524,7 +460,6 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
             hashtags={["DataSanitizer", "CSVEncoding", "AllInOneToolbox"]}
           />
         </div>
-
         <section className="mt-section pt-xl border-t border-hairline">
           <h2 className="text-display-md font-serif text-ink mb-8">
             {t("faqTitle")}
@@ -546,7 +481,6 @@ export default function DataSanitizerClient({ locale }: DataSanitizerClientProps
             ))}
           </div>
         </section>
-
         <ToolPageFooter slug="data-sanitizer" />
       </div>
     </div>

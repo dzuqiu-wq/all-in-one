@@ -1,9 +1,7 @@
 "use client";
-
 import { useCallback, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Key, Check, Copy, Eraser, Wand2, RefreshCw } from "lucide-react";
-import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import ShareButtons from "@/components/ShareButtons";
@@ -13,12 +11,10 @@ import {
   type PasswordOptions,
   type PasswordStrength,
 } from "@/lib/tools/passwordGenerator";
-
 // Structured data for SEO - locale-aware
 function StructuredData() {
   const locale = useLocale();
   const isZh = locale === "zh";
-
   return (
     <script
       type="application/ld+json"
@@ -42,26 +38,21 @@ function StructuredData() {
     />
   );
 }
-
 const MIN_LENGTH = 4;
 const MAX_LENGTH = 64;
 const DEFAULT_LENGTH = 20;
-
 const STRENGTH_BAR_COLOR: Record<PasswordStrength, string> = {
   weak: "bg-red-500",
   medium: "bg-amber-500",
   strong: "bg-emerald-500",
 };
-
 const STRENGTH_BAR_FILL: Record<PasswordStrength, string> = {
   weak: "w-1/3",
   medium: "w-2/3",
   strong: "w-full",
 };
-
 export default function PasswordGeneratorClient() {
   const t = useTranslations("tools.passwordGenerator");
-
   const [length, setLength] = useState<number>(DEFAULT_LENGTH);
   const [uppercase, setUppercase] = useState<boolean>(true);
   const [lowercase, setLowercase] = useState<boolean>(true);
@@ -70,9 +61,7 @@ export default function PasswordGeneratorClient() {
   const [output, setOutput] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-
   const canGenerate = uppercase || lowercase || digits || symbols;
-
   const handleGenerate = useCallback(() => {
     if (!canGenerate) {
       setError(t("errorNoClass"));
@@ -94,7 +83,6 @@ export default function PasswordGeneratorClient() {
       setError(err instanceof Error ? err.message : t("errorNoClass"));
     }
   }, [canGenerate, length, uppercase, lowercase, digits, symbols, t]);
-
   const handleCopy = useCallback(async () => {
     if (!output) return;
     try {
@@ -105,38 +93,31 @@ export default function PasswordGeneratorClient() {
       // Clipboard write can fail in non-secure contexts; degrade silently.
     }
   }, [output]);
-
   const handleClear = useCallback(() => {
     setOutput("");
     setError("");
     setCopied(false);
   }, []);
-
   const strength: PasswordStrength | null = useMemo(
     () => (output ? estimateStrength(output) : null),
     [output],
   );
-
   const strengthLabel = useMemo(() => {
     if (!strength) return "";
     if (strength === "weak") return t("strengthWeak");
     if (strength === "medium") return t("strengthMedium");
     return t("strengthStrong");
   }, [strength, t]);
-
   const faqs: { q: string; a: string }[] = [
     { q: t("faq1Q"), a: t("faq1A") },
     { q: t("faq2Q"), a: t("faq2A") },
     { q: t("faq3Q"), a: t("faq3A") },
   ];
-
   return (
     <div className="min-h-screen bg-canvas">
       <StructuredData />
-
       <div className="max-w-5xl mx-auto px-6 py-section">
         <ToolBreadcrumb slug="password-generator" />
-
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4 inline-flex items-center gap-2">
             <Key className="w-3.5 h-3.5" strokeWidth={2} />
@@ -152,11 +133,8 @@ export default function PasswordGeneratorClient() {
             {t("description")}
           </p>
         </div>
-
         <div className="mb-8">
-          <AdBanner slot="passwordgen-top" format="auto" />
         </div>
-
         {/* ---------------- Controls ---------------- */}
         <div className="surface-card hairline rounded-lg p-6 mb-6 space-y-5">
           {/* Length slider */}
@@ -182,7 +160,6 @@ export default function PasswordGeneratorClient() {
               className="w-full accent-primary"
             />
           </div>
-
           {/* Character class checkboxes */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <label className="inline-flex items-center gap-2 text-body-sm text-ink cursor-pointer">
@@ -222,7 +199,6 @@ export default function PasswordGeneratorClient() {
               {t("symbols")}
             </label>
           </div>
-
           {/* Action row */}
           <div className="flex flex-wrap items-center gap-3">
             <button
@@ -248,14 +224,12 @@ export default function PasswordGeneratorClient() {
               {t("clear")}
             </button>
           </div>
-
           {error && (
             <p className="text-body-sm text-red-500" role="alert">
               {error}
             </p>
           )}
         </div>
-
         {/* ---------------- Output ---------------- */}
         <div className="flex flex-col">
           <div className="flex items-center justify-between mb-2">
@@ -276,7 +250,6 @@ export default function PasswordGeneratorClient() {
               {copied ? t("copied") : t("copy")}
             </button>
           </div>
-
           {output ? (
             <pre className="w-full min-h-[72px] px-4 py-3 surface-card border border-hairline rounded-md text-ink font-mono text-body-sm overflow-auto whitespace-pre-wrap break-all">
               {output}
@@ -286,7 +259,6 @@ export default function PasswordGeneratorClient() {
               {t("output")}
             </div>
           )}
-
           {/* Strength meter */}
           {strength && (
             <div className="mt-3">
@@ -308,7 +280,6 @@ export default function PasswordGeneratorClient() {
             </div>
           )}
         </div>
-
         {/* FAQ */}
         <div className="mt-16">
           <h2 className="text-display-md font-serif text-ink mb-6">
@@ -325,7 +296,6 @@ export default function PasswordGeneratorClient() {
             ))}
           </div>
         </div>
-
         <div className="mt-12">
           <ShareButtons
             title={{
@@ -339,7 +309,6 @@ export default function PasswordGeneratorClient() {
             hashtags={["PasswordGenerator", "AllInOneToolbox", "PrivacyTools"]}
           />
         </div>
-
         <ToolPageFooter slug="password-generator" />
       </div>
     </div>

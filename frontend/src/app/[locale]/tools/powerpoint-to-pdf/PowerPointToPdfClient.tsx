@@ -1,14 +1,11 @@
 "use client";
-
 import { useState, useRef, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Upload, Download, Presentation, AlertCircle, CheckCircle } from "lucide-react";
 import PseudoProcessor from "@/components/PseudoProcessor";
-import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import ShareButtons from "@/components/ShareButtons";
-
 interface ConversionResult {
   fileName: string;
   processingTime: string;
@@ -16,14 +13,11 @@ interface ConversionResult {
   pdfSize: number;
   blob: Blob;
 }
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 // Structured data for SEO - uses useLocale to detect which version to show
 function StructuredData() {
   const locale = useLocale();
   const isZh = locale === "zh";
-
   return (
     <>
       <script
@@ -154,7 +148,6 @@ function StructuredData() {
     </>
   );
 }
-
 export default function PowerPointToPDFPage() {
   const t = useTranslations("tools.powerpointPdf");
   const [file, setFile] = useState<File | null>(null);
@@ -162,59 +155,48 @@ export default function PowerPointToPDFPage() {
   const [result, setResult] = useState<ConversionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const loadingTexts = [
     t("loading1"),
     t("loading2"),
     t("loading3"),
     t("loading4"),
   ];
-
   const handleFileSelect = useCallback((selectedFile: File) => {
     const validExt = selectedFile.name.match(/\.(pptx|ppt)$/i);
     if (!validExt) {
       setError(t("errorInvalid"));
       return;
     }
-
     if (selectedFile.size > 5 * 1024 * 1024) {
       setError(t("errorSize"));
       return;
     }
-
     setFile(selectedFile);
     setResult(null);
     setError(null);
   }, [t]);
-
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     const f = e.dataTransfer.files[0];
     if (f) handleFileSelect(f);
   }, [handleFileSelect]);
-
   const formatBytes = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
-
   const handleConvert = useCallback(async () => {
     if (!file) return;
-
     setState("processing");
     setError(null);
-
     try {
       const formData = new FormData();
       formData.append("file", file);
-
       const response = await fetch(`${API_BASE_URL}/api/v1/convert/powerpoint-to-pdf`, {
         method: "POST",
         body: formData,
         signal: AbortSignal.timeout(7000),
       });
-
       if (response.status === 413) throw new Error(t("error413"));
       if (response.status === 429) {
         const data = await response.json();
@@ -225,10 +207,8 @@ export default function PowerPointToPDFPage() {
         const data = await response.json().catch(() => ({}));
         throw new Error(data.detail || `${t("errorGeneric")}: ${response.status}`);
       }
-
       const processingTime = response.headers.get("X-Processing-Time") || "0";
       const pdfBlob = await response.blob();
-
       setResult({
         fileName: file.name.replace(/\.(pptx|ppt)$/i, ".pdf"),
         processingTime: `${(parseFloat(processingTime) * 1000).toFixed(0)}ms`,
@@ -236,14 +216,12 @@ export default function PowerPointToPDFPage() {
         pdfSize: pdfBlob.size,
         blob: pdfBlob,
       });
-
       setState("success");
     } catch (err) {
       setError(err instanceof Error ? err.message : t("errorUnexpected"));
       setState("error");
     }
   }, [file, t]);
-
   const handleDownload = useCallback(() => {
     if (!result?.blob) return;
     const url = URL.createObjectURL(result.blob);
@@ -255,29 +233,24 @@ export default function PowerPointToPDFPage() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, [result]);
-
   const handleReset = useCallback(() => {
     setFile(null);
     setState("idle");
     setResult(null);
     setError(null);
   }, []);
-
   return (
     <div className="min-h-screen bg-canvas">
       {/* SEO Structured Data */}
       <StructuredData />
-
       <PseudoProcessor
         isProcessing={false}
         onComplete={() => {}}
         loadingTexts={loadingTexts}
       />
-
       <div className="max-w-4xl mx-auto px-6 py-section">
         {/* Breadcrumb */}
         <ToolBreadcrumb slug="powerpoint-to-pdf" />
-
         {/* Hero */}
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4">{t("tag")}</div>
@@ -288,12 +261,9 @@ export default function PowerPointToPDFPage() {
             {t("description")}
           </p>
         </div>
-
         {/* Top Ad */}
         <div className="mb-8">
-          <AdBanner slot="pptpdf-top" format="auto" />
         </div>
-
         {/* Upload Zone */}
         <div
           onDrop={handleDrop}
@@ -318,7 +288,6 @@ export default function PowerPointToPDFPage() {
             {file ? formatBytes(file.size) : t("supported")}
           </p>
         </div>
-
         {/* Action Button */}
         {file && state === "idle" && (
           <div className="mt-6 flex gap-3">
@@ -337,7 +306,6 @@ export default function PowerPointToPDFPage() {
             </button>
           </div>
         )}
-
         {/* Processing State */}
         {state === "processing" && (
           <div className="mt-6 surface-card rounded-lg p-lg">
@@ -347,7 +315,6 @@ export default function PowerPointToPDFPage() {
             </div>
           </div>
         )}
-
         {/* Error State */}
         {error && (
           <div className="mt-6 surface-card border border-error/30 rounded-lg p-lg">
@@ -366,7 +333,6 @@ export default function PowerPointToPDFPage() {
             </div>
           </div>
         )}
-
         {/* Success State */}
         {result && (
           <div className="mt-8 space-y-6">
@@ -375,7 +341,6 @@ export default function PowerPointToPDFPage() {
                 <CheckCircle className="w-6 h-6 text-success" />
                 <h4 className="text-title-md font-sans text-ink">{t("success")}</h4>
               </div>
-
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div>
                   <div className="caption-upper text-muted-soft mb-1">{t("original")}</div>
@@ -390,7 +355,6 @@ export default function PowerPointToPDFPage() {
                   <div className="text-title-md font-sans text-primary">{result.processingTime}</div>
                 </div>
               </div>
-
               <div className="flex gap-3">
                 <button
                   onClick={handleDownload}
@@ -407,12 +371,9 @@ export default function PowerPointToPDFPage() {
                 </button>
               </div>
             </div>
-
             {/* Mid Ad */}
-            <AdBanner slot="pptpdf-mid" format="rectangle" className="mx-auto max-w-[336px]" />
           </div>
         )}
-
         {/* Share strip */}
         <div className="mt-8">
           <ShareButtons
@@ -427,7 +388,6 @@ export default function PowerPointToPDFPage() {
             hashtags={["PowerPointToPDF", "AllInOneToolbox", "PrivacyTools"]}
           />
         </div>
-
         {/* FAQ Section */}
         <section className="mt-section pt-xl border-t border-hairline">
           <h2 className="text-display-md font-serif text-ink mb-8">
@@ -451,7 +411,6 @@ export default function PowerPointToPDFPage() {
             ))}
           </div>
         </section>
-
         <ToolPageFooter slug="powerpoint-to-pdf" />
       </div>
     </div>

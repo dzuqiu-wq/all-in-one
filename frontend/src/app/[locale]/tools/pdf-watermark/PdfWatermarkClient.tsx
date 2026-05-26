@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import {
@@ -11,7 +10,6 @@ import {
   RefreshCw,
   Trash2,
 } from "lucide-react";
-import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import SampleButton from "@/components/SampleButton";
@@ -26,11 +24,9 @@ import type {
   StampShape,
   WatermarkMode,
 } from "@/lib/pdf-watermark/types";
-
 interface PdfWatermarkClientProps {
   locale: string;
 }
-
 const DEFAULT_STAMP_CONFIG: StampConfig = {
   shape: "circle",
   companyName: "公司名称",
@@ -42,7 +38,6 @@ const DEFAULT_STAMP_CONFIG: StampConfig = {
   borderWidth: 3,
   innerCircleRadius: 0.85,
 };
-
 const DEFAULT_WATERMARK_CONFIG: WatermarkConfig = {
   mode: "stamp",
   opacity: 0.3,
@@ -54,20 +49,17 @@ const DEFAULT_WATERMARK_CONFIG: WatermarkConfig = {
   offsetY: 0,
   pages: "all",
 };
-
 const DEFAULT_TEXT_CONFIG: TextConfig = {
   text: "CONFIDENTIAL",
   fontSize: 48,
   fontFamily: "Helvetica-Bold",
 };
-
 export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) {
   const t = useTranslations("tools.pdfWatermark");
   // Locale is consumed by next-intl provider; the prop is kept for parity
   // with the server page wrapper and to enable future locale-specific
   // sample assets without churning the public component contract.
   void locale;
-
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [stampConfig, setStampConfig] = useState<StampConfig>(DEFAULT_STAMP_CONFIG);
   const [watermarkConfig, setWatermarkConfig] = useState<WatermarkConfig>(DEFAULT_WATERMARK_CONFIG);
@@ -81,22 +73,18 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
   });
   const [resultBlob, setResultBlob] = useState<Blob | null>(null);
   const [error, setError] = useState<string | null>(null);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
   const processorRef = useRef<WatermarkProcessor | null>(null);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   useEffect(() => {
     processorRef.current = new WatermarkProcessor(stampConfig);
   }, []);
-
   useEffect(() => {
     if (processorRef.current) {
       processorRef.current.updateStampConfig(stampConfig);
     }
   }, [stampConfig]);
-
   // Bind preview redraw to ALL individual StampConfig fields.
   // Listing each field explicitly guarantees React detects every change
   // even if the parent object reference identity is stable.
@@ -104,24 +92,20 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
-
     debounceTimerRef.current = setTimeout(() => {
       const canvas = previewCanvasRef.current;
       const processor = processorRef.current;
       if (!canvas || !processor) return;
-
       // Day-1 clear → full redraw via StampRenderer
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
-
       // Renderer internally resets canvas.width/height = stampConfig.size,
       // which also wipes the bitmap — guaranteeing a clean draw.
       const renderer = processor.getStampRenderer();
       renderer.renderToCanvas(canvas);
     }, 50);
-
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
@@ -138,19 +122,16 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
     stampConfig.borderWidth,
     stampConfig.innerCircleRadius,
   ]);
-
   const handleFileSelect = useCallback((file: File) => {
     if (!file.name.toLowerCase().endsWith(".pdf")) {
       setError(t("errorInvalid"));
       return;
     }
-
     setPdfFile(file);
     setResultBlob(null);
     setError(null);
     setProgress({ status: "idle", currentPage: 0, totalPages: 0, percent: 0, message: "" });
   }, [t]);
-
   const handleLoadSample = useCallback(async () => {
     const sample = await buildSamplePdfFile({
       title: "Sample contract draft",
@@ -159,32 +140,25 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
     });
     handleFileSelect(sample);
   }, [handleFileSelect]);
-
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (file) handleFileSelect(file);
   }, [handleFileSelect]);
-
   const handleGenerate = useCallback(async () => {
     if (!pdfFile || !processorRef.current) return;
-
     setError(null);
     setResultBlob(null);
-
     try {
       const arrayBuffer = await pdfFile.arrayBuffer();
-
       const resultBytes = await processorRef.current.processPDF(
         arrayBuffer,
         watermarkConfig,
         textConfig,
         (state) => setProgress({ ...state })
       );
-
       const blob = new Blob([resultBytes as BlobPart], { type: "application/pdf" });
       setResultBlob(blob);
-
       setProgress((prev) => ({
         ...prev,
         status: "success",
@@ -199,10 +173,8 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
       }));
     }
   }, [pdfFile, watermarkConfig, textConfig, t]);
-
   const handleDownload = useCallback(() => {
     if (!resultBlob || !pdfFile) return;
-
     const url = URL.createObjectURL(resultBlob);
     const a = document.createElement("a");
     a.href = url;
@@ -212,7 +184,6 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, [resultBlob, pdfFile]);
-
   const handleReset = useCallback(() => {
     setPdfFile(null);
     setResultBlob(null);
@@ -222,20 +193,16 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
     setWatermarkConfig(DEFAULT_WATERMARK_CONFIG);
     setTextConfig(DEFAULT_TEXT_CONFIG);
   }, []);
-
   const formatBytes = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
-
   const isProcessing = progress.status === "processing";
-
   return (
     <div className="min-h-screen bg-canvas">
       <div className="max-w-7xl mx-auto px-6 py-section">
         <ToolBreadcrumb slug="pdf-watermark" />
-
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4">{t("tag")}</div>
           <h1 className="text-display-lg font-serif text-ink mb-4">
@@ -245,11 +212,8 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
             {t("description")}
           </p>
         </div>
-
         <div className="mb-8">
-          <AdBanner slot="pdfwatermark-top" format="auto" />
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Panel - Controls */}
           <div className="space-y-6">
@@ -281,14 +245,12 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                 ))}
               </div>
             </div>
-
             {/* Stamp Configuration */}
             {(watermarkConfig.mode === "stamp" || watermarkConfig.mode === "hybrid") && (
               <div className="surface-card rounded-xl p-lg">
                 <h3 className="text-title-sm font-sans font-medium text-ink mb-4">
                   {t("stampConfig")}
                 </h3>
-
                 <div className="mb-4">
                   <label className="block text-body-sm text-muted mb-2">{t("stampShape")}</label>
                   <div className="flex gap-2">
@@ -307,7 +269,6 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                     ))}
                   </div>
                 </div>
-
                 <div className="mb-4">
                   <label className="block text-body-sm text-muted mb-2">{t("companyName")}</label>
                   <input
@@ -317,7 +278,6 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                     className="w-full px-3 py-2 bg-canvas border border-hairline rounded-md text-body-sm text-ink focus:outline-none focus:border-primary"
                   />
                 </div>
-
                 <div className="mb-4">
                   <label className="block text-body-sm text-muted mb-2">{t("departmentName")}</label>
                   <input
@@ -327,7 +287,6 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                     className="w-full px-3 py-2 bg-canvas border border-hairline rounded-md text-body-sm text-ink focus:outline-none focus:border-primary"
                   />
                 </div>
-
                 <div className="mb-4">
                   <label className="block text-body-sm text-muted mb-2">{t("stampColor")}</label>
                   <div className="flex gap-3">
@@ -345,7 +304,6 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                     />
                   </div>
                 </div>
-
                 <div className="mb-4">
                   <label className="block text-body-sm text-muted mb-2">
                     {t("noiseLevel")}: {Math.round(stampConfig.noiseLevel * 100)}%
@@ -363,14 +321,12 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                 </div>
               </div>
             )}
-
             {/* Text Configuration */}
             {(watermarkConfig.mode === "text" || watermarkConfig.mode === "hybrid") && (
               <div className="surface-card rounded-xl p-lg">
                 <h3 className="text-title-sm font-sans font-medium text-ink mb-4">
                   {t("textConfig")}
                 </h3>
-
                 <div className="mb-4">
                   <label className="block text-body-sm text-muted mb-2">{t("watermarkText")}</label>
                   <input
@@ -380,7 +336,6 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                     className="w-full px-3 py-2 bg-canvas border border-hairline rounded-md text-body-sm text-ink focus:outline-none focus:border-primary"
                   />
                 </div>
-
                 <div className="mb-4">
                   <label className="block text-body-sm text-muted mb-2">
                     {t("fontSize")}: {textConfig.fontSize}pt
@@ -398,13 +353,11 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                 </div>
               </div>
             )}
-
             {/* Watermark Settings */}
             <div className="surface-card rounded-xl p-lg">
               <h3 className="text-title-sm font-sans font-medium text-ink mb-4">
                 {t("watermarkSettings")}
               </h3>
-
               <div className="mb-4">
                 <label className="block text-body-sm text-muted mb-2">
                   {t("opacity")}: {Math.round(watermarkConfig.opacity * 100)}%
@@ -420,7 +373,6 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                   className="w-full accent-primary"
                 />
               </div>
-
               <div className="mb-4">
                 <label className="block text-body-sm text-muted mb-2">
                   {t("rotation")}: {watermarkConfig.rotation}°
@@ -436,7 +388,6 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                   className="w-full accent-primary"
                 />
               </div>
-
               <div className="mb-4">
                 <label className="block text-body-sm text-muted mb-2">
                   {t("tileX")}: {watermarkConfig.tileX}pt
@@ -452,7 +403,6 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                   className="w-full accent-primary"
                 />
               </div>
-
               <div className="mb-4">
                 <label className="block text-body-sm text-muted mb-2">
                   {t("tileY")}: {watermarkConfig.tileY}pt
@@ -469,7 +419,6 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                 />
               </div>
             </div>
-
             {/* PDF Upload */}
             <div
               onDrop={handleDrop}
@@ -496,12 +445,10 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                 {pdfFile ? formatBytes(pdfFile.size) : t("supported")}
               </p>
             </div>
-
             {!pdfFile && (
               <SampleButton onLoad={handleLoadSample} layout="block" />
             )}
           </div>
-
           {/* Right Panel - Preview & Actions */}
           <div className="space-y-6">
             {/* Preview */}
@@ -509,7 +456,6 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
               <h3 className="text-title-sm font-sans font-medium text-ink mb-4">
                 {t("preview")}
               </h3>
-
               <div className="flex items-center justify-center bg-surface-soft rounded-lg p-8 min-h-[300px]">
                 <canvas
                   ref={previewCanvasRef}
@@ -518,7 +464,6 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                 />
               </div>
             </div>
-
             {/* Progress Bar */}
             {isProcessing && (
               <div className="surface-card rounded-xl p-lg">
@@ -536,7 +481,6 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                 </div>
               </div>
             )}
-
             {error && (
               <div className="surface-card border border-error/30 rounded-lg p-lg">
                 <div className="flex items-start gap-3">
@@ -548,7 +492,6 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                 </div>
               </div>
             )}
-
             {resultBlob && (
               <div className="surface-card rounded-xl p-lg">
                 <div className="flex items-center gap-3 mb-4">
@@ -560,7 +503,6 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                 </div>
               </div>
             )}
-
             <div className="space-y-3">
               {!resultBlob ? (
                 <button
@@ -588,7 +530,6 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                   {t("download")}
                 </button>
               )}
-
               <button
                 onClick={handleReset}
                 className="w-full py-3 bg-canvas border border-hairline text-ink text-body-sm font-medium rounded-md hover:bg-surface-card transition-colors flex items-center justify-center gap-2"
@@ -597,11 +538,8 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
                 {t("reset")}
               </button>
             </div>
-
-            <AdBanner slot="pdfwatermark-bottom" format="rectangle" className="mx-auto max-w-[336px]" />
           </div>
         </div>
-
         <div className="mt-8">
           <ShareButtons
             title={{
@@ -615,7 +553,6 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
             hashtags={["EStamp", "PDFWatermark", "AllInOneToolbox"]}
           />
         </div>
-
         <section className="mt-section pt-xl border-t border-hairline">
           <h2 className="text-display-md font-serif text-ink mb-8">{t("faqTitle")}</h2>
           <div className="space-y-6">
@@ -634,7 +571,6 @@ export default function PdfWatermarkClient({ locale }: PdfWatermarkClientProps) 
             ))}
           </div>
         </section>
-
         <ToolPageFooter slug="pdf-watermark" />
       </div>
     </div>

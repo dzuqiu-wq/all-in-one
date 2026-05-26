@@ -1,16 +1,13 @@
 "use client";
-
 import { useState, useRef, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Upload, Download, FileText, AlertCircle, CheckCircle } from "lucide-react";
 import PseudoProcessor from "@/components/PseudoProcessor";
-import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import SampleButton from "@/components/SampleButton";
 import ShareButtons from "@/components/ShareButtons";
 import { buildSampleWordPdfResult } from "@/lib/sampleData";
-
 interface ConversionResult {
   fileName: string;
   processingTime: string;
@@ -18,14 +15,11 @@ interface ConversionResult {
   pdfSize: number;
   blob: Blob;
 }
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 // Structured data for SEO - uses useLocale to detect which version to show
 function StructuredData() {
   const locale = useLocale();
   const isZh = locale === "zh";
-  
   return (
     <>
       <script
@@ -156,7 +150,6 @@ function StructuredData() {
     </>
   );
 }
-
 export default function WordToPDFPage() {
   const t = useTranslations("tools.wordPdf");
   const [file, setFile] = useState<File | null>(null);
@@ -164,59 +157,48 @@ export default function WordToPDFPage() {
   const [result, setResult] = useState<ConversionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const loadingTexts = [
     t("loading1"),
     t("loading2"),
     t("loading3"),
     t("loading4"),
   ];
-
   const handleFileSelect = useCallback((selectedFile: File) => {
     const validExt = selectedFile.name.match(/\.(docx|doc)$/i);
     if (!validExt) {
       setError(t("errorInvalid"));
       return;
     }
-
     if (selectedFile.size > 5 * 1024 * 1024) {
       setError(t("errorSize"));
       return;
     }
-
     setFile(selectedFile);
     setResult(null);
     setError(null);
   }, [t]);
-
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     const f = e.dataTransfer.files[0];
     if (f) handleFileSelect(f);
   }, [handleFileSelect]);
-
   const formatBytes = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
-
   const handleConvert = useCallback(async () => {
     if (!file) return;
-
     setState("processing");
     setError(null);
-
     try {
       const formData = new FormData();
       formData.append("file", file);
-
       const response = await fetch(`${API_BASE_URL}/api/v1/convert/word-to-pdf`, {
         method: "POST",
         body: formData,
         signal: AbortSignal.timeout(7000),
       });
-
       if (response.status === 413) throw new Error(t("error413"));
       if (response.status === 429) {
         const data = await response.json();
@@ -227,10 +209,8 @@ export default function WordToPDFPage() {
         const data = await response.json().catch(() => ({}));
         throw new Error(data.detail || `${t("errorGeneric")}: ${response.status}`);
       }
-
       const processingTime = response.headers.get("X-Processing-Time") || "0";
       const pdfBlob = await response.blob();
-
       setResult({
         fileName: file.name.replace(/\.(docx|doc)$/i, ".pdf"),
         processingTime: `${(parseFloat(processingTime) * 1000).toFixed(0)}ms`,
@@ -238,14 +218,12 @@ export default function WordToPDFPage() {
         pdfSize: pdfBlob.size,
         blob: pdfBlob,
       });
-
       setState("success");
     } catch (err) {
       setError(err instanceof Error ? err.message : t("errorUnexpected"));
       setState("error");
     }
   }, [file, t]);
-
   const handleDownload = useCallback(() => {
     if (!result?.blob) return;
     const url = URL.createObjectURL(result.blob);
@@ -257,14 +235,12 @@ export default function WordToPDFPage() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, [result]);
-
   const handleReset = useCallback(() => {
     setFile(null);
     setState("idle");
     setResult(null);
     setError(null);
   }, []);
-
   const handleLoadSample = useCallback(async () => {
     setError(null);
     setState("processing");
@@ -288,22 +264,18 @@ export default function WordToPDFPage() {
       setState("idle");
     }
   }, []);
-
   return (
     <div className="min-h-screen bg-canvas">
       {/* SEO Structured Data */}
       <StructuredData />
-      
       <PseudoProcessor
         isProcessing={false}
         onComplete={() => {}}
         loadingTexts={loadingTexts}
       />
-
       <div className="max-w-4xl mx-auto px-6 py-section">
         {/* Breadcrumb */}
         <ToolBreadcrumb slug="word-to-pdf" />
-
         {/* Hero */}
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4">{t("tag")}</div>
@@ -314,12 +286,9 @@ export default function WordToPDFPage() {
             {t("description")}
           </p>
         </div>
-
         {/* Top Ad */}
         <div className="mb-8">
-          <AdBanner slot="wordtopdf-top" format="auto" />
         </div>
-
         {/* Upload Zone */}
         <div
           onDrop={handleDrop}
@@ -344,14 +313,12 @@ export default function WordToPDFPage() {
             {file ? formatBytes(file.size) : t("supported")}
           </p>
         </div>
-
         {/* Sample data trigger */}
         {!file && state === "idle" && (
           <div className="mt-4">
             <SampleButton onLoad={handleLoadSample} layout="block" />
           </div>
         )}
-
         {/* Action Button */}
         {file && state === "idle" && (
           <div className="mt-6 flex gap-3">
@@ -370,7 +337,6 @@ export default function WordToPDFPage() {
             </button>
           </div>
         )}
-
         {/* Processing State */}
         {state === "processing" && (
           <div className="mt-6 bg-canvas border border-hairline rounded-lg p-6">
@@ -380,7 +346,6 @@ export default function WordToPDFPage() {
             </div>
           </div>
         )}
-
         {/* Error State */}
         {error && (
           <div className="mt-6 surface-card border border-error/30 rounded-lg p-lg">
@@ -399,7 +364,6 @@ export default function WordToPDFPage() {
             </div>
           </div>
         )}
-
         {/* Success State */}
         {result && (
           <div className="mt-8 space-y-6">
@@ -408,7 +372,6 @@ export default function WordToPDFPage() {
                 <CheckCircle className="w-6 h-6 text-success" />
                 <h4 className="text-lg font-medium text-ink">{t("success")}</h4>
               </div>
-
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div>
                   <div className="caption-upper text-muted-soft mb-1">{t("original")}</div>
@@ -423,7 +386,6 @@ export default function WordToPDFPage() {
                   <div className="text-title-md font-sans text-primary">{result.processingTime}</div>
                 </div>
               </div>
-
               <div className="flex gap-3">
                 <button
                   onClick={handleDownload}
@@ -440,12 +402,9 @@ export default function WordToPDFPage() {
                 </button>
               </div>
             </div>
-
             {/* Mid Ad */}
-            <AdBanner slot="wordtopdf-mid" format="rectangle" className="mx-auto max-w-[336px]" />
           </div>
         )}
-
         {/* Share strip */}
         <div className="mt-8">
           <ShareButtons
@@ -460,7 +419,6 @@ export default function WordToPDFPage() {
             hashtags={["WordToPDF", "AllInOneToolbox", "PrivacyTools"]}
           />
         </div>
-
         {/* FAQ Section */}
         <section className="mt-section pt-xl border-t border-hairline">
           <h2 className="text-3xl font-medium text-ink mb-8">
@@ -484,7 +442,6 @@ export default function WordToPDFPage() {
             ))}
           </div>
         </section>
-
         <ToolPageFooter slug="word-to-pdf" />
       </div>
     </div>

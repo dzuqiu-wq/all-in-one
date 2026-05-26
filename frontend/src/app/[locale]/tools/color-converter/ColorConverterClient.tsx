@@ -1,9 +1,7 @@
 "use client";
-
 import { useCallback, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Copy, Palette } from "lucide-react";
-import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import ShareButtons from "@/components/ShareButtons";
@@ -15,14 +13,11 @@ import {
   type HSL,
   type RGB,
 } from "@/lib/tools/colorConverter";
-
 const DEFAULT_RGB: RGB = { r: 99, g: 102, b: 241 };
-
 // Structured data for SEO - locale-aware
 function StructuredData() {
   const locale = useLocale();
   const isZh = locale === "zh";
-
   return (
     <script
       type="application/ld+json"
@@ -47,30 +42,24 @@ function StructuredData() {
     />
   );
 }
-
 function clamp(value: number, min: number, max: number): number {
   if (Number.isNaN(value)) return min;
   return Math.max(min, Math.min(max, Math.round(value)));
 }
-
 export default function ColorConverterClient() {
   const t = useTranslations("tools.colorConverter");
-
   // Canonical state is RGB; HEX and HSL are derived for display.
   const [rgb, setRgb] = useState<RGB>(DEFAULT_RGB);
   const [hexInput, setHexInput] = useState<string>(rgbToHex(DEFAULT_RGB));
   const [hexError, setHexError] = useState<string | null>(null);
   const [copied, setCopied] = useState<"hex" | "rgb" | "hsl" | null>(null);
-
   const hex = useMemo(() => rgbToHex(rgb), [rgb]);
   const hsl = useMemo(() => rgbToHsl(rgb), [rgb]);
-
   // Keep hexInput in sync with canonical RGB unless the user is typing an invalid value.
   const syncHexInput = useCallback((next: RGB) => {
     setHexInput(rgbToHex(next));
     setHexError(null);
   }, []);
-
   const handleHexChange = useCallback((raw: string) => {
     setHexInput(raw);
     try {
@@ -81,7 +70,6 @@ export default function ColorConverterClient() {
       setHexError("invalid");
     }
   }, []);
-
   const handleRgbChange = useCallback(
     (channel: keyof RGB, raw: string) => {
       const value = clamp(Number(raw), 0, 255);
@@ -91,7 +79,6 @@ export default function ColorConverterClient() {
     },
     [rgb, syncHexInput],
   );
-
   const handleHslChange = useCallback(
     (channel: keyof HSL, raw: string) => {
       const max = channel === "h" ? 360 : 100;
@@ -103,7 +90,6 @@ export default function ColorConverterClient() {
     },
     [hsl, syncHexInput],
   );
-
   const handleCopy = useCallback(
     async (kind: "hex" | "rgb" | "hsl", text: string) => {
       try {
@@ -116,23 +102,18 @@ export default function ColorConverterClient() {
     },
     [],
   );
-
   const rgbString = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
   const hslString = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
-
   const faqs: { q: string; a: string }[] = [
     { q: t("faq1Q"), a: t("faq1A") },
     { q: t("faq2Q"), a: t("faq2A") },
     { q: t("faq3Q"), a: t("faq3A") },
   ];
-
   return (
     <div className="min-h-screen bg-canvas">
       <StructuredData />
-
       <div className="max-w-4xl mx-auto px-6 py-section">
         <ToolBreadcrumb slug="color-converter" />
-
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4 inline-flex items-center gap-2">
             <Palette className="w-3.5 h-3.5" strokeWidth={2} />
@@ -148,11 +129,8 @@ export default function ColorConverterClient() {
             {t("description")}
           </p>
         </div>
-
         <div className="mb-8">
-          <AdBanner slot="colorconverter-top" format="auto" />
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
           {/* Live preview */}
           <div className="md:col-span-2">
@@ -166,7 +144,6 @@ export default function ColorConverterClient() {
             />
             <div className="mt-3 font-mono text-body-sm text-ink">{hex}</div>
           </div>
-
           {/* Inputs */}
           <div className="md:col-span-3 space-y-4">
             {/* HEX */}
@@ -203,7 +180,6 @@ export default function ColorConverterClient() {
                 </p>
               )}
             </div>
-
             {/* RGB */}
             <div className="surface-card rounded-lg p-md">
               <div className="flex items-end gap-2">
@@ -241,7 +217,6 @@ export default function ColorConverterClient() {
                 {rgbString}
               </div>
             </div>
-
             {/* HSL */}
             <div className="surface-card rounded-lg p-md">
               <div className="flex items-end gap-2">
@@ -281,7 +256,6 @@ export default function ColorConverterClient() {
             </div>
           </div>
         </div>
-
         {/* Share strip */}
         <div className="mt-8">
           <ShareButtons
@@ -296,7 +270,6 @@ export default function ColorConverterClient() {
             hashtags={["ColorConverter", "Design", "AllInOneToolbox"]}
           />
         </div>
-
         {/* FAQ */}
         <section className="mt-section pt-xl border-t border-hairline">
           <h2 className="text-display-md font-serif text-ink mb-8">
@@ -318,7 +291,6 @@ export default function ColorConverterClient() {
             ))}
           </div>
         </section>
-
         <ToolPageFooter slug="color-converter" />
       </div>
     </div>

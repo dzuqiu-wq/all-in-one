@@ -1,13 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import AdBanner from "@/components/AdBanner";
 
 interface PseudoProcessorProps {
   isProcessing: boolean;
   onComplete: () => void;
   loadingTexts: string[];
-  adSlot?: string;
 }
 
 interface LogEntry {
@@ -35,7 +33,6 @@ export default function PseudoProcessor({
   isProcessing,
   onComplete,
   loadingTexts,
-  adSlot = "processing-mid",
 }: PseudoProcessorProps) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isActive, setIsActive] = useState(false);
@@ -160,11 +157,6 @@ export default function PseudoProcessor({
               <span className="inline-block w-2 h-3 bg-on-dark animate-pulse" />
             </div>
           </div>
-        </div>
-
-        {/* Ad Banner */}
-        <div className="px-6 pb-6">
-          <AdBanner slot={adSlot} format="auto" />
         </div>
       </div>
     </div>

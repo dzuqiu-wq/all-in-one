@@ -1,5 +1,4 @@
 "use client";
-
 import { useCallback, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -11,7 +10,6 @@ import {
   Undo2,
   AlertTriangle,
 } from "lucide-react";
-import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import ShareButtons from "@/components/ShareButtons";
@@ -21,17 +19,14 @@ import {
   encodeBase64Url,
   decodeBase64Url,
 } from "@/lib/tools/base64";
-
 interface ClientState {
   output: string;
   error: string | null;
 }
-
 // Structured data for SEO - uses useLocale to detect which version to show
 function StructuredData() {
   const locale = useLocale();
   const isZh = locale === "zh";
-
   return (
     <>
       <script
@@ -57,10 +52,8 @@ function StructuredData() {
     </>
   );
 }
-
 export default function Base64Client() {
   const t = useTranslations("tools.base64");
-
   const [input, setInput] = useState("");
   const [urlSafe, setUrlSafe] = useState(false);
   const [state, setState] = useState<ClientState>({
@@ -68,12 +61,10 @@ export default function Base64Client() {
     error: null,
   });
   const [copied, setCopied] = useState(false);
-
   const stats = useMemo(() => {
     const chars = input.length;
     return `${chars}`;
   }, [input]);
-
   const handleEncode = useCallback(() => {
     try {
       const output = urlSafe ? encodeBase64Url(input) : encodeBase64(input);
@@ -83,7 +74,6 @@ export default function Base64Client() {
       setState({ output: "", error: message });
     }
   }, [input, urlSafe]);
-
   const handleDecode = useCallback(() => {
     try {
       const output = urlSafe ? decodeBase64Url(input) : decodeBase64(input);
@@ -92,7 +82,6 @@ export default function Base64Client() {
       setState({ output: "", error: t("errorInvalid") });
     }
   }, [input, urlSafe, t]);
-
   const handleCopy = useCallback(async () => {
     if (!state.output) return;
     try {
@@ -103,25 +92,20 @@ export default function Base64Client() {
       // Clipboard write can fail in non-secure contexts; degrade silently.
     }
   }, [state.output]);
-
   const handleClear = useCallback(() => {
     setInput("");
     setState({ output: "", error: null });
   }, []);
-
   const faqs: { q: string; a: string }[] = [
     { q: t("faq1Q"), a: t("faq1A") },
     { q: t("faq2Q"), a: t("faq2A") },
     { q: t("faq3Q"), a: t("faq3A") },
   ];
-
   return (
     <div className="min-h-screen bg-canvas">
       <StructuredData />
-
       <div className="max-w-5xl mx-auto px-6 py-section">
         <ToolBreadcrumb slug="base64" />
-
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4 inline-flex items-center gap-2">
             <FileCode2 className="w-3.5 h-3.5" strokeWidth={2} />
@@ -137,11 +121,8 @@ export default function Base64Client() {
             {t("description")}
           </p>
         </div>
-
         <div className="mb-8">
-          <AdBanner slot="base64-top" format="auto" />
         </div>
-
         {/* ---------------- Controls ---------------- */}
         <div className="surface-card hairline rounded-lg p-6 mb-6 flex flex-wrap items-center gap-3">
           <label className="inline-flex items-center gap-2 cursor-pointer">
@@ -153,9 +134,7 @@ export default function Base64Client() {
             />
             <span className="text-body-sm text-ink">{t("urlSafe")}</span>
           </label>
-
           <div className="flex-1" />
-
           <button
             type="button"
             onClick={handleEncode}
@@ -175,7 +154,6 @@ export default function Base64Client() {
             {t("decode")}
           </button>
         </div>
-
         {/* ---------------- Editor grid ---------------- */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Input pane */}
@@ -209,7 +187,6 @@ export default function Base64Client() {
               {stats}
             </div>
           </div>
-
           {/* Output pane */}
           <div className="flex flex-col">
             <div className="flex items-center justify-between mb-2">
@@ -230,7 +207,6 @@ export default function Base64Client() {
                 {t("copy")}
               </button>
             </div>
-
             {state.error !== null ? (
               <div
                 role="alert"
@@ -255,7 +231,6 @@ export default function Base64Client() {
             )}
           </div>
         </div>
-
         {/* FAQ */}
         <div className="mt-16">
           <h2 className="text-display-md font-serif text-ink mb-6">
@@ -274,7 +249,6 @@ export default function Base64Client() {
             ))}
           </div>
         </div>
-
         <div className="mt-12">
           <ShareButtons
             title={{
@@ -288,7 +262,6 @@ export default function Base64Client() {
             hashtags={["Base64", "AllInOneToolbox", "PrivacyTools"]}
           />
         </div>
-
         <ToolPageFooter slug="base64" />
       </div>
     </div>

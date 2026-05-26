@@ -1,9 +1,7 @@
 "use client";
-
 import { useCallback, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Download, Image as ImageIcon, RotateCcw, Wand2 } from "lucide-react";
-import AdBanner from "@/components/AdBanner";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import ShareButtons from "@/components/ShareButtons";
@@ -12,15 +10,12 @@ import {
   extensionForFormat,
   type ImageFormat,
 } from "@/lib/tools/imageConverter";
-
 const ACCEPTED_MIME = ["image/png", "image/jpeg", "image/webp"] as const;
 const MAX_SIZE_BYTES = 10 * 1024 * 1024;
-
 // Structured data for SEO - locale-aware
 function StructuredData() {
   const locale = useLocale();
   const isZh = locale === "zh";
-
   return (
     <script
       type="application/ld+json"
@@ -44,16 +39,13 @@ function StructuredData() {
     />
   );
 }
-
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 }
-
 export default function ImageConverterClient() {
   const t = useTranslations("tools.imageConverter");
-
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [targetFormat, setTargetFormat] = useState<ImageFormat>("webp");
@@ -62,9 +54,7 @@ export default function ImageConverterClient() {
   const [resultBlob, setResultBlob] = useState<Blob | null>(null);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const handleFileSelect = useCallback(
     (f: File) => {
       setError(null);
@@ -88,7 +78,6 @@ export default function ImageConverterClient() {
     },
     [t, resultUrl],
   );
-
   const handleConvert = useCallback(async () => {
     if (!file) return;
     setIsConverting(true);
@@ -104,7 +93,6 @@ export default function ImageConverterClient() {
       setIsConverting(false);
     }
   }, [file, targetFormat, quality, resultUrl, t]);
-
   const handleReset = useCallback(() => {
     setFile(null);
     setPreview(null);
@@ -116,7 +104,6 @@ export default function ImageConverterClient() {
     setError(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }, [resultUrl]);
-
   const handleDownload = useCallback(() => {
     if (!resultBlob || !file) return;
     const url = URL.createObjectURL(resultBlob);
@@ -127,20 +114,16 @@ export default function ImageConverterClient() {
     a.click();
     URL.revokeObjectURL(url);
   }, [resultBlob, file, targetFormat]);
-
   const faqs: { q: string; a: string }[] = [
     { q: t("faq1Q"), a: t("faq1A") },
     { q: t("faq2Q"), a: t("faq2A") },
     { q: t("faq3Q"), a: t("faq3A") },
   ];
-
   return (
     <div className="min-h-screen bg-canvas">
       <StructuredData />
-
       <div className="max-w-4xl mx-auto px-6 py-section">
         <ToolBreadcrumb slug="image-converter" />
-
         <div className="mb-12">
           <div className="caption-upper text-muted mb-4 inline-flex items-center gap-2">
             <ImageIcon className="w-3.5 h-3.5" strokeWidth={2} />
@@ -156,11 +139,8 @@ export default function ImageConverterClient() {
             {t("description")}
           </p>
         </div>
-
         <div className="mb-8">
-          <AdBanner slot="imageconverter-top" format="auto" />
         </div>
-
         {/* Upload Zone */}
         <div
           onDrop={(e) => {
@@ -190,7 +170,6 @@ export default function ImageConverterClient() {
           </h4>
           <p className="text-body-sm text-muted">{t("supported")}</p>
         </div>
-
         {error && (
           <div className="mt-4 surface-card rounded-lg p-md border border-hairline">
             <div className="caption-upper text-muted-soft mb-1">
@@ -199,7 +178,6 @@ export default function ImageConverterClient() {
             <p className="text-body-sm text-ink">{error}</p>
           </div>
         )}
-
         {/* Preview & Controls */}
         {preview && file && (
           <div className="mt-6 space-y-6">
@@ -233,7 +211,6 @@ export default function ImageConverterClient() {
                 </div>
               )}
             </div>
-
             <div className="surface-card rounded-lg p-lg grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label
@@ -255,7 +232,6 @@ export default function ImageConverterClient() {
                   <option value="webp">WebP</option>
                 </select>
               </div>
-
               {targetFormat !== "png" && (
                 <div>
                   <label
@@ -275,7 +251,6 @@ export default function ImageConverterClient() {
                   />
                 </div>
               )}
-
               <div className={`flex items-end gap-2 ${targetFormat === "png" ? "md:col-span-2" : ""}`}>
                 <button
                   type="button"
@@ -296,7 +271,6 @@ export default function ImageConverterClient() {
                 </button>
               </div>
             </div>
-
             {resultBlob && (
               <button
                 type="button"
@@ -309,7 +283,6 @@ export default function ImageConverterClient() {
             )}
           </div>
         )}
-
         {/* Share strip */}
         <div className="mt-8">
           <ShareButtons
@@ -324,7 +297,6 @@ export default function ImageConverterClient() {
             hashtags={["ImageConverter", "WebP", "AllInOneToolbox"]}
           />
         </div>
-
         {/* FAQ */}
         <section className="mt-section pt-xl border-t border-hairline">
           <h2 className="text-display-md font-serif text-ink mb-8">
@@ -346,7 +318,6 @@ export default function ImageConverterClient() {
             ))}
           </div>
         </section>
-
         <ToolPageFooter slug="image-converter" />
       </div>
     </div>
