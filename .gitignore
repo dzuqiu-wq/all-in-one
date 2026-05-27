@@ -61,7 +61,14 @@ decision.json
 !frontend/
 # TypeScript incremental build cache
 *.tsbuildinfo
+
+# Markdown files - allow important project docs
 *.md
+!README.md
+!DESIGN.md
+!mvp.md
+!AGENTS.md
+!CLAUDE.md
 
 # Allow markdown docs that live under .github/ (deployment runbooks, issue templates, etc.)
 !.github/**/*.md
