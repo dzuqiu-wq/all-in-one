@@ -4,7 +4,8 @@
  * about page, JSON-LD blocks, and system status panel.
  */
 
-export const BASE_URL = "https://333654.xyz" as const;
+export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://333654.xyz";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 export const CONTACT = {
   general: "hello@333654.xyz",

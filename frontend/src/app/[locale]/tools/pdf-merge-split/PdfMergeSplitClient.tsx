@@ -30,7 +30,7 @@ function StructuredDataEN() {
             operatingSystem: "All",
             applicationCategory: "BusinessApplication",
             browserRequirements: "Requires HTML5 Canvas API and File API support",
-            url: "https://333654.xyz/tools/pdf-merge-split",
+            url: "BASE_URL/tools/pdf-merge-split",
             description: "Merge multiple PDF files into one document or extract specific pages from PDF files. Pure client-side processing using pdf-lib library — files never leave your browser.",
           }),
         }}
@@ -102,7 +102,7 @@ function _StructuredDataZH() {
             operatingSystem: "All",
             applicationCategory: "BusinessApplication",
             browserRequirements: "Requires HTML5 Canvas API and File API support",
-            url: "https://333654.xyz/zh/tools/pdf-merge-split",
+            url: "BASE_URL/zh/tools/pdf-merge-split",
             description: "合并多个 PDF 或提取文档中的特定页面。纯浏览器端处理，无需上传文件。100%隐私保护，完全免费无限制使用。",
           }),
         }}

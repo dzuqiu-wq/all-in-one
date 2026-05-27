@@ -24,17 +24,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? ["微信聊天生成器", "微信截图", "聊天Mockup", "微信设计稿", "微信对话"]
       : ["wechat chat generator", "wechat mockup", "chat screenshot", "wechat design", "conversation mockup"],
     alternates: {
-      canonical: "https://333654.xyz/tools/wechat-generator",
+      canonical: "BASE_URL/tools/wechat-generator",
       languages: {
-        "en-US": "https://333654.xyz/tools/wechat-generator",
-        "zh-CN": "https://333654.xyz/zh/tools/wechat-generator",
+        "en-US": "BASE_URL/tools/wechat-generator",
+        "zh-CN": "BASE_URL/zh/tools/wechat-generator",
       },
     },
     openGraph: {
       type: "website",
       locale: isZh ? "zh_CN" : "en_US",
       alternateLocale: isZh ? "en_US" : "zh_CN",
-      url: "https://333654.xyz/tools/wechat-generator",
+      url: "BASE_URL/tools/wechat-generator",
       siteName: "All-in-One Toolbox",
       title,
       description,

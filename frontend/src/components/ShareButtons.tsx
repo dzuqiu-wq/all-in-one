@@ -10,7 +10,6 @@ import {
   Share2,
   MessageCircle,
 } from "lucide-react";
-import { BASE_URL } from "@/lib/constants";
 
 export interface BilingualText {
   en: string;
@@ -78,7 +77,7 @@ export default function ShareButtons({
   const locale = params?.locale === "zh" ? "zh" : "en";
   const isZh = locale === "zh";
 
-  const [absUrl, setAbsUrl] = useState<string>(() => `${BASE_URL}${pathname}`);
+  const [absUrl, setAbsUrl] = useState<string>(() => `BASE_URL${pathname}`);
   const [canNativeShare, setCanNativeShare] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
 

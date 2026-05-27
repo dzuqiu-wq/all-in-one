@@ -32,7 +32,7 @@ function StructuredData() {
             operatingSystem: "All",
             applicationCategory: "BusinessApplication",
             browserRequirements: "Requires HTML5 Canvas API and File API support",
-            url: isZh ? "https://333654.xyz/zh/tools/word-to-pdf" : "https://333654.xyz/tools/word-to-pdf",
+            url: isZh ? "BASE_URL/zh/tools/word-to-pdf" : "BASE_URL/tools/word-to-pdf",
             description: isZh 
               ? "使用服务端 LibreOffice 处理将 Word 文档转换为 PDF。纯内存管道处理，文件绝不上传磁盘。5秒快速超时，100%隐私安全。"
               : "Convert Word documents (.docx, .doc) to PDF format using server-side LibreOffice processing. Features 5-second timeout, memory-only pipeline, and no file storage.",

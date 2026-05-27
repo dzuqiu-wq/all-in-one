@@ -7,8 +7,6 @@ interface Props {
   params: Promise<{ locale: string }>;
 }
 
-const BASE_URL = "https://333654.xyz";
-
 export async function generateStaticParams() {
   return [{ locale: "en" }, { locale: "zh" }];
 }
@@ -31,16 +29,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? ["更新日志", "版本历史", "v0.1.0", "生产上线", "All-in-One Toolbox"]
       : ["changelog", "release notes", "v0.1.0", "production launch", "All-in-One Toolbox"],
     alternates: {
-      canonical: `${BASE_URL}/${locale}/changelog`,
+      canonical: `/${locale}/changelog`,
       languages: {
-        "en-US": `${BASE_URL}/en/changelog`,
-        "zh-CN": `${BASE_URL}/zh/changelog`,
+        "en-US": `/en/changelog`,
+        "zh-CN": `/zh/changelog`,
       },
     },
     openGraph: {
       type: "article",
       locale: isZh ? "zh_CN" : "en_US",
-      url: `${BASE_URL}/${locale}/changelog`,
+      url: `/${locale}/changelog`,
       siteName: "All-in-One Toolbox",
       title,
       description,

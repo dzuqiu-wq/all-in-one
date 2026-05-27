@@ -10,6 +10,7 @@ import { GrainOverlay } from "@/components/GrainOverlay";
 import { CustomCursor } from "@/components/CustomCursor";
 import "../globals.css";
 import { Metadata } from "next";
+import { BASE_URL } from "@/lib/constants";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -47,17 +48,17 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       ? ["在线工具", "文档转换器", "图片优化", "PDF工具", "二维码生成器", "免费工具", "效率工具"]
       : ["online tools", "document converter", "image optimizer", "pdf tools", "qr code generator", "free tools", "productivity"],
     alternates: {
-      canonical: "https://333654.xyz",
+      canonical: BASE_URL,
       languages: {
-        "en-US": "https://333654.xyz",
-        "zh-CN": "https://333654.xyz/zh",
+        "en-US": BASE_URL,
+        "zh-CN": `${BASE_URL}/zh`,
       },
     },
     openGraph: {
       type: "website",
       locale: isZh ? "zh_CN" : "en_US",
       alternateLocale: isZh ? "en_US" : "zh_CN",
-      url: "https://333654.xyz",
+      url: BASE_URL,
       siteName: "All-in-One Toolbox",
       title: isZh 
         ? "All-in-One Toolbox | 免费在线文档与图片工具" 

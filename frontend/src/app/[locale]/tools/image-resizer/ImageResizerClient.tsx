@@ -25,8 +25,8 @@ function StructuredData() {
           browserRequirements:
             "Requires HTML5 Canvas API and createImageBitmap support",
           url: isZh
-            ? "https://333654.xyz/zh/tools/image-resizer"
-            : "https://333654.xyz/tools/image-resizer",
+            ? "BASE_URL/zh/tools/image-resizer"
+            : "BASE_URL/tools/image-resizer",
           description: isZh
             ? "精确调整图片尺寸，可选锁定纵横比。完全使用 Canvas API 在浏览器中运行，无需上传。"
             : "Resize images precisely with optional aspect-ratio lock. Runs entirely in your browser using Canvas. No upload required.",

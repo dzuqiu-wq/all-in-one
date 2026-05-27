@@ -62,8 +62,8 @@ function StructuredData() {
             applicationCategory: "UtilitiesApplication",
             browserRequirements: "Requires a modern browser with JSON.parse support",
             url: isZh
-              ? "https://333654.xyz/zh/tools/json-formatter"
-              : "https://333654.xyz/tools/json-formatter",
+              ? "BASE_URL/zh/tools/json-formatter"
+              : "BASE_URL/tools/json-formatter",
             description: isZh
               ? "在浏览器内完成 JSON 的格式化、校验与压缩，调用原生 JSON.parse 引擎。符合 ECMA-404 标准，零上传、零落盘。"
               : "Format, validate, and minify JSON entirely client-side via the native JSON.parse engine. ECMA-404 compliant, zero upload.",

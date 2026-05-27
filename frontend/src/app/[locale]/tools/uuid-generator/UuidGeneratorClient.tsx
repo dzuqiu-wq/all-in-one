@@ -25,8 +25,8 @@ function StructuredData() {
           browserRequirements:
             "Requires a modern browser with Web Crypto API (crypto.randomUUID or crypto.getRandomValues)",
           url: isZh
-            ? "https://333654.xyz/zh/tools/uuid-generator"
-            : "https://333654.xyz/tools/uuid-generator",
+            ? "BASE_URL/zh/tools/uuid-generator"
+            : "BASE_URL/tools/uuid-generator",
           description: isZh
             ? "在浏览器中生成密码学随机的 UUID（RFC 4122 v4）。一次最多 10,000 个。无服务器、无追踪。"
             : "Generate cryptographically random UUIDs (RFC 4122 v4) in your browser. Up to 10,000 at once. No server, no tracking.",

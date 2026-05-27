@@ -29,8 +29,8 @@ function StructuredData() {
           browserRequirements:
             "Requires HTML5 Canvas API and createImageBitmap support",
           url: isZh
-            ? "https://333654.xyz/zh/tools/image-converter"
-            : "https://333654.xyz/tools/image-converter",
+            ? "BASE_URL/zh/tools/image-converter"
+            : "BASE_URL/tools/image-converter",
           description: isZh
             ? "在浏览器中转换 PNG、JPEG 和 WebP 图片。使用原生 Canvas 编码，无需上传，无追踪。"
             : "Convert PNG, JPEG, and WebP images in your browser. Native Canvas encoding. No upload, no tracking.",

@@ -30,7 +30,7 @@ function StructuredDataEN() {
             operatingSystem: "All",
             applicationCategory: "DesignApplication",
             browserRequirements: "Requires HTML5 Canvas API and File API support",
-            url: "https://333654.xyz/tools/image-optimizer",
+            url: "BASE_URL/tools/image-optimizer",
             description: "Compress images and convert to WebP format. Smart compression reduces file size by up to 80% while preserving quality. Pure browser processing with Web Workers.",
           }),
         }}
@@ -102,7 +102,7 @@ function _StructuredDataZH() {
             operatingSystem: "All",
             applicationCategory: "DesignApplication",
             browserRequirements: "Requires HTML5 Canvas API and File API support",
-            url: "https://333654.xyz/zh/tools/image-optimizer",
+            url: "BASE_URL/zh/tools/image-optimizer",
             description: "压缩图片并转换为 WebP 格式。智能压缩可在保持质量的同时将文件大小减少 80%。纯浏览器处理，无需上传，隐私安全。",
           }),
         }}

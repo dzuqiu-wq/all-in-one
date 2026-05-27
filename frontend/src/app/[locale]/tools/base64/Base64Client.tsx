@@ -41,8 +41,8 @@ function StructuredData() {
             browserRequirements:
               "Requires a modern browser with btoa/atob and TextEncoder support",
             url: isZh
-              ? "https://333654.xyz/zh/tools/base64"
-              : "https://333654.xyz/tools/base64",
+              ? "BASE_URL/zh/tools/base64"
+              : "BASE_URL/tools/base64",
             description: isZh
               ? "在浏览器中对 Base64 文本进行编码和解码。支持标准和 URL-safe 变体，原生支持 UTF-8。"
               : "Encode and decode Base64 text in your browser. Supports standard and URL-safe variants. UTF-8 friendly.",

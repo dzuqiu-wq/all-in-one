@@ -1,4 +1,5 @@
 import { ToolSlug } from "./metadata";
+import { BASE_URL } from "@/lib/constants";
 
 // FAQ item type
 interface FAQItem {
@@ -211,9 +212,6 @@ function generateFAQPageSchema(faqs: FAQItem[]): string {
   };
   return JSON.stringify(schema);
 }
-
-// Base URL
-const BASE_URL = "https://333654.xyz";
 
 // Props for StructuredData component
 interface StructuredDataProps {

@@ -28,8 +28,8 @@ function StructuredData() {
           browserRequirements:
             "Requires a modern browser with Web Crypto API support (crypto.getRandomValues)",
           url: isZh
-            ? "https://333654.xyz/zh/tools/password-generator"
-            : "https://333654.xyz/tools/password-generator",
+            ? "BASE_URL/zh/tools/password-generator"
+            : "BASE_URL/tools/password-generator",
           description: isZh
             ? "在浏览器中使用 Web Crypto CSPRNG 生成密码学安全的随机密码。不传输，不存储。"
             : "Generate cryptographically secure passwords in your browser using the Web Crypto CSPRNG. No transmission, no storage.",

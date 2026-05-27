@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { BASE_URL } from "@/lib/constants";
 
 // Tool definitions for SEO metadata
 export type ToolSlug = "word-to-pdf" | "pdf-merge-split" | "image-optimizer" | "qrcode-generator";
@@ -77,9 +78,6 @@ const toolMeta: Record<ToolSlug, ToolMeta> = {
     },
   },
 };
-
-// Base URL for canonical and hreflang
-const BASE_URL = "https://333654.xyz";
 
 // Helper to generate alternates with hreflang
 function generateAlternates(path: string): Metadata["alternates"] {

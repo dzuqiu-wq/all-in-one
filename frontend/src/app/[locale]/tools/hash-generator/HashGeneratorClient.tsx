@@ -26,8 +26,8 @@ function StructuredData() {
             browserRequirements:
               "Requires a modern browser with Web Crypto API support (crypto.subtle.digest)",
             url: isZh
-              ? "https://333654.xyz/zh/tools/hash-generator"
-              : "https://333654.xyz/tools/hash-generator",
+              ? "BASE_URL/zh/tools/hash-generator"
+              : "BASE_URL/tools/hash-generator",
             description: isZh
               ? "在浏览器中使用 Web Crypto API 计算 SHA-1、SHA-256、SHA-384 和 SHA-512 哈希值。无需上传，无追踪。"
               : "Compute SHA-1, SHA-256, SHA-384, and SHA-512 hashes in your browser via the native Web Crypto API. No upload, no tracking.",

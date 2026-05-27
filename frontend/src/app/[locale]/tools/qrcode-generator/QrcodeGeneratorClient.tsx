@@ -40,7 +40,7 @@ function StructuredDataEN() {
             operatingSystem: "All",
             applicationCategory: "DesignApplication",
             browserRequirements: "Requires HTML5 Canvas API and File API support",
-            url: "https://333654.xyz/tools/qrcode-generator",
+            url: "BASE_URL/tools/qrcode-generator",
             description: "Generate beautiful QR codes for URLs, text, and contact information. Customizable colors, sizes, and error correction levels. Client-side generation.",
           }),
         }}
@@ -112,7 +112,7 @@ function _StructuredDataZH() {
             operatingSystem: "All",
             applicationCategory: "DesignApplication",
             browserRequirements: "Requires HTML5 Canvas API and File API support",
-            url: "https://333654.xyz/zh/tools/qrcode-generator",
+            url: "BASE_URL/zh/tools/qrcode-generator",
             description: "为网址、文本和联系人信息生成精美的二维码。可自定义颜色、尺寸和纠错级别。纯客户端生成，无需服务器处理。",
           }),
         }}

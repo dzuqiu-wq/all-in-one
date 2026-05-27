@@ -1,3 +1,4 @@
+import { BASE_URL } from "@/lib/constants";
 import { Metadata } from "next";
 import InfoPageLayout, {
   InfoSection,
@@ -7,8 +8,6 @@ import InfoPageLayout, {
 interface Props {
   params: Promise<{ locale: string }>;
 }
-
-const BASE_URL = "https://333654.xyz";
 
 export async function generateStaticParams() {
   return [{ locale: "en" }, { locale: "zh" }];

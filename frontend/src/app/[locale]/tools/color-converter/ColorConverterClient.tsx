@@ -32,8 +32,8 @@ function StructuredData() {
           applicationCategory: "DesignApplication",
           browserRequirements: "Requires JavaScript",
           url: isZh
-            ? "https://333654.xyz/zh/tools/color-converter"
-            : "https://333654.xyz/tools/color-converter",
+            ? "BASE_URL/zh/tools/color-converter"
+            : "BASE_URL/tools/color-converter",
           description: isZh
             ? "在 HEX、RGB 和 HSL 颜色空间之间转换，实时预览。所有计算在浏览器中完成。"
             : "Convert between HEX, RGB, and HSL color spaces with live preview. All math runs in your browser.",

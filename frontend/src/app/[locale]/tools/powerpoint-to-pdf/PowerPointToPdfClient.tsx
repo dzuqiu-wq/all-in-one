@@ -30,7 +30,7 @@ function StructuredData() {
             operatingSystem: "All",
             applicationCategory: "BusinessApplication",
             browserRequirements: "Requires HTML5 Canvas API and File API support",
-            url: isZh ? "https://333654.xyz/zh/tools/powerpoint-to-pdf" : "https://333654.xyz/tools/powerpoint-to-pdf",
+            url: isZh ? "BASE_URL/zh/tools/powerpoint-to-pdf" : "BASE_URL/tools/powerpoint-to-pdf",
             description: isZh
               ? "使用服务端 LibreOffice Impress 处理将 PowerPoint 演示文稿转换为 PDF。纯内存管道处理，文件绝不上传磁盘。5秒快速超时，100%隐私安全。"
               : "Convert PowerPoint presentations (.pptx, .ppt) to PDF format using server-side LibreOffice Impress processing. Features 5-second timeout, memory-only pipeline, and no file storage.",

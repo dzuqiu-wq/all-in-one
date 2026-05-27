@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ChevronRight, Home } from "lucide-react";
 import { useLocalizedHref, useCurrentLocale } from "@/i18n/useLocalizedHref";
-import { BASE_URL } from "@/lib/constants";
 
 export interface BreadcrumbCrumb {
   /** Visible label, already localized. */
@@ -52,7 +51,7 @@ export default function Breadcrumb({ crumbs }: BreadcrumbProps) {
         position: idx + 1,
         name: crumb.label,
         ...(localizedPath && !isLast
-          ? { item: `${BASE_URL}${localizedPath}` }
+          ? { item: `BASE_URL${localizedPath}` }
           : {}),
       };
     }),
