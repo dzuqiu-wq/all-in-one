@@ -73,3 +73,6 @@ decision.json
 # Allow markdown docs that live under .github/ (deployment runbooks, issue templates, etc.)
 !.github/**/*.md
 .gstack/
+
+# Duplicate project directory - local working copy only
+/all-in-one-toolbox/
