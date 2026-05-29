@@ -1,11 +1,42 @@
-"""
+﻿"""
 Application Configuration
 Environment-based settings using Pydantic Settings
 Production-grade configuration with rate limiting and security settings
 """
+import logging
+import sys
 from pydantic_settings import BaseSettings
 from typing import List
 import os
+
+
+# ============================================================================
+# Logging Configuration
+# ============================================================================
+def setup_logging():
+    """Configure application-wide logging."""
+    log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+    
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(getattr(logging, log_level, logging.INFO))
+    
+    formatter = logging.Formatter(
+        "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S"
+    )
+    handler.setFormatter(formatter)
+    
+    # Configure root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(getattr(logging, log_level, logging.INFO))
+    root_logger.handlers = []
+    root_logger.addHandler(handler)
+    
+    return root_logger
+
+
+# Initialize logging on module import
+logger = setup_logging()
 
 
 class Settings(BaseSettings):
@@ -20,9 +51,7 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
 
-    # CORS - Production hardening: only the production origin is allowed.
-    # No localhost residue; cross-origin requests from any other host (including
-    # 127.0.0.1 / 0.0.0.0 / staging URLs) are rejected by the browser.
+    # CORS - Production hardening
     CORS_ORIGINS: List[str] = ["https://333654.xyz"]
 
     # Gotenberg Service
@@ -49,124 +78,5 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-
-
-# ============================================================================
-# Rate Limiter - In-Memory Sliding Window Implementation
-# ============================================================================
-import asyncio
-import time
-from collections import defaultdict
-from typing import Dict, List, Tuple
-from dataclasses import dataclass, field
-
-
-@dataclass
-class RateLimitEntry:
-    """Single rate limit bucket with timestamps"""
-    timestamps: List[float] = field(default_factory=list)
-
-
-class SlidingWindowRateLimiter:
-    """
-    In-memory sliding window rate limiter.
-    No external dependencies (no Redis) - perfect for single VPS deployment.
-
-    Thread-safe using asyncio.Lock for concurrent access.
-    """
-
-    def __init__(
-        self,
-        window_seconds: int = 60,
-        max_requests: int = 5
-    ):
-        self.window_seconds = window_seconds
-        self.max_requests = max_requests
-        self._storage: Dict[str, RateLimitEntry] = defaultdict(RateLimitEntry)
-        self._lock = asyncio.Lock()
-
-    async def is_allowed(self, client_ip: str) -> Tuple[bool, int, int]:
-        """
-        Check if request is allowed and remaining quota.
-
-        Returns:
-            Tuple of (is_allowed, remaining_requests, reset_in_seconds)
-        """
-        async with self._lock:
-            current_time = time.time()
-            window_start = current_time - self.window_seconds
-
-            entry = self._storage[client_ip]
-
-            # Filter out expired timestamps
-            entry.timestamps = [
-                ts for ts in entry.timestamps
-                if ts > window_start
-            ]
-
-            # Check rate limit
-            if len(entry.timestamps) >= self.max_requests:
-                # Calculate when the oldest request will expire
-                oldest = min(entry.timestamps)
-                reset_in = int(oldest + self.window_seconds - current_time)
-                return False, 0, max(1, reset_in)
-
-            # Record this request
-            entry.timestamps.append(current_time)
-
-            remaining = self.max_requests - len(entry.timestamps)
-
-            # Calculate reset time
-            if entry.timestamps:
-                oldest = min(entry.timestamps)
-                reset_in = int(oldest + self.window_seconds - current_time)
-            else:
-                reset_in = self.window_seconds
-
-            return True, remaining, max(1, reset_in)
-
-    async def cleanup_expired(self) -> int:
-        """Remove expired entries to prevent memory bloat"""
-        async with self._lock:
-            current_time = time.time()
-            window_start = current_time - self.window_seconds
-
-            removed_count = 0
-            for client_ip in list(self._storage.keys()):
-                entry = self._storage[client_ip]
-                entry.timestamps = [ts for ts in entry.timestamps if ts > window_start]
-                if not entry.timestamps:
-                    del self._storage[client_ip]
-                    removed_count += 1
-
-            return removed_count
-
-
-# Global rate limiter instance
-rate_limiter = SlidingWindowRateLimiter(
-    window_seconds=settings.RATE_LIMIT_WINDOW_SECONDS,
-    max_requests=settings.RATE_LIMIT_MAX_REQUESTS
-)
-
-
-# ============================================================================
-# Concurrency Semaphore - Async Semaphore for LibreOffice Control
-# ============================================================================
-# Global semaphore limiting concurrent LibreOffice conversions
-# This prevents VPS from running out of memory when many conversions happen
-conversion_semaphore = asyncio.Semaphore(settings.MAX_CONCURRENT_CONVERSIONS)
-
-
-# ============================================================================
-# Cleanup Task - Periodic maintenance
-# ============================================================================
-async def start_cleanup_task():
-    """Background task to clean up expired rate limit entries"""
-    while True:
-        try:
-            await asyncio.sleep(300)  # Run every 5 minutes
-            removed = await rate_limiter.cleanup_expired()
-            if removed > 0:
-                print(f"[CLEANUP] Removed {removed} expired rate limit entries")
-        except Exception as e:
-            print(f"[CLEANUP] Error during cleanup: {e}")
+log = logging.getLogger(__name__)
+log.info(f"Loaded settings: {settings.APP_NAME} v{settings.APP_VERSION}")

@@ -22,6 +22,8 @@ from fastapi import FastAPI, UploadFile, File, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
 
+import logging
+import time as time_module
 from app.config import (
     settings,
     rate_limiter,
@@ -72,6 +74,30 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Logging middleware
+@app.middleware("http")
+async def logging_middleware(request, call_next):
+    start_time = time_module.time()
+    client_ip = get_client_ip(request)
+    
+    try:
+        response = await call_next(request)
+        elapsed = time_module.time() - start_time
+        
+        # Log request
+        logging.getLogger("api").info(
+            f"{client_ip} {request.method} {request.url.path} {response.status_code} {elapsed:.3f}s"
+        )
+        
+        # Add timing header
+        response.headers["X-Response-Time"] = f"{elapsed:.3f}s"
+        return response
+    except Exception as e:
+        elapsed = time_module.time() - start_time
+        logging.getLogger("api").error(
+            f"{client_ip} {request.method} {request.url.path} ERROR {elapsed:.3f}s - {str(e)}"
+        )
+        raise
 # CORS Configuration
 app.add_middleware(
     CORSMiddleware,
@@ -589,9 +615,34 @@ async def convert_powerpoint_to_pdf(
     )
 
 
-# ============================================================================
+logging.getLogger("api").info("Starting API server")
+
+@app.get("/health/detailed")
+async def health_detailed():
+    """Detailed health check with system metrics"""
+    import psutil
+    
+    return {
+        "status": "healthy",
+        "version": settings.APP_VERSION,
+        "uptime": time_module.time() - start_time if "start_time" in dir() else "N/A",
+        "system": {
+            "memory_percent": psutil.virtual_memory().percent,
+            "cpu_percent": psutil.cpu_percent(interval=0.1),
+        },
+        "rate_limiting": {
+            "max_requests": settings.RATE_LIMIT_MAX_REQUESTS,
+            "window_seconds": settings.RATE_LIMIT_WINDOW_SECONDS,
+        },
+        "gotenberg": {
+            "url": settings.GOTENBERG_URL,
+            "timeout": settings.GOTENBERG_TIMEOUT,
+        },
+    }
+
+# ========================
 # Root Endpoint
-# ============================================================================
+# ========================
 @app.get("/")
 async def root():
     """Root endpoint"""

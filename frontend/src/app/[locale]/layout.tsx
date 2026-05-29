@@ -1,13 +1,8 @@
-import { SmoothScrollProvider } from "@/components/SmoothScrollProvider";
-import { PageTransition } from "@/animations/PageTransition";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { Inter, Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { GrainOverlay } from "@/components/GrainOverlay";
-import { CustomCursor } from "@/components/CustomCursor";
+import ClientLayout from "@/components/ClientLayout";
 import "../globals.css";
 import { Metadata } from "next";
 import { BASE_URL } from "@/lib/constants";
@@ -40,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: isZh 
       ? "All-in-One Toolbox | 免费在线文档与图片工具" 
-      : "All-in-One Toolbox | Free Online Document & Image Tools",
+      : "All-in-One Toolbox | Free Online Document and Image Tools",
     description: isZh
       ? "免费的在线工具集合，包括文档转换、图片优化和效率工具。隐私优先，纯浏览器处理。"
       : "A comprehensive collection of free online tools for document conversion, image optimization, and productivity. Privacy-first, browser-based processing.",
@@ -62,16 +57,16 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       siteName: "All-in-One Toolbox",
       title: isZh 
         ? "All-in-One Toolbox | 免费在线文档与图片工具" 
-        : "All-in-One Toolbox | Free Online Document & Image Tools",
+        : "All-in-One Toolbox | Free Online Document and Image Tools",
       description: isZh
-        ? "免费的在线工具集合，包括文档转换、图片优化和效率工具。隐私优先，纯浏览器处理。"
+        ? "免费的在线工具集合，包括文档转换、图片优化和效率工具。"
         : "A comprehensive collection of free online tools for document conversion, image optimization, and productivity.",
     },
     twitter: {
       card: "summary_large_image",
       title: isZh 
         ? "All-in-One Toolbox | 免费在线文档与图片工具" 
-        : "All-in-One Toolbox | Free Online Document & Image Tools",
+        : "All-in-One Toolbox | Free Online Document and Image Tools",
       description: isZh
         ? "免费的在线工具集合，包括文档转换、图片优化和效率工具"
         : "A comprehensive collection of free online tools for document conversion, image optimization, and productivity.",
@@ -107,15 +102,7 @@ export default async function LocaleLayout({
         className={`${inter.variable} ${cormorant.variable} ${jetbrainsMono.variable} antialiased bg-canvas text-ink min-h-screen flex flex-col`}
       >
         <NextIntlClientProvider messages={messages}>
-          <SmoothScrollProvider>
-            <Navbar />
-            <main className="flex-1">
-              <PageTransition>{children}</PageTransition>
-            </main>
-            <Footer />
-            <GrainOverlay />
-            <CustomCursor />
-          </SmoothScrollProvider>
+          <ClientLayout>{children}</ClientLayout>
         </NextIntlClientProvider>
       </body>
     </html>
