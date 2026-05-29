@@ -115,7 +115,7 @@ jobs:
         # Hit the public endpoint from the GitHub runner to confirm the
         # rollout is visible from the outside, not just inside the VPS.
         env:
-          HEALTH_URL: ${{ secrets.HEALTH_CHECK_URL || format('http://{0}/health', secrets.VPS_HOST) }}
+          HEALTH_URL: ${{ secrets.HEALTH_CHECK_URL || format('https://{0}/health', secrets.VPS_HOST) }}
         run: |
           echo "==> Probing $HEALTH_URL"
           for i in $(seq 1 10); do
