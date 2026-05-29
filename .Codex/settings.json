@@ -1,0 +1,24 @@
+﻿{
+  "permissions": {
+    "deny": [
+      "Bash(rm -rf node_modules)",
+      "Bash(rm -rf backend/__pycache__)",
+      "Bash(rm -rf frontend/.next)",
+      "Write(/**/.env)",
+      "Write(/**/.env.local)",
+      "Write(/**/secrets.yaml)"
+    ],
+    "allow": [
+      "Read(/**/*)"
+    ]
+  },
+  "tools": {
+    "ripgrep": {
+      "extended": true
+    }
+  },
+  "features": {
+    "explicitBrowserTool": true,
+    "inlineTools": true
+  }
+}

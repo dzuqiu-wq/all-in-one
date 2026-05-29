@@ -2,12 +2,13 @@
 import { useState, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { PDFDocument } from "pdf-lib";
-import { Download, FileText, Merge, Scissors, X, GripVertical, CheckCircle } from "lucide-react";
+import { Download, FileText, Merge, Scissors, X, GripVertical, CheckCircle, Eye } from "lucide-react";
 import ToolBreadcrumb from "@/components/ToolBreadcrumb";
 import ToolPageFooter from "@/components/ToolPageFooter";
 import SampleButton from "@/components/SampleButton";
 import ShareButtons from "@/components/ShareButtons";
 import { buildSamplePdfFile } from "@/lib/sampleData";
+import FilePreviewModal from "@/components/FilePreviewModal";
 interface PDFFile {
   id: string;
   file: File;
@@ -167,6 +168,7 @@ export default function PDFMergeSplitPage() {
   const [files, setFiles] = useState<PDFFile[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<Blob | null>(null);
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
   const [splitError, setSplitError] = useState<string | null>(null);
   const [splitRanges, setSplitRanges] = useState("1");
   const [dragIdx, setDragIdx] = useState<number | null>(null);
@@ -198,6 +200,9 @@ export default function PDFMergeSplitPage() {
     setFiles((prev) => [...prev, ...newFiles]);
     setResult(null);
   }, []);
+  const handlePreview = (pdfFile: PDFFile) => {
+    setPreviewFile(pdfFile.file);
+  };
   const handleLoadSample = useCallback(async () => {
     const samples =
       mode === "merge"
@@ -406,6 +411,13 @@ export default function PDFMergeSplitPage() {
                       <div className="text-xs font-mono text-muted">{f.pageCount} {t("pages")} · PDF v{f.version}</div>
                     </div>
                     <button
+                      onClick={() => handlePreview(f)}
+                      className="p-1.5 text-muted hover:text-primary transition-colors"
+                      title="Preview"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </button>
+                    <button
                       onClick={() => setFiles((p) => p.filter((x) => x.id !== f.id))}
                       className="p-1.5 text-muted hover:text-error transition-colors"
                     >
@@ -502,6 +514,7 @@ export default function PDFMergeSplitPage() {
             ))}
           </div>
         </section>
+        <FilePreviewModal isOpen={!!previewFile} onClose={() => setPreviewFile(null)} file={previewFile} />
         <ToolPageFooter slug="pdf-merge-split" />
       </div>
     </div>

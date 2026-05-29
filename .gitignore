@@ -76,3 +76,6 @@ decision.json
 
 # Duplicate project directory - local working copy only
 /all-in-one-toolbox/
+
+# Codex hooks (personal - not shared)
+.Codex/hooks/
