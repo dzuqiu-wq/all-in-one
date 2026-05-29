@@ -1,5 +1,6 @@
 // Server component - provides metadata and wraps client functionality
 import { Metadata } from "next";
+import { BASE_URL } from "@/lib/constants";
 import WordToPdfClient from "./WordToPdfClient";
 
 interface Props {
@@ -21,17 +22,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? ["Word转PDF", "DOCX转PDF", "文档转换器", "PDF转换", "在线转换工具", "LibreOffice"]
       : ["word to pdf", "docx to pdf", "document converter", "libreoffice", "pdf conversion", "online converter"],
     alternates: {
-      canonical: "BASE_URL/tools/word-to-pdf",
+      canonical: `${BASE_URL}/${locale}/tools/word-to-pdf`,
       languages: {
-        "en-US": "BASE_URL/tools/word-to-pdf",
-        "zh-CN": "BASE_URL/zh/tools/word-to-pdf",
+        "en-US": `${BASE_URL}/tools/word-to-pdf`,
+        "zh-CN": `${BASE_URL}/zh/tools/word-to-pdf`,
       },
     },
     openGraph: {
       type: "website",
       locale: isZh ? "zh_CN" : "en_US",
       alternateLocale: isZh ? "en_US" : "zh_CN",
-      url: "BASE_URL/tools/word-to-pdf",
+      url: `${BASE_URL}/${locale}/tools/word-to-pdf`,
       siteName: "All-in-One Toolbox",
       title: isZh 
         ? "Word 转 PDF 转换器 | All-in-One Toolbox" 

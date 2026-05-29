@@ -8,10 +8,12 @@ Key Features:
 - Semaphore concurrency control (2 concurrent conversions max)
 - 5-second hard timeout for Gotenberg operations
 - 100% memory-based streaming (no disk I/O)
+- Defense-in-depth: MIME + magic bytes + extension suffix validation
 """
 import asyncio
 import io
-import time
+import logging
+import time as time_module
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
@@ -22,13 +24,11 @@ from fastapi import FastAPI, UploadFile, File, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
 
-import logging
-import time as time_module
 from app.config import (
     settings,
     rate_limiter,
     conversion_semaphore,
-    start_cleanup_task
+    start_cleanup_task,
 )
 
 
@@ -84,12 +84,9 @@ async def logging_middleware(request, call_next):
         response = await call_next(request)
         elapsed = time_module.time() - start_time
         
-        # Log request
         logging.getLogger("api").info(
             f"{client_ip} {request.method} {request.url.path} {response.status_code} {elapsed:.3f}s"
         )
-        
-        # Add timing header
         response.headers["X-Response-Time"] = f"{elapsed:.3f}s"
         return response
     except Exception as e:
@@ -98,6 +95,8 @@ async def logging_middleware(request, call_next):
             f"{client_ip} {request.method} {request.url.path} ERROR {elapsed:.3f}s - {str(e)}"
         )
         raise
+
+
 # CORS Configuration
 app.add_middleware(
     CORSMiddleware,
@@ -111,81 +110,123 @@ app.add_middleware(
 # ============================================================================
 # Security Constants
 # ============================================================================
-# Allowed MIME types for Word documents (strict anti-MIME-spoofing)
 ALLOWED_WORD_MIME_TYPES = frozenset({
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",  # .docx
-    "application/msword",  # .doc
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/msword",
 })
 
 ALLOWED_EXCEL_MIME_TYPES = frozenset({
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",  # .xlsx
-    "application/vnd.ms-excel",  # .xls
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-excel",
 })
 
 ALLOWED_PPT_MIME_TYPES = frozenset({
-    "application/vnd.openxmlformats-officedocument.presentationml.presentation",  # .pptx
-    "application/vnd.ms-powerpoint",  # .ppt
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "application/vnd.ms-powerpoint",
 })
 
-# Word family magic bytes (binary signatures)
-# .docx -> Zip container header  "PK\x03\x04"
-# .doc  -> OLE2 Compound File    "\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1"
-WORD_MAGIC_BYTES: tuple = (
-    b"\x50\x4B\x03\x04",
-    b"\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1",
-)
+# Magic bytes (binary signatures) for each file family.
+# .docx / .xlsx / .pptx -> ZIP container  "PK\x03\x04"
+# .doc  / .xls  / .ppt  -> OLE2 Compound  "\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1"
+OFFICE_ZIP_MAGIC = b"\x50\x4B\x03\x04"
+OFFICE_OLE_MAGIC = b"\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1"
+
+WORD_MAGIC_BYTES = (OFFICE_ZIP_MAGIC, OFFICE_OLE_MAGIC)
+EXCEL_MAGIC_BYTES = (OFFICE_ZIP_MAGIC, OFFICE_OLE_MAGIC)
+PPT_MAGIC_BYTES = (OFFICE_ZIP_MAGIC, OFFICE_OLE_MAGIC)
 
 
 # ============================================================================
-# Helper Functions
+# Security Validation Helpers
 # ============================================================================
 def get_client_ip(request: Request) -> str:
     """
     Extract client IP from request, handling proxies.
 
     SECURITY: Only trusts X-Real-IP (set by nginx from $remote_addr).
-    X-Forwarded-For is NOT trusted to prevent IP spoofing attacks.
+    Falls back to direct client IP only when X-Real-IP is not available.
     """
-    # Primary: X-Real-IP set by nginx proxy (authoritative)
     real_ip = request.headers.get("x-real-ip")
     if real_ip:
         return real_ip.strip()
-
-    # Fallback: Direct connection client host
     return request.client.host if request.client else "unknown"
 
 
 async def validate_file_size(file: UploadFile) -> bytes:
     """
     Read file content and validate size BEFORE processing.
-    Returns file bytes if valid.
-    Raises HTTPException if file exceeds limit.
+    Returns file bytes if valid. Raises HTTPException if file exceeds limit.
     """
     content = await file.read()
 
     if len(content) > settings.MAX_FILE_SIZE_BYTES:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"File size exceeds maximum limit of {settings.MAX_FILE_SIZE_BYTES // (1024*1024)}MB"
+            detail=f"File too large. Maximum size is {settings.MAX_FILE_SIZE_BYTES / 1024 / 1024:.1f}MB"
         )
 
-    # Reset file position for potential re-read
-    await file.seek(0)
+    if len(content) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File is empty"
+        )
 
     return content
 
 
+def validate_mime_type(content_type: Optional[str], allowed: frozenset) -> None:
+    """
+    Validate MIME type against allowed whitelist.
+
+    SECURITY: Prevents MIME type spoofing where malicious files are uploaded
+    with forged Content-Type headers. Raises HTTPException(415) if rejected.
+    """
+    if not content_type:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Missing Content-Type header."
+        )
+    normalized = content_type.lower().split(";")[0].strip()
+    if normalized not in allowed:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=f"Unsupported MIME type: {content_type}."
+        )
+
+
+def validate_magic_bytes(content: bytes, magic_bytes: tuple) -> None:
+    """
+    Deep binary signature check for Office family uploads.
+
+    SECURITY: MIME and extension headers are forgeable. This function inspects
+    the actual leading bytes so that an attacker who renames payload.exe to
+    payload.docx and forges Content-Type still gets rejected here.
+
+    Accepted signatures:
+      * .docx / .xlsx / .pptx -> b"\\x50\\x4B\\x03\\x04" (ZIP / OOXML)
+      * .doc  / .xls  / .ppt  -> b"\\xD0\\xCF\\x11\\xE0..." (OLE2 compound)
+
+    Raises HTTPException(400) when leading bytes do not match.
+    """
+    if not any(content.startswith(sig) for sig in magic_bytes):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid file signature. Uploaded content is not a real Office document."
+        )
+
+
 def validate_extension_suffix(filename: Optional[str], allowed_extensions: list) -> None:
     """
-    Validate file extension using proper suffix check.
+    Validate file extension using suffix check.
 
     SECURITY: Prevents double-extension bypass attacks.
-    Uses str.endswith() which checks the TRUE suffix, not just the last dot-segment.
+    Uses str.endswith() which checks the TRUE suffix, not just the last
+    dot-segment.
 
     Example attacks prevented:
-    - "malicious.docx.exe" -> NOT .docx -> REJECTED
-    - "test.pdf.docx" -> NOT .docx -> REJECTED
-    - "document.docx" -> .docx -> ACCEPTED
+      - "malicious.docx.exe" -> NOT .docx -> REJECTED
+      - "test.pdf.docx"      -> NOT .docx -> REJECTED
+      - "document.docx"       -> .docx    -> ACCEPTED
 
     Raises HTTPException(400) if extension is not in allowed list.
     """
@@ -198,7 +239,7 @@ def validate_extension_suffix(filename: Optional[str], allowed_extensions: list)
     filename_lower = filename.lower()
     for ext in allowed_extensions:
         if filename_lower.endswith(ext.lower()):
-            return  # Valid extension found
+            return
 
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
@@ -206,82 +247,9 @@ def validate_extension_suffix(filename: Optional[str], allowed_extensions: list)
     )
 
 
-def generate_safe_output_filename(original_filename: Optional[str], output_ext: str = ".pdf") -> str:
-    """
-    Generate safe output filename with proper extension handling.
-
-    SECURITY: Uses rsplit to replace only the final extension segment.
-    Ensures the output always has a valid extension with dot separator.
-
-    Args:
-        original_filename: Original uploaded filename
-        output_ext: Target extension (default: .pdf)
-
-    Returns:
-        Safe filename with correct extension
-    """
-    if not original_filename:
-        return f"converted{output_ext}"
-
-    # Handle files without extension
-    if "." not in original_filename:
-        return f"{original_filename}{output_ext}"
-
-    # Replace ONLY the last extension segment
-    base_name = original_filename.rsplit(".", 1)[0]
-    return f"{base_name}{output_ext}"
-
-
-def validate_mime_type(content_type: Optional[str], allowed_types: frozenset) -> None:
-    """
-    Validate MIME type against allowed whitelist.
-
-    SECURITY: This prevents MIME type spoofing attacks where malicious files
-    are uploaded with forged Content-Type headers.
-
-    Raises HTTPException(415) if MIME type is not allowed.
-    """
-    if not content_type:
-        raise HTTPException(
-            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail="Missing Content-Type header. Cannot determine file type."
-        )
-
-    # Normalize: lowercase, strip parameters (e.g., "text/html; charset=utf-8")
-    normalized = content_type.lower().split(";")[0].strip()
-
-    if normalized not in allowed_types:
-        raise HTTPException(
-            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail=f"Unsupported MIME type: {content_type}. Allowed: {', '.join(sorted(allowed_types))}"
-        )
-
-
-def validate_magic_bytes(file_bytes: bytes) -> None:
-    """
-    Deep binary signature check for Word family uploads.
-
-    SECURITY: MIME and extension checks rely on client-supplied headers and
-    filenames, both of which are forgeable. This function inspects the actual
-    leading bytes of the payload so that an attacker who renames `payload.exe`
-    to `payload.docx` and forges Content-Type still gets rejected here.
-
-    Accepted signatures:
-      * .docx -> b"\\x50\\x4B\\x03\\x04"                (Zip / OOXML)
-      * .doc  -> b"\\xD0\\xCF\\x11\\xE0\\xA1\\xB1\\x1A\\xE1" (OLE2 compound)
-
-    Raises HTTPException(400) when the leading bytes do not match.
-    """
-    if not any(file_bytes.startswith(sig) for sig in WORD_MAGIC_BYTES):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                "Invalid file signature. Uploaded content is not a real Word "
-                "document (expected .docx Zip header or .doc OLE header)."
-            ),
-        )
-
-
+# ============================================================================
+# Gotenberg Integration
+# ============================================================================
 async def call_gotenberg(
     client: httpx.AsyncClient,
     file_bytes: bytes,
@@ -289,208 +257,124 @@ async def call_gotenberg(
     content_type: Optional[str] = None,
 ) -> bytes:
     """
-    Call Gotenberg service with in-memory file using the shared httpx pool.
+    Call Gotenberg API to convert document to PDF.
 
-    The `client` is the lifespan-managed `app.state.http_client` so we reuse
-    keepalive connections instead of constructing/tearing down a TCP socket
-    per request. Concurrency stays bounded by `conversion_semaphore`.
+    Uses the LibreOffice conversion endpoint with a 5-second hard timeout.
+    The Gotenberg container uses a 512MB tmpfs mount for /tmp so temporary
+    files are stored in memory, not on disk.
     """
-    async with conversion_semaphore:
-        # Prepare multipart form data - NO disk I/O
-        mime_type = content_type or "application/octet-stream"
-        files = {
-            "files": (filename, io.BytesIO(file_bytes), mime_type)
-        }
+    url = f"{settings.GOTENBERG_URL}/forms/libreoffice/convert"
+    files = {"files": (filename, file_bytes, content_type)}
+    response = await client.post(url, files=files)
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Gotenberg conversion failed with status {response.status_code}"
+        )
+    return response.content
 
-        try:
-            response = await client.post(
-                f"{settings.GOTENBERG_URL}/forms/libreoffice/convert",
-                files=files,
-            )
-            response.raise_for_status()
-            return response.content
 
-        except httpx.TimeoutException:
-            raise HTTPException(
-                status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-                detail="Conversion timeout: Gotenberg service took too long (>5s). Please try again."
-            )
-        except httpx.HTTPStatusError as e:
-            raise HTTPException(
-                status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=f"Gotenberg service error: {e.response.status_code}"
-            )
-        except httpx.RequestError as e:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=f"Gotenberg connection failed: {str(e)}"
-            )
+def generate_safe_output_filename(input_filename: str, target_ext: str) -> str:
+    """
+    Generate a safe output filename by replacing the extension.
+    Handles files without extension and strips any path components.
+    """
+    if not input_filename:
+        return f"converted{target_ext}"
+    safe_name = Path(input_filename).name
+    if "." in safe_name:
+        base_name = safe_name.rsplit(".", 1)[0]
+        return f"{base_name}{target_ext}"
+    return f"{safe_name}{target_ext}"
 
 
 # ============================================================================
-# Health Check Endpoints
-# ============================================================================
-@app.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "app": settings.APP_NAME,
-        "version": settings.APP_VERSION,
-        "timestamp": datetime.utcnow().isoformat(),
-        "max_concurrent": settings.MAX_CONCURRENT_CONVERSIONS,
-        "max_file_size_mb": settings.MAX_FILE_SIZE_BYTES // (1024 * 1024)
-    }
-
-
-@app.get("/health/gotenberg")
-async def gotenberg_health(request: Request):
-    """Check Gotenberg service connectivity via the shared httpx pool."""
-    client: httpx.AsyncClient = request.app.state.http_client
-    try:
-        response = await client.get(
-            f"{settings.GOTENBERG_URL}/health",
-            timeout=5.0,
-        )
-        return {
-            "status": "connected",
-            "gotenberg": "healthy",
-            "response_time_ms": response.elapsed.total_seconds() * 1000
-        }
-    except httpx.TimeoutException:
-        return JSONResponse(
-            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-            content={"status": "timeout", "gotenberg": "unreachable"}
-        )
-    except Exception as e:
-        return JSONResponse(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={"status": "error", "gotenberg": str(e)}
-        )
-
-
-# ============================================================================
-# Rate Limit Check Middleware
+# Rate Limiting Middleware
 # ============================================================================
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
-    """Apply rate limiting to conversion endpoints"""
-    # Only rate limit specific paths
-    if request.url.path.startswith("/api/v1/convert/"):
-        client_ip = get_client_ip(request)
-        is_allowed, remaining, reset_in = await rate_limiter.is_allowed(client_ip)
+    """Apply rate limiting to conversion API endpoints."""
+    if not request.url.path.startswith("/api/v1/convert/"):
+        return await call_next(request)
 
-        if not is_allowed:
-            return JSONResponse(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                content={
-                    "error": "Rate limit exceeded",
-                    "message": f"Maximum {settings.RATE_LIMIT_MAX_REQUESTS} conversions per minute",
-                    "retry_after_seconds": reset_in
-                },
-                headers={
-                    "Retry-After": str(reset_in),
-                    "X-RateLimit-Limit": str(settings.RATE_LIMIT_MAX_REQUESTS),
-                    "X-RateLimit-Remaining": "0",
-                    "X-RateLimit-Reset": str(reset_in)
-                }
-            )
+    client_ip = get_client_ip(request)
+    allowed, remaining, reset_in = await rate_limiter.is_allowed(client_ip)
+
+    if not allowed:
+        logging.getLogger("api").warning(
+            f"[RATE_LIMIT] {client_ip} blocked - resets in {reset_in}s"
+        )
+        return JSONResponse(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            content={"detail": "Rate limit exceeded.", "retry_after": reset_in},
+            headers={
+                "Retry-After": str(reset_in),
+                "X-RateLimit-Remaining": str(remaining),
+                "X-RateLimit-Reset": str(reset_in),
+            }
+        )
 
     response = await call_next(request)
+    response.headers["X-RateLimit-Remaining"] = str(remaining)
+    response.headers["X-RateLimit-Reset"] = str(reset_in)
     return response
 
 
 # ============================================================================
 # Conversion Endpoints
 # ============================================================================
+start_time = time_module.time()
+
+
 @app.post("/api/v1/convert/word-to-pdf")
 async def convert_word_to_pdf(
     request: Request,
     file: UploadFile = File(...)
 ):
-    """
-    Convert Word document to PDF using Gotenberg.
-
-    Security Features:
-    - MIME type whitelist validation (415 if invalid)
-    - 5MB file size limit (validated before processing)
-    - 5 requests/minute per IP (sliding window)
-    - 2 concurrent conversions max (semaphore)
-    - 5 second timeout (hard circuit breaker)
-
-    Memory Flow:
-    - Upload -> Memory bytes -> Gotenberg -> Memory bytes -> Stream Response
-    - ZERO disk operations
-    """
-    start_time = time.time()
+    """Convert Word document to PDF using Gotenberg (LibreOffice)"""
     client_ip = get_client_ip(request)
-
-    # Log request
     print(f"[REQUEST] {client_ip} -> {request.url.path} | {file.filename}")
 
-    # 1. Validate MIME type FIRST (anti-MIME-spoofing)
+    # 1. MIME type (forgeable, first gate)
     validate_mime_type(file.content_type, ALLOWED_WORD_MIME_TYPES)
 
-    # 2. Validate file size (pre-read, reject early)
-    try:
-        file_bytes = await validate_file_size(file)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to read file: {str(e)}"
-        )
+    # 2. File size (reject oversized before any processing)
+    file_bytes = await validate_file_size(file)
 
-    # 3. Deep binary signature check (magic bytes) — defeats spoofed MIME +
-    # renamed-extension uploads that would otherwise reach Gotenberg.
-    validate_magic_bytes(file_bytes)
+    # 3. Magic bytes (defeats MIME + renamed-executable spoofing)
+    validate_magic_bytes(file_bytes, WORD_MAGIC_BYTES)
 
-    # 4. Validate file extension (secondary check, after MIME)
-    # Uses suffix-based validation to prevent double-extension bypass
+    # 4. Extension suffix (defeats double-extension bypass)
     validate_extension_suffix(file.filename, settings.ALLOWED_EXTENSIONS)
 
-    # 5. Process with 5-second timeout using asyncio.wait_for
-    try:
-        # Generate safe output filename with proper dot separator
-        output_filename = generate_safe_output_filename(file.filename, ".pdf")
+    # 5. Convert with concurrency + timeout guards
+    async with conversion_semaphore:
+        try:
+            output_filename = generate_safe_output_filename(file.filename, ".pdf")
+            pdf_bytes = await asyncio.wait_for(
+                call_gotenberg(
+                    request.app.state.http_client,
+                    file_bytes,
+                    file.filename or "document.docx",
+                    file.content_type,
+                ),
+                timeout=settings.GOTENBERG_TIMEOUT
+            )
+        except asyncio.TimeoutError:
+            raise HTTPException(
+                status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+                detail="Conversion timeout. Please try again."
+            )
 
-        pdf_bytes = await asyncio.wait_for(
-            call_gotenberg(
-                request.app.state.http_client,
-                file_bytes,
-                file.filename or "document.docx",
-                file.content_type,
-            ),
-            timeout=settings.GOTENBERG_TIMEOUT
-        )
-    except asyncio.TimeoutError:
-        elapsed = time.time() - start_time
-        print(f"[TIMEOUT] {client_ip} conversion timeout after {elapsed:.2f}s")
-        raise HTTPException(
-            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-            detail=f"Conversion timeout after {settings.GOTENBERG_TIMEOUT}s. Gotenberg may be overloaded."
-        )
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"[ERROR] {client_ip} conversion failed: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Conversion failed: {str(e)}"
-        )
-
-    # 5. Stream response (memory -> response, no disk)
-    elapsed = time.time() - start_time
-    print(f"[SUCCESS] {client_ip} conversion completed in {elapsed:.2f}s")
+    elapsed = time_module.time() - start_time
+    print(f"[SUCCESS] {client_ip} Word conversion in {elapsed:.2f}s")
 
     return StreamingResponse(
         io.BytesIO(pdf_bytes),
         media_type="application/pdf",
         headers={
             "Content-Disposition": f'attachment; filename="{output_filename}"',
-            "X-Processing-Time": f"{elapsed:.3f}s",
-            "X-Content-Length": str(len(pdf_bytes))
+            "X-Processing-Time": f"{elapsed:.3f}s"
         }
     )
 
@@ -500,49 +384,42 @@ async def convert_excel_to_pdf(
     request: Request,
     file: UploadFile = File(...)
 ):
-    """Convert Excel spreadsheet to PDF"""
-    start_time = time.time()
+    """Convert Excel spreadsheet to PDF using Gotenberg (LibreOffice)"""
     client_ip = get_client_ip(request)
-
     print(f"[REQUEST] {client_ip} -> {request.url.path} | {file.filename}")
 
-    # 1. Validate MIME type FIRST (anti-MIME-spoofing)
+    # 1. MIME type
     validate_mime_type(file.content_type, ALLOWED_EXCEL_MIME_TYPES)
 
-    # 2. Validate and read file
-    try:
-        file_bytes = await validate_file_size(file)
-    except HTTPException:
-        raise
+    # 2. File size
+    file_bytes = await validate_file_size(file)
 
-    ext = "." + file.filename.split(".")[-1].lower() if file.filename else ""
-    if ext not in [".xlsx", ".xls"]:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Only Excel files (.xlsx, .xls) are supported"
-        )
+    # 3. Magic bytes
+    validate_magic_bytes(file_bytes, EXCEL_MAGIC_BYTES)
 
-    # 3. Process
-    try:
-        # Generate safe output filename
-        output_filename = generate_safe_output_filename(file.filename, ".pdf")
+    # 4. Extension suffix
+    validate_extension_suffix(file.filename, settings.ALLOWED_EXTENSIONS)
 
-        pdf_bytes = await asyncio.wait_for(
-            call_gotenberg(
-                request.app.state.http_client,
-                file_bytes,
-                file.filename or "spreadsheet.xlsx",
-                file.content_type,
-            ),
-            timeout=settings.GOTENBERG_TIMEOUT
-        )
-    except asyncio.TimeoutError:
-        raise HTTPException(
-            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-            detail="Conversion timeout. Please try again."
-        )
+    # 5. Convert
+    async with conversion_semaphore:
+        try:
+            output_filename = generate_safe_output_filename(file.filename, ".pdf")
+            pdf_bytes = await asyncio.wait_for(
+                call_gotenberg(
+                    request.app.state.http_client,
+                    file_bytes,
+                    file.filename or "spreadsheet.xlsx",
+                    file.content_type,
+                ),
+                timeout=settings.GOTENBERG_TIMEOUT
+            )
+        except asyncio.TimeoutError:
+            raise HTTPException(
+                status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+                detail="Conversion timeout. Please try again."
+            )
 
-    elapsed = time.time() - start_time
+    elapsed = time_module.time() - start_time
     print(f"[SUCCESS] {client_ip} Excel conversion in {elapsed:.2f}s")
 
     return StreamingResponse(
@@ -560,49 +437,42 @@ async def convert_powerpoint_to_pdf(
     request: Request,
     file: UploadFile = File(...)
 ):
-    """Convert PowerPoint presentation to PDF"""
-    start_time = time.time()
+    """Convert PowerPoint presentation to PDF using Gotenberg (LibreOffice)"""
     client_ip = get_client_ip(request)
-
     print(f"[REQUEST] {client_ip} -> {request.url.path} | {file.filename}")
 
-    # 1. Validate MIME type FIRST (anti-MIME-spoofing)
+    # 1. MIME type
     validate_mime_type(file.content_type, ALLOWED_PPT_MIME_TYPES)
 
-    # 2. Validate and read file
-    try:
-        file_bytes = await validate_file_size(file)
-    except HTTPException:
-        raise
+    # 2. File size
+    file_bytes = await validate_file_size(file)
 
-    ext = "." + file.filename.split(".")[-1].lower() if file.filename else ""
-    if ext not in [".pptx", ".ppt"]:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Only PowerPoint files (.pptx, .ppt) are supported"
-        )
+    # 3. Magic bytes
+    validate_magic_bytes(file_bytes, PPT_MAGIC_BYTES)
 
-    # 3. Process
-    try:
-        # Generate safe output filename
-        output_filename = generate_safe_output_filename(file.filename, ".pdf")
+    # 4. Extension suffix
+    validate_extension_suffix(file.filename, settings.ALLOWED_EXTENSIONS)
 
-        pdf_bytes = await asyncio.wait_for(
-            call_gotenberg(
-                request.app.state.http_client,
-                file_bytes,
-                file.filename or "presentation.pptx",
-                file.content_type,
-            ),
-            timeout=settings.GOTENBERG_TIMEOUT
-        )
-    except asyncio.TimeoutError:
-        raise HTTPException(
-            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-            detail="Conversion timeout. Please try again."
-        )
+    # 5. Convert
+    async with conversion_semaphore:
+        try:
+            output_filename = generate_safe_output_filename(file.filename, ".pdf")
+            pdf_bytes = await asyncio.wait_for(
+                call_gotenberg(
+                    request.app.state.http_client,
+                    file_bytes,
+                    file.filename or "presentation.pptx",
+                    file.content_type,
+                ),
+                timeout=settings.GOTENBERG_TIMEOUT
+            )
+        except asyncio.TimeoutError:
+            raise HTTPException(
+                status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+                detail="Conversion timeout. Please try again."
+            )
 
-    elapsed = time.time() - start_time
+    elapsed = time_module.time() - start_time
     print(f"[SUCCESS] {client_ip} PPT conversion in {elapsed:.2f}s")
 
     return StreamingResponse(
@@ -615,13 +485,47 @@ async def convert_powerpoint_to_pdf(
     )
 
 
+# ============================================================================
+# Health Check Endpoints
+# ============================================================================
+@app.get("/health")
+async def health():
+    """Basic health check"""
+    return {"status": "healthy"}
+
+
+@app.get("/health/gotenberg")
+async def health_gotenberg(request: Request):
+    """Check Gotenberg availability"""
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.get(f"{settings.GOTENBERG_URL}/health")
+            if response.status_code == 200:
+                return {"status": "healthy", "gotenberg": "reachable"}
+            return JSONResponse(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                content={"status": "unhealthy", "gotenberg": "unreachable"}
+            )
+    except httpx.TimeoutException:
+        return JSONResponse(
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+            content={"status": "unhealthy", "gotenberg": "timeout"}
+        )
+    except Exception:
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"status": "unhealthy", "gotenberg": "connection_error"}
+        )
+
+
 logging.getLogger("api").info("Starting API server")
+
 
 @app.get("/health/detailed")
 async def health_detailed():
     """Detailed health check with system metrics"""
     import psutil
-    
+
     return {
         "status": "healthy",
         "version": settings.APP_VERSION,
@@ -633,6 +537,7 @@ async def health_detailed():
         "rate_limiting": {
             "max_requests": settings.RATE_LIMIT_MAX_REQUESTS,
             "window_seconds": settings.RATE_LIMIT_WINDOW_SECONDS,
+            "denied_count": rate_limiter.get_denied_count(),
         },
         "gotenberg": {
             "url": settings.GOTENBERG_URL,
@@ -640,9 +545,10 @@ async def health_detailed():
         },
     }
 
-# ========================
+
+# ============================================================================
 # Root Endpoint
-# ========================
+# ============================================================================
 @app.get("/")
 async def root():
     """Root endpoint"""

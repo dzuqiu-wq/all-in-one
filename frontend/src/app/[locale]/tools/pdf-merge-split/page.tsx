@@ -1,5 +1,6 @@
 // Server component - provides metadata and wraps client functionality
 import { Metadata } from "next";
+import { BASE_URL } from "@/lib/constants";
 import PdfMergeSplitClient from "./PdfMergeSplitClient";
 
 interface Props {
@@ -21,17 +22,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? ["PDF合并", "PDF拆分", "合并PDF", "提取页面", "PDF工具", "浏览器PDF"]
       : ["pdf merge", "pdf split", "combine pdf", "extract pdf pages", "pdf tool", "browser pdf"],
     alternates: {
-      canonical: "BASE_URL/tools/pdf-merge-split",
+      canonical: `${BASE_URL}/${locale}/tools/pdf-merge-split`,
       languages: {
-        "en-US": "BASE_URL/tools/pdf-merge-split",
-        "zh-CN": "BASE_URL/zh/tools/pdf-merge-split",
+        "en-US": `${BASE_URL}/tools/pdf-merge-split`,
+        "zh-CN": `${BASE_URL}/zh/tools/pdf-merge-split`,
       },
     },
     openGraph: {
       type: "website",
       locale: isZh ? "zh_CN" : "en_US",
       alternateLocale: isZh ? "en_US" : "zh_CN",
-      url: "BASE_URL/tools/pdf-merge-split",
+      url: `${BASE_URL}/${locale}/tools/pdf-merge-split`,
       siteName: "All-in-One Toolbox",
       title: isZh
         ? "PDF 合并与拆分工具 | All-in-One Toolbox"

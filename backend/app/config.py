@@ -5,6 +5,7 @@ Production-grade configuration with rate limiting and security settings
 """
 import asyncio
 import logging
+import os
 import sys
 import time
 from collections import defaultdict
@@ -38,7 +39,6 @@ def setup_logging():
     return root_logger
 
 
-import os
 logger = setup_logging()
 
 
@@ -82,6 +82,7 @@ class SlidingWindowRateLimiter:
         self.max_requests = max_requests
         self._storage: Dict[str, RateLimitEntry] = defaultdict(RateLimitEntry)
         self._lock = asyncio.Lock()
+        self._denied_count: int = 0
 
     async def is_allowed(self, client_ip: str) -> Tuple[bool, int, int]:
         async with self._lock:
@@ -91,6 +92,7 @@ class SlidingWindowRateLimiter:
             entry.timestamps = [ts for ts in entry.timestamps if ts > window_start]
             
             if len(entry.timestamps) >= self.max_requests:
+                self._denied_count += 1
                 oldest = min(entry.timestamps)
                 reset_in = int(oldest + self.window_seconds - current_time)
                 return False, 0, max(1, reset_in)
@@ -113,6 +115,10 @@ class SlidingWindowRateLimiter:
                     del self._storage[client_ip]
                     removed += 1
             return removed
+
+    def get_denied_count(self) -> int:
+        """Return total rate-limit denials since startup."""
+        return self._denied_count
 
 
 rate_limiter = SlidingWindowRateLimiter(
