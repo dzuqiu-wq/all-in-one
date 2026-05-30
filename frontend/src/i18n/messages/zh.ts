@@ -130,6 +130,12 @@ export default {
     badge: {
       privacy: '隐私优先',
     },
+    section: {
+      allTools: '全部工具',
+      documentTools: '文档工具',
+      imageTools: '图片工具',
+      devTools: '开发者工具',
+    },
 
     tryItNow: '立即体验',
     terminal: {
@@ -999,5 +1005,6 @@ export default {
     learnMore: '了解更多',
     more: '更多',
     legal: '法律信息',
+    company: '公司',
   },
 };

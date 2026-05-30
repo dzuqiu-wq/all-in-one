@@ -129,6 +129,12 @@ export default {
     badge: {
       privacy: 'Privacy-first',
     },
+    section: {
+      allTools: 'All Tools',
+      documentTools: 'Document Tools',
+      imageTools: 'Image Tools',
+      devTools: 'Developer Tools',
+    },
 
     tryItNow: 'Try it now',
     terminal: {
