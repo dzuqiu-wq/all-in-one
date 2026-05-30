@@ -992,19 +992,12 @@ export default {
 
   footer: {
     copyright: 'All-in-One Toolbox，开源 MIT 协议。',
-    madeWith: '用',
-    by: '开发者打造',
-    privacy: '隐私政策',
-    terms: '服务条款',
-    about: '关于我们',
-    cookies: 'Cookie 政策',
-    documentation: '文档',
-    apiReference: 'API 参考',
-    changelog: '更新日志',
-    thirdPartyAds: '第三方广告有助于抵消服务器成本。',
-    learnMore: '了解更多',
-    more: '更多',
-    legal: '法律信息',
-    company: '公司',
+    brand: {
+      name: '全能工具箱',
+      tagline: '隐私优先的浏览器工具。不上传、不追踪，所有处理均在本地完成。',
+    },
+    madeWith: '用心',
+    forCommunity: '献给每一位用户',
+    cookies: 'Cookie 使用政策',
   },
 };

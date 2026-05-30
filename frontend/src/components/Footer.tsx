@@ -58,14 +58,14 @@ export default function Footer() {
                 </svg>
               </div>
               <span className="font-semibold text-lg" style={{ color: 'var(--color-text)' }}>
-                All-in-One
+                {t("footer.brand.name")}
               </span>
             </Link>
-            <p 
+            <p
               className="text-sm leading-relaxed mb-6 max-w-xs"
               style={{ color: 'var(--color-text-muted)' }}
             >
-              Privacy-first browser tools. No upload, no tracking. All processing happens locally.
+              {t("footer.brand.tagline")}
             </p>
             <div className="flex items-center gap-4">
               <a
@@ -185,7 +185,7 @@ export default function Footer() {
                   className="text-sm transition-colors duration-150 hover:text-primary no-underline"
                   style={{ color: 'var(--color-text-muted)' }}
                 >
-                  Cookies
+                  <span>{t("footer.cookies")}</span>
                 </Link>
               </li>
             </ul>
@@ -200,16 +200,16 @@ export default function Footer() {
             className="flex items-center gap-2 text-sm"
             style={{ color: 'var(--color-text-muted)' }}
           >
-            <span>&copy; {currentYear} All-in-One.</span>
+            <span>&copy; {currentYear} {t("footer.brand.name")}.</span>
             <span className="hidden sm:inline">MIT License.</span>
           </div>
           <div 
             className="flex items-center gap-1 text-sm"
             style={{ color: 'var(--color-text-faint)' }}
           >
-            <span>Made with</span>
+            <span>{t("footer.madeWith")}</span>
             <Heart className="w-4 h-4 text-error" />
-            <span>for the community</span>
+            <span>{t("footer.forCommunity")}</span>
           </div>
         </div>
       </div>

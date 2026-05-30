@@ -68,7 +68,7 @@ export default function Navbar() {
               </svg>
             </div>
             <span className="font-semibold text-lg hidden sm:block" style={{ color: "var(--color-text)" }}>
-              All-in-One
+              {t("footer.brand.name")}
             </span>
           </Link>
 

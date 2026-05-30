@@ -1020,19 +1020,12 @@ From a compliance standpoint, the client-side-only architecture eliminates any o
 
   footer: {
     copyright: 'All-in-One Toolbox. Open source under MIT License.',
-    madeWith: 'MADE WITH',
-    by: 'BY DEVELOPERS',
-    privacy: 'Privacy Policy',
-    terms: 'Terms of Service',
-    about: 'About Us',
+    brand: {
+      name: 'All-in-One Toolbox',
+      tagline: 'Privacy-first browser tools. No upload, no tracking. All processing happens locally.',
+    },
+    madeWith: 'Made with',
+    forCommunity: 'for the community',
     cookies: 'Cookie Policy',
-    documentation: 'Documentation',
-    apiReference: 'API Reference',
-    changelog: 'Changelog',
-    thirdPartyAds: 'Third-party ads help offset server costs.',
-    learnMore: 'Learn more',
-    more: 'More',
-    legal: 'Legal',
-    company: 'Company',
   },
 };
