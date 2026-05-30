@@ -103,6 +103,13 @@ export default {
     subtitle: '精心收集的文档转换、图片优化和效率工具。隐私优先，基于浏览器处理。',
     startWithWordPdf: '从 Word → PDF 开始',
     browseAll: '浏览全部工具',
+    badge: {
+      privacy: '隐私优先',
+    },
+    toolsSection: {
+      title: '全部工具',
+      subtitle: '查看我们所有的在线工具',
+    },
     stats: {
       tools: '款在线工具',
       privatePercent: '100%',

@@ -103,6 +103,13 @@ export default {
     subtitle: 'A curated suite of document conversion, image optimization, and productivity tools. Privacy-first, processed inside your browser.',
     startWithWordPdf: 'Start with Word → PDF',
     browseAll: 'Browse all tools',
+    badge: {
+      privacy: 'Privacy-first',
+    },
+    toolsSection: {
+      title: 'All Tools',
+      subtitle: 'Explore all our online tools',
+    },
     stats: {
       tools: 'online tools',
       privatePercent: '100%',
@@ -123,13 +130,6 @@ export default {
         title: 'Developer Tools',
         description: 'JSON formatter, Base64, hash generator, no server needed.',
       },
-    },
-    toolsSection: {
-      title: 'All Tools',
-      subtitle: 'Explore all our online tools',
-    },
-    badge: {
-      privacy: 'Privacy-first',
     },
     section: {
       allTools: 'All Tools',
