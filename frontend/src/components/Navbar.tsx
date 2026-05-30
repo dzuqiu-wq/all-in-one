@@ -106,10 +106,11 @@ export default function Navbar() {
                           <div className="space-y-1">
                             {category.tools.map((tool) => {
                               const Icon = tool.icon;
+                              const toolUrl = "/" + locale + tool.href;
                               return (
                                 <Link
                                   key={tool.slug}
-                                  href={`/${locale}${tool.href}`}
+                                  href={toolUrl}
                                   onClick={() => setIsDropdownOpen(false)}
                                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 hover:bg-muted group"
                                 >
@@ -120,7 +121,7 @@ export default function Navbar() {
                                     <Icon className="w-4 h-4" />
                                   </div>
                                   <span className="font-medium text-sm" style={{ color: "var(--color-text)" }}>
-                                    {t(`${tool.navKey}.name`)}
+                                    {t(String(tool.navKey) + ".name")}
                                   </span>
                                 </Link>
                               );
@@ -136,9 +137,10 @@ export default function Navbar() {
 
             <Link
               href={docsHref}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150"
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-muted"
               style={{
                 color: isActive("/docs") ? "var(--color-primary)" : "var(--color-text-secondary)",
+                backgroundColor: isActive("/docs") ? "var(--color-muted)" : "transparent",
               }}
             >
               {t("nav.docs")}
@@ -189,15 +191,16 @@ export default function Navbar() {
                   <div className="space-y-1">
                     {category.tools.map((tool) => {
                       const Icon = tool.icon;
+                      const toolUrl = "/" + locale + tool.href;
                       return (
                         <Link
                           key={tool.slug}
-                          href={`/${locale}${tool.href}`}
+                          href={toolUrl}
                           onClick={() => setIsMobileMenuOpen(false)}
                           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 hover:bg-muted"
                         >
                           <Icon className="w-4 h-4" style={{ color: "var(--color-text-muted)" }} />
-                          <span style={{ color: "var(--color-text)" }}>{t(`${tool.navKey}.name`)}</span>
+                          <span style={{ color: "var(--color-text)" }}>{t(String(tool.navKey) + ".name")}</span>
                         </Link>
                       );
                     })}
