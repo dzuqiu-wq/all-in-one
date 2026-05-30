@@ -1,0 +1,3 @@
+[submodule "all-in-one-toolbox"]
+	path = all-in-one-toolbox
+	url = https://github.com/dzuqiu-wq/all-in-one.git
