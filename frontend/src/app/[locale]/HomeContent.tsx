@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useMemo } from "react";
 import Link from "next/link";
@@ -31,9 +31,12 @@ export default function HomeContent() {
     () =>
       TOOLS.map((tool) => ({
         ...tool,
+        id: tool.slug,
+        name: t(`${tool.intlKey}.name`),
+        description: t(`${tool.intlKey}.description`),
         href: buildLocalizedHref(tool.href, locale),
       })),
-    [locale]
+    [locale, t]
   );
 
   const statusEntries: readonly StatusEntry[] = useMemo(
