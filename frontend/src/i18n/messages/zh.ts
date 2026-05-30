@@ -105,9 +105,10 @@ export default {
     browseAll: '浏览全部工具',
     stats: {
       tools: '款在线工具',
+      privatePercent: '100%',
+      uploads: '0',
       private: '完全本地处理',
-      uploads: '文件从不离开浏览器',
-      percent: '100%',
+      uploadsLabel: '文件从不离开浏览器',
     },
     feature: {
       doc: {
@@ -129,6 +130,8 @@ export default {
     },
     badge: {
       privacy: '隐私优先',
+      statPrivate: '完全本地处理',
+      statUploads: '文件从不离开浏览器',
     },
     section: {
       allTools: '全部工具',

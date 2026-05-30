@@ -105,8 +105,10 @@ export default {
     browseAll: 'Browse all tools',
     stats: {
       tools: 'online tools',
+      privatePercent: '100%',
+      uploads: '0',
       private: '100% client-side',
-      uploads: 'Files never leave your browser',
+      uploadsLabel: 'Files never leave your browser',
     },
     feature: {
       doc: {

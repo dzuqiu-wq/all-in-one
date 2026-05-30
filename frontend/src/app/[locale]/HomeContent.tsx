@@ -159,7 +159,7 @@ export default function HomeContent() {
                 <div className="w-px h-12" style={{ backgroundColor: "var(--color-border)" }} />
                 <div>
                   <div className="text-2xl font-bold" style={{ color: "var(--color-text)" }}>
-                    100%
+                    {t("home.stats.privatePercent")}
                   </div>
                   <div className="text-sm" style={{ color: "var(--color-text-muted)" }}>
                     {t("home.stats.private")}
@@ -168,10 +168,10 @@ export default function HomeContent() {
                 <div className="w-px h-12" style={{ backgroundColor: "var(--color-border)" }} />
                 <div>
                   <div className="text-2xl font-bold" style={{ color: "var(--color-text)" }}>
-                    0
+                    {t("home.stats.uploads")}
                   </div>
                   <div className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-                    {t("home.stats.uploads")}
+                    {t("home.stats.uploadsLabel")}
                   </div>
                 </div>
               </div>
