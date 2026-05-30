@@ -1,18 +1,18 @@
-# Continuous Deployment â€” on a successful CI run against main, SSH into
+# Continuous Deployment â€?on a successful CI run against main, SSH into
 # the VPS, pull the freshly merged code, rebuild the production Docker
 # images, and roll the stack with zero-downtime semantics.
 #
-# Required GitHub Secrets (Settings â†’ Secrets and variables â†’ Actions):
+# Required GitHub Secrets (Settings â†?Secrets and variables â†?Actions):
 #
-#   VPS_HOST           â€” public IP or hostname of the production VPS
-#   VPS_USER           â€” SSH user (recommended: a non-root user in the docker group)
-#   VPS_SSH_KEY        â€” full private key text (OpenSSH format, no passphrase)
-#   VPS_PORT           â€” SSH port (optional, defaults to 22)
-#   VPS_PROJECT_PATH   â€” absolute path on the VPS where the repo is cloned
+#   VPS_HOST           â€?public IP or hostname of the production VPS
+#   VPS_USER           â€?SSH user (recommended: a non-root user in the docker group)
+#   VPS_SSH_KEY        â€?full private key text (OpenSSH format, no passphrase)
+#   VPS_PORT           â€?SSH port (optional, defaults to 22)
+#   VPS_PROJECT_PATH   â€?absolute path on the VPS where the repo is cloned
 #                        (e.g. /home/deploy/all-in-one-toolbox)
 #
 # Optional secret:
-#   HEALTH_CHECK_URL   â€” full URL the workflow probes after rollout
+#   HEALTH_CHECK_URL   â€?full URL the workflow probes after rollout
 #                        (defaults to http://${VPS_HOST}/health)
 #
 # See .github/DEPLOYMENT.md for the one-time setup instructions.
@@ -30,10 +30,6 @@ on:
         required: false
         default: false
 
-# Required by actions/checkout to clone the repository with GITHUB_TOKEN
-permissions:
-  contents: read
-
 # Only one deploy may run at a time against the production environment;
 # back-to-back pushes will queue rather than race for the SSH socket.
 concurrency:
@@ -42,14 +38,14 @@ concurrency:
 
 jobs:
   # ==========================================================================
-  # Reuse CI as a gate â€” the deploy job will not start unless CI succeeds.
+  # Reuse CI as a gate â€?the deploy job will not start unless CI succeeds.
   # ==========================================================================
   ci:
     name: Pre-deploy CI
     uses: ./.github/workflows/ci.yml
 
   # ==========================================================================
-  # Deploy â€” SSH into the VPS, pull, rebuild, roll, health-check.
+  # Deploy â€?SSH into the VPS, pull, rebuild, roll, health-check.
   # ==========================================================================
   deploy:
     name: Roll production
@@ -99,7 +95,7 @@ jobs:
           #
           # appleboy/ssh-action splits the `script:` block on newlines and
           # injects implicit exit-status checks between lines, which
-          # historically miskills scripts at innocuous `if [ â€¦ ]; then`
+          # historically miskills scripts at innocuous `if [ â€?]; then`
           # boundaries (the so-called "false = true" trap). We dodge the
           # entire class of problems by shipping the real rollout logic as
           # a committed bash file (.github/scripts/deploy-vps.sh) and
@@ -120,13 +116,13 @@ jobs:
           echo "==> Probing $HEALTH_URL"
           for i in $(seq 1 10); do
             if curl -fsS --max-time 5 "$HEALTH_URL" >/tmp/health.txt 2>/dev/null; then
-              echo "    OK â€” $(cat /tmp/health.txt | head -c 200)"
+              echo "    OK â€?$(cat /tmp/health.txt | head -c 200)"
               exit 0
             fi
             echo "    attempt $i failed, retrying in 3 s"
             sleep 3
           done
-          echo "::error::Health probe failed after 10 attempts"
+          cat /tmp/health.txt 2>/dev/null; echo '::error::Health probe failed after 10 attempts'
           exit 1
 
       - name: Summary
@@ -142,3 +138,6 @@ jobs:
             echo ""
             echo "Public URL: https://333654.xyz"
           } >> "$GITHUB_STEP_SUMMARY"
+
+
+
