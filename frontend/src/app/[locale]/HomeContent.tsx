@@ -7,27 +7,24 @@ import {
   Shield,
   Zap,
   Lock,
-  Sparkles,
-  LayoutGrid,
   FileText,
   Image as ImageIcon,
   Code,
 } from "lucide-react";
 import SystemStatus, { type StatusEntry } from "@/components/SystemStatus";
 import ShareButtons from "@/components/ShareButtons";
-import { useLocalizedHref } from "@/i18n/useLocalizedHref";
-import {
-  CATEGORIES,
-  TOOLS,
-  type CategoryDescriptor,
-  type ToolDescriptor,
-} from "@/lib/toolRegistry";
-import { SOCIAL } from "@/lib/constants";
+import { useLocalizedHref, buildLocalizedHref } from "@/i18n/useLocalizedHref";
+import { TOOLS } from "@/lib/toolRegistry";
 
 export default function HomeContent() {
   const t = useTranslations();
   const wordPdfHref = useLocalizedHref("/tools/word-to-pdf");
-  const aboutHref = useLocalizedHref("/about");
+  
+  // Pre-compute tool hrefs to avoid hook-in-loop
+  const toolsWithHrefs = TOOLS.map(tool => ({
+    ...tool,
+    href: buildLocalizedHref(tool.href, 'en'),
+  }));
   
   const statusEntries: readonly StatusEntry[] = [
     {
@@ -58,7 +55,6 @@ export default function HomeContent() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
       <section 
         className="relative overflow-hidden py-20 lg:py-28"
         style={{ backgroundColor: 'var(--color-background)' }}
@@ -66,14 +62,12 @@ export default function HomeContent() {
         <div 
           className="absolute inset-0 opacity-30"
           style={{
-            backgroundImage: `radial-gradient(circle at 20% 30%, var(--color-primary) 0%, transparent 40%),
-                             radial-gradient(circle at 80% 70%, var(--color-secondary) 0%, transparent 40%)`,
+            backgroundImage: 'radial-gradient(circle at 20% 30%, var(--color-primary) 0%, transparent 40%), radial-gradient(circle at 80% 70%, var(--color-secondary) 0%, transparent 40%)',
           }}
         />
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left: Hero Content */}
             <div className="space-y-8">
               <div 
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
@@ -157,10 +151,9 @@ export default function HomeContent() {
               </div>
             </div>
 
-            {/* Right: Feature Cards */}
             <div className="grid grid-cols-2 gap-4">
               <div 
-                className="col-span-2 p-6 rounded-2xl border transition-all duration-200 hover:scale-[1.02] cursor-pointer"
+                className="col-span-2 p-6 rounded-2xl border transition-all duration-200 hover:scale-[1.02]"
                 style={{ 
                   backgroundColor: 'var(--color-surface)',
                   borderColor: 'var(--color-border)'
@@ -178,14 +171,14 @@ export default function HomeContent() {
                       Document Tools
                     </h3>
                     <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
-                      Word to PDF, Excel to PDF, PowerPoint, Merge & Split
+                      Word to PDF, Excel to PDF, PowerPoint, Merge and Split
                     </p>
                   </div>
                 </div>
               </div>
 
               <div 
-                className="p-5 rounded-xl border transition-all duration-200 hover:scale-[1.02] cursor-pointer"
+                className="p-5 rounded-xl border transition-all duration-200 hover:scale-[1.02]"
                 style={{ 
                   backgroundColor: 'var(--color-surface)',
                   borderColor: 'var(--color-border)'
@@ -206,7 +199,7 @@ export default function HomeContent() {
               </div>
 
               <div 
-                className="p-5 rounded-xl border transition-all duration-200 hover:scale-[1.02] cursor-pointer"
+                className="p-5 rounded-xl border transition-all duration-200 hover:scale-[1.02]"
                 style={{ 
                   backgroundColor: 'var(--color-surface)',
                   borderColor: 'var(--color-border)'
@@ -230,7 +223,6 @@ export default function HomeContent() {
         </div>
       </section>
 
-      {/* Bento Grid Tools Section */}
       <section 
         id="tools"
         className="py-20"
@@ -252,22 +244,18 @@ export default function HomeContent() {
               className="text-lg max-w-2xl mx-auto"
               style={{ color: 'var(--color-text-muted)' }}
             >
-              Everything you need, nothing you don&apos;t. Click any tool to start.
+              Everything you need, nothing you do not. Click any tool to start.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {TOOLS.map((tool, index) => {
+            {toolsWithHrefs.map((tool) => {
               const Icon = tool.icon;
-              const isLarge = index < 2 || index === 5;
-              
               return (
                 <Link
                   key={tool.slug}
-                  href={useLocalizedHref(tool.href)}
-                  className={`group relative p-6 rounded-2xl border transition-all duration-200 hover:scale-[1.02] ${
-                    isLarge ? 'sm:col-span-2 lg:row-span-1' : ''
-                  }`}
+                  href={tool.href}
+                  className="group relative p-6 rounded-2xl border transition-all duration-200 hover:scale-[1.02]"
                   style={{ 
                     backgroundColor: 'var(--color-surface)',
                     borderColor: 'var(--color-border)',
@@ -318,7 +306,6 @@ export default function HomeContent() {
         </div>
       </section>
 
-      {/* Values Section */}
       <section 
         className="py-20"
         style={{ backgroundColor: 'var(--color-background)' }}
@@ -400,7 +387,6 @@ export default function HomeContent() {
         </div>
       </section>
 
-      {/* System Status */}
       <section 
         className="py-16"
         style={{ backgroundColor: 'var(--color-surface)' }}
@@ -427,7 +413,6 @@ export default function HomeContent() {
         </div>
       </section>
 
-      {/* Share Section */}
       <section 
         className="py-16 border-t"
         style={{ 

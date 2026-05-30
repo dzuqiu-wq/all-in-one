@@ -1,11 +1,10 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { Github, Twitter, Heart, LayoutGrid } from "lucide-react";
+import { Github, Heart } from "lucide-react";
 import { TOOLS } from "@/lib/toolRegistry";
-import { SOCIAL } from "@/lib/constants";
 import {
   useLocalizedHref,
   useCurrentLocale,
@@ -45,9 +44,7 @@ export default function Footer() {
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Main Footer Content */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 lg:gap-12">
-          {/* Brand Column */}
           <div className="col-span-2 lg:col-span-1">
             <Link href={homeHref} className="inline-flex items-center gap-3 mb-6 group">
               <div 
@@ -56,7 +53,9 @@ export default function Footer() {
                   background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
                 }}
               >
-                <LayoutGrid className="w-5 h-5 text-white" />
+                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
               </div>
               <span className="font-semibold text-lg" style={{ color: 'var(--color-text)' }}>
                 All-in-One
@@ -70,7 +69,7 @@ export default function Footer() {
             </p>
             <div className="flex items-center gap-4">
               <a
-                href={SOCIAL.github}
+                href="https://github.com/dzuqiu-wq/all-in-one"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 rounded-lg transition-all duration-150 hover:bg-muted"
@@ -81,7 +80,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Tools Links - Group 1 */}
           <div>
             <h4 
               className="text-sm font-semibold mb-4"
@@ -97,17 +95,16 @@ export default function Footer() {
                     className="text-sm transition-colors duration-150 hover:text-primary no-underline"
                     style={{ color: 'var(--color-text-muted)' }}
                   >
-                    {t(${tool.navKey}.name)}
+                    {t(`${tool.navKey}.name`)}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Tools Links - Group 2 */}
           <div>
             <h4 
-              className="text-sm font-semibold mb-4 opacity-0"
+              className="text-sm font-semibold mb-4"
               style={{ color: 'var(--color-text)' }}
             >
               {t("common.tools")}
@@ -120,14 +117,13 @@ export default function Footer() {
                     className="text-sm transition-colors duration-150 hover:text-primary no-underline"
                     style={{ color: 'var(--color-text-muted)' }}
                   >
-                    {t(${tool.navKey}.name)}
+                    {t(`${tool.navKey}.name`)}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Company Links */}
           <div>
             <h4 
               className="text-sm font-semibold mb-4"
@@ -157,7 +153,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Legal Links */}
           <div>
             <h4 
               className="text-sm font-semibold mb-4"
@@ -197,7 +192,6 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom Bar */}
         <div 
           className="mt-12 pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4"
           style={{ borderColor: 'var(--color-border)' }}
