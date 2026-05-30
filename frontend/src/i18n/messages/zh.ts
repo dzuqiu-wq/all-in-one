@@ -16,6 +16,12 @@ export default {
     utilities: '效率通用',
     about: '关于我们',
     docs: '开发文档',
+    categories: {
+      documents: '文档工具',
+      business: '商业与金融',
+      media: '媒体与设计',
+      developer: '开发者',
+    },
     wordPdf: {
       name: 'Word ↔ PDF 转换',
       description: '使用服务端 LibreOffice 引擎将 Word 文档精准转换为 PDF。',
@@ -88,12 +94,6 @@ export default {
     uuidGenerator: {
       name: 'UUID 生成器',
       description: '在浏览器中生成密码学随机的 UUID（RFC 4122 v4）。一次最多 10,000 个。无上传、无追踪。',
-    },
-    categories: {
-      documents: '文档与法律',
-      business: '商业与金融',
-      media: '媒体与设计',
-      developer: '开发者',
     },
   },
   home: {
