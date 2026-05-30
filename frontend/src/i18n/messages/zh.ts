@@ -124,20 +124,17 @@ export default {
         description: 'JSON 格式化、Base64、哈希生成器，无需服务器。',
       },
     },
-    toolsSection: {
-      title: '全部工具',
-      subtitle: '查看我们所有的在线工具',
-    },
-    badge: {
-      privacy: '隐私优先',
-      statPrivate: '完全本地处理',
-      statUploads: '文件从不离开浏览器',
-    },
     section: {
       allTools: '全部工具',
       documentTools: '文档工具',
       imageTools: '图片工具',
       devTools: '开发者工具',
+      featureDocTools: 'Word 转 PDF、Excel 转 PDF、PowerPoint',
+      featureDocDesc: '合并、拆分，一站式文档处理',
+      featureImageTools: '压缩、调整大小、转换',
+      featureImageDesc: '图片格式全覆盖，本地处理',
+      featureDevTools: '哈希、JSON、UUID',
+      featureDevDesc: '开发者效率工具，即开即用',
     },
 
     tryItNow: '立即体验',

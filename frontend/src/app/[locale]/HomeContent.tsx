@@ -246,7 +246,10 @@ export default function HomeContent() {
                 {t("home.section.documentTools")}
               </h3>
               <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-                {t("home.feature.doc.description")}
+                {t("home.section.featureDocTools")}
+              </p>
+              <p className="text-xs mt-1" style={{ color: "var(--color-text-muted)" }}>
+                {t("home.section.featureDocDesc")}
               </p>
             </div>
 
@@ -264,7 +267,10 @@ export default function HomeContent() {
                 {t("home.section.imageTools")}
               </h3>
               <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-                {t("home.feature.image.description")}
+                {t("home.section.featureImageTools")}
+              </p>
+              <p className="text-xs mt-1" style={{ color: "var(--color-text-muted)" }}>
+                {t("home.section.featureImageDesc")}
               </p>
             </div>
 
@@ -282,7 +288,10 @@ export default function HomeContent() {
                 {t("home.section.devTools")}
               </h3>
               <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-                {t("home.feature.dev.description")}
+                {t("home.section.featureDevTools")}
+              </p>
+              <p className="text-xs mt-1" style={{ color: "var(--color-text-muted)" }}>
+                {t("home.section.featureDevDesc")}
               </p>
             </div>
           </div>

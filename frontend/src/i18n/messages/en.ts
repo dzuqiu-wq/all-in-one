@@ -136,6 +136,12 @@ export default {
       documentTools: 'Document Tools',
       imageTools: 'Image Tools',
       devTools: 'Developer Tools',
+      featureDocTools: 'Word to PDF, Excel to PDF, PowerPoint',
+      featureDocDesc: 'Merge, split, one-stop document processing',
+      featureImageTools: 'Compress, resize, convert',
+      featureImageDesc: 'Full image format coverage, local processing',
+      featureDevTools: 'Hash, JSON, UUID',
+      featureDevDesc: 'Developer productivity tools, ready to use',
     },
 
     tryItNow: 'Try it now',
