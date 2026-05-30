@@ -13,16 +13,17 @@ import {
 } from "lucide-react";
 import SystemStatus, { type StatusEntry } from "@/components/SystemStatus";
 import ShareButtons from "@/components/ShareButtons";
-import { useLocalizedHref, buildLocalizedHref } from "@/i18n/useLocalizedHref";
+import { useLocalizedHref, useCurrentLocale } from "@/i18n/useLocalizedHref";
 import { TOOLS } from "@/lib/toolRegistry";
 
 export default function HomeContent() {
   const t = useTranslations();
+  const locale = useCurrentLocale();
   const wordPdfHref = useLocalizedHref("/tools/word-to-pdf");
 
-  const toolsWithHrefs = TOOLS.map(tool => ({
+  const toolsWithHrefs = TOOLS.map((tool) => ({
     ...tool,
-    href: buildLocalizedHref(tool.href, "en"),
+    href: useLocalizedHref(tool.href),
   }));
 
   const statusEntries: readonly StatusEntry[] = [
@@ -79,7 +80,7 @@ export default function HomeContent() {
                   className="w-2 h-2 rounded-full animate-pulse"
                   style={{ backgroundColor: "var(--color-primary)" }}
                 />
-                <span>Privacy-First Tools</span>
+                <span>{t("home.badge.privacy")}</span>
               </div>
 
               <div className="space-y-4">
@@ -91,19 +92,18 @@ export default function HomeContent() {
                     letterSpacing: "-0.02em",
                   }}
                 >
-                  All-in-One{" "}
+                  {t("home.headline")}
                   <span
                     className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
                   >
-                    Toolbox
+                    {t("home.headlineAccent")}
                   </span>
                 </h1>
                 <p
                   className="text-lg lg:text-xl leading-relaxed max-w-xl"
                   style={{ color: "var(--color-text-secondary)" }}
                 >
-                  Free browser-based tools for documents, images, and productivity.
-                  No upload required — everything runs locally in your browser.
+                  {t("home.subtitle")}
                 </p>
               </div>
 
@@ -116,7 +116,7 @@ export default function HomeContent() {
                     color: "var(--color-on-primary)",
                   }}
                 >
-                  <span>Try Word to PDF</span>
+                  <span>{t("home.startWithWordPdf")}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link
@@ -128,24 +128,36 @@ export default function HomeContent() {
                     backgroundColor: "transparent",
                   }}
                 >
-                  <span>Browse All Tools</span>
+                  <span>{t("home.browseAll")}</span>
                 </Link>
               </div>
 
               <div className="flex items-center gap-8 pt-4">
                 <div>
-                  <div className="text-2xl font-bold" style={{ color: "var(--color-primary)" }}>14+</div>
-                  <div className="text-sm" style={{ color: "var(--color-text-muted)" }}>Tools</div>
+                  <div className="text-2xl font-bold" style={{ color: "var(--color-primary)" }}>
+                    {TOOLS.length}+
+                  </div>
+                  <div className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+                    {t("home.stats.tools")}
+                  </div>
                 </div>
                 <div className="w-px h-12" style={{ backgroundColor: "var(--color-border)" }} />
                 <div>
-                  <div className="text-2xl font-bold" style={{ color: "var(--color-primary)" }}>100%</div>
-                  <div className="text-sm" style={{ color: "var(--color-text-muted)" }}>Private</div>
+                  <div className="text-2xl font-bold" style={{ color: "var(--color-primary)" }}>
+                    100%
+                  </div>
+                  <div className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+                    {t("home.stats.private")}
+                  </div>
                 </div>
                 <div className="w-px h-12" style={{ backgroundColor: "var(--color-border)" }} />
                 <div>
-                  <div className="text-2xl font-bold" style={{ color: "var(--color-primary)" }}>0</div>
-                  <div className="text-sm" style={{ color: "var(--color-text-muted)" }}>Uploads</div>
+                  <div className="text-2xl font-bold" style={{ color: "var(--color-primary)" }}>
+                    0
+                  </div>
+                  <div className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+                    {t("home.stats.uploads")}
+                  </div>
                 </div>
               </div>
             </div>
@@ -167,10 +179,10 @@ export default function HomeContent() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold mb-1" style={{ color: "var(--color-text)" }}>
-                      Document Tools
+                      {t("home.feature.doc.title")}
                     </h3>
                     <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-                      Word to PDF, Excel to PDF, PowerPoint, Merge and Split
+                      {t("home.feature.doc.desc")}
                     </p>
                   </div>
                 </div>
@@ -190,10 +202,10 @@ export default function HomeContent() {
                   <ImageIcon className="w-5 h-5" />
                 </div>
                 <h3 className="font-semibold mb-1" style={{ color: "var(--color-text)" }}>
-                  Image Tools
+                  {t("home.feature.image.title")}
                 </h3>
                 <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                  Resize, optimize, convert
+                  {t("home.feature.image.desc")}
                 </p>
               </div>
 
@@ -211,10 +223,10 @@ export default function HomeContent() {
                   <Code className="w-5 h-5" />
                 </div>
                 <h3 className="font-semibold mb-1" style={{ color: "var(--color-text)" }}>
-                  Dev Tools
+                  {t("home.feature.dev.title")}
                 </h3>
                 <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                  Hash, JSON, UUID
+                  {t("home.feature.dev.desc")}
                 </p>
               </div>
             </div>
@@ -237,13 +249,13 @@ export default function HomeContent() {
                 letterSpacing: "-0.02em",
               }}
             >
-              All Tools
+              {t("home.toolsSection.title")}
             </h2>
             <p
               className="text-lg max-w-2xl mx-auto"
               style={{ color: "var(--color-text-muted)" }}
             >
-              Everything you need, nothing you do not. Click any tool to start.
+              {t("home.toolsSection.subtitle")}
             </p>
           </div>
 
@@ -279,13 +291,13 @@ export default function HomeContent() {
                       className="font-semibold mb-2"
                       style={{ color: "var(--color-text)" }}
                     >
-                      {t(String(tool.navKey) + ".name")}
+                      {t(`${tool.navKey}.name`)}
                     </h3>
                     <p
                       className="text-sm"
                       style={{ color: "var(--color-text-muted)" }}
                     >
-                      {t(String(tool.navKey) + ".description")}
+                      {t(`${tool.navKey}.description`)}
                     </p>
 
                     <div
@@ -325,13 +337,13 @@ export default function HomeContent() {
                 className="font-bold text-xl mb-3"
                 style={{ color: "var(--color-text)" }}
               >
-                100% Private
+                {t("home.values.privacy.title")}
               </h3>
               <p
                 className="text-base"
                 style={{ color: "var(--color-text-muted)" }}
               >
-                All processing happens locally in your browser. Your files never leave your device.
+                {t("home.values.privacy.description")}
               </p>
             </div>
 
@@ -349,13 +361,13 @@ export default function HomeContent() {
                 className="font-bold text-xl mb-3"
                 style={{ color: "var(--color-text)" }}
               >
-                Lightning Fast
+                {t("home.values.speed.title")}
               </h3>
               <p
                 className="text-base"
                 style={{ color: "var(--color-text-muted)" }}
               >
-                No server uploads means instant results. Process files in milliseconds.
+                {t("home.values.speed.description")}
               </p>
             </div>
 
@@ -373,13 +385,13 @@ export default function HomeContent() {
                 className="font-bold text-xl mb-3"
                 style={{ color: "var(--color-text)" }}
               >
-                No Sign-up
+                {t("home.values.nosignup.title")}
               </h3>
               <p
                 className="text-base"
                 style={{ color: "var(--color-text-muted)" }}
               >
-                Start using immediately. No accounts, no subscriptions, no tracking.
+                {t("home.values.nosignup.description")}
               </p>
             </div>
           </div>
@@ -393,10 +405,10 @@ export default function HomeContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-2xl border p-8" style={{ borderColor: "var(--color-border)" }}>
             <SystemStatus
-              heading="System Status"
-              eyebrow="INFRASTRUCTURE HEALTH"
-              nominalLabel="All Systems Operational"
-              lastVerifiedLabel="Last verified"
+              heading={t("systemStatus.heading")}
+              eyebrow={t("systemStatus.eyebrow")}
+              nominalLabel={t("systemStatus.nominalLabel")}
+              lastVerifiedLabel={t("systemStatus.lastVerifiedLabel")}
               entries={statusEntries}
             />
           </div>
@@ -416,16 +428,19 @@ export default function HomeContent() {
               className="font-bold text-2xl mb-4"
               style={{ color: "var(--color-text)" }}
             >
-              Share the Toolbox
+              {t("share.title")}
             </h2>
             <p
               className="text-base mb-8"
               style={{ color: "var(--color-text-muted)" }}
             >
-              Help your friends discover free, privacy-first tools.
+              {t("share.subtitle")}
             </p>
             <ShareButtons
-              title={{ en: "Check out All-in-One Toolbox - free browser-based tools!", zh: "试试 All-in-One 工具箱 - 免费浏览器工具！" }}
+              title={{
+                en: "Check out All-in-One Toolbox - free browser-based tools!",
+                zh: "试试 All-in-One 工具箱 - 免费浏览器工具！",
+              }}
               hashtags={["PDFTools", "AllInOneToolbox", "BrowserPDF"]}
             />
           </div>

@@ -103,6 +103,33 @@ export default {
     subtitle: 'A curated suite of document conversion, image optimization, and productivity tools. Privacy-first, processed inside your browser.',
     startWithWordPdf: 'Start with Word → PDF',
     browseAll: 'Browse all tools',
+    stats: {
+      tools: 'online tools',
+      private: '100% client-side',
+      uploads: 'Files never leave your browser',
+    },
+    feature: {
+      doc: {
+        title: 'Document Tools',
+        description: 'Convert Word, Excel, PowerPoint to PDF entirely in your browser.',
+      },
+      image: {
+        title: 'Image Optimization',
+        description: 'Compress, resize, and convert images, all done locally.',
+      },
+      dev: {
+        title: 'Developer Tools',
+        description: 'JSON formatter, Base64, hash generator, no server needed.',
+      },
+    },
+    toolsSection: {
+      title: 'All Tools',
+      subtitle: 'Explore all our online tools',
+    },
+    badge: {
+      privacy: 'Privacy-first',
+    },
+
     tryItNow: 'Try it now',
     terminal: {
       convert: 'convert document.docx',
@@ -120,6 +147,11 @@ export default {
         title: 'Built for speed',
         description: 'Server tools use memory-only pipelines with 5-second hard timeouts. No queues, no waiting.',
       },
+      nosignup: {
+        title: 'No Sign-up Required',
+        description: 'Use directly, no account or registration needed.',
+      },
+
       opensource: {
         title: 'Open source',
         description: 'MIT licensed and transparent. Read the code, run it locally, or contribute on GitHub.',
@@ -968,6 +1000,18 @@ From a compliance standpoint, the client-side-only architecture eliminates any o
       faq3A: 'html2canvas rasterises the preview DOM at 2× device pixel ratio, but raster avatars uploaded at small sizes will upscale and may look soft on retina displays. For sharp exports, upload an avatar at least 256×256 px, or supply an SVG. The mockup itself stays crisp regardless because the chrome elements (bubbles, icons, status bar) are vector or pure CSS.',
     },
   },
+
+  systemStatus: {
+    eyebrow: 'Real-time monitoring',
+    heading: 'System Status',
+    nominalLabel: 'Nominal',
+    lastVerifiedLabel: 'Last verified',
+  },
+  share: {
+    title: 'Share',
+    subtitle: 'Share this tool with your friends',
+  },
+
   footer: {
     copyright: 'All-in-One Toolbox. Open source under MIT License.',
     madeWith: 'MADE WITH',

@@ -103,6 +103,33 @@ export default {
     subtitle: '精心收集的文档转换、图片优化和效率工具。隐私优先，基于浏览器处理。',
     startWithWordPdf: '从 Word → PDF 开始',
     browseAll: '浏览全部工具',
+    stats: {
+      tools: '款在线工具',
+      private: '完全本地处理',
+      uploads: '文件从不离开浏览器',
+    },
+    feature: {
+      doc: {
+        title: '文档处理',
+        description: 'Word、Excel、PowerPoint 转 PDF，完全在浏览器中处理。',
+      },
+      image: {
+        title: '图片优化',
+        description: '压缩、调整大小、格式转换，全部本地完成。',
+      },
+      dev: {
+        title: '开发者工具',
+        description: 'JSON 格式化、Base64、哈希生成器，无需服务器。',
+      },
+    },
+    toolsSection: {
+      title: '全部工具',
+      subtitle: '查看我们所有的在线工具',
+    },
+    badge: {
+      privacy: '隐私优先',
+    },
+
     tryItNow: '立即体验',
     terminal: {
       convert: 'convert document.docx',
@@ -120,6 +147,11 @@ export default {
         title: '极速体验',
         description: '服务端工具使用纯内存管道，5秒硬超时限制。无需排队，无需等待。',
       },
+      nosignup: {
+        title: '无需注册',
+        description: '直接使用，无需账户或注册流程。',
+      },
+
       opensource: {
         title: '开源透明',
         description: 'MIT 协议开源。查看代码、本地运行或在 GitHub 上贡献。',
@@ -939,6 +971,18 @@ export default {
       faq3A: 'html2canvas 会以 2 倍设备像素比对预览 DOM 做光栅化，但如果上传的头像本身是小尺寸位图，被放大后在 Retina 屏上自然会发软。想要锐利导出，请上传至少 256×256 像素的头像，或者直接使用 SVG。Mockup 本身的气泡、图标、状态栏都是矢量或纯 CSS，不受影响。',
     },
   },
+
+  systemStatus: {
+    eyebrow: '实时监控',
+    heading: '系统状态',
+    nominalLabel: '正常',
+    lastVerifiedLabel: '最近验证',
+  },
+  share: {
+    title: '分享',
+    subtitle: '分享这个工具给你的朋友',
+  },
+
   footer: {
     copyright: 'All-in-One Toolbox，开源 MIT 协议。',
     madeWith: '用',
