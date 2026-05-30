@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All-in-One Toolbox - Design System Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    :root {
+      /* Light Mode Colors */
+      --color-primary: #0D9488;
+      --color-primary-hover: #0F766E;
+      --color-secondary: #14B8A6;
+      --color-accent: #EA580C;
+      --color-background: #F0FDFA;
+      --color-surface: #FFFFFF;
+      --color-text: #1E293B;
+      --color-text-secondary: #475569;
+      --color-text-muted: #64748B;
+      --color-muted: #E8F1F4;
+      --color-border: #99F6E4;
+      --color-on-primary: #FFFFFF;
+      --color-success: #10B981;
+      --color-warning: #F59E0B;
+      --color-error: #DC2626;
+      
+      /* Spacing */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-2xl: 48px;
+      
+      /* Radius */
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --radius-full: 9999px;
+      
+      /* Shadows */
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-lg: 0 4px 6px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background-color: var(--color-background);
+      color: var(--color-text);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Typography */
+    .text-display { font-size: 56px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+    .text-h1 { font-size: 40px; font-weight: 600; letter-spacing: -0.02em; }
+    .text-h2 { font-size: 28px; font-weight: 600; }
+    .text-h3 { font-size: 22px; font-weight: 600; }
+    .text-body-lg { font-size: 18px; }
+    .text-body { font-size: 16px; }
+    .text-body-sm { font-size: 14px; }
+    .text-caption { font-size: 12px; font-weight: 500; letter-spacing: 0.5px; }
+
+    /* Container */
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+    /* Section */
+    .section { padding: 80px 0; }
+    .section-sm { padding: 48px 0; }
+
+    /* Colors */
+    .text-primary { color: var(--color-primary); }
+    .text-muted { color: var(--color-text-muted); }
+    .text-secondary { color: var(--color-text-secondary); }
+    .bg-surface { background-color: var(--color-surface); }
+    .bg-primary { background-color: var(--color-primary); }
+    .bg-muted { background-color: var(--color-muted); }
+
+    /* Navbar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--color-border);
+      height: 64px;
+      display: flex;
+      align-items: center;
+    }
+    .navbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--color-text);
+    }
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    .logo-text { font-weight: 600; font-size: 18px; }
+    .nav-links { display: flex; align-items: center; gap: 8px; }
+    .nav-link {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      color: var(--color-text-secondary);
+      transition: all 150ms;
+    }
+    .nav-link:hover { background: var(--color-muted); }
+    .nav-link.active { background: var(--color-muted); color: var(--color-primary); }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 150ms;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background-color: var(--color-primary);
+      color: var(--color-on-primary);
+    }
+    .btn-primary:hover { filter: brightness(1.1); transform: scale(1.02); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-secondary {
+      background-color: transparent;
+      border: 1.5px solid var(--color-border);
+      color: var(--color-text);
+    }
+    .btn-secondary:hover { background-color: var(--color-muted); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--color-text);
+    }
+    .btn-ghost:hover { background-color: var(--color-muted); }
+
+    /* Cards */
+    .card {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-md);
+      transition: all 200ms;
+    }
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
+    }
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      background-color: var(--color-muted);
+      color: var(--color-primary);
+    }
+
+    /* Bento Grid */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .tool-card {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      text-decoration: none;
+      color: var(--color-text);
+      transition: all 200ms;
+      position: relative;
+      overflow: hidden;
+    }
+    .tool-card:hover {
+      border-color: var(--color-primary);
+      transform: scale(1.02);
+    }
+    .tool-card:hover .tool-icon {
+      background-color: var(--color-primary);
+      color: white;
+    }
+    .tool-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      background-color: var(--color-muted);
+      color: var(--color-primary);
+      transition: all 200ms;
+    }
+    .tool-card-title { font-weight: 600; margin-bottom: 8px; }
+    .tool-card-desc { font-size: 14px; color: var(--color-text-muted); }
+    .tool-card-arrow {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-muted);
+      transition: all 200ms;
+    }
+    .tool-card:hover .tool-card-arrow {
+      transform: translate(4px, -4px);
+      background-color: var(--color-primary);
+      color: white;
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      font-size: 14px;
+      font-weight: 500;
+      background-color: var(--color-muted);
+      color: var(--color-primary);
+    }
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--color-primary);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Stats */
+    .stats { display: flex; align-items: center; gap: 32px; }
+    .stat-item { text-align: center; }
+    .stat-value { font-size: 32px; font-weight: 700; color: var(--color-primary); }
+    .stat-label { font-size: 14px; color: var(--color-text-muted); }
+    .stat-divider { width: 1px; height: 48px; background-color: var(--color-border); }
+
+    /* Value Cards */
+    .value-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .value-card { text-align: center; padding: 32px; background-color: var(--color-surface); border-radius: var(--radius-xl); }
+    .value-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-xl);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      background-color: var(--color-muted);
+      color: var(--color-primary);
+    }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid var(--color-border);
+      padding: 64px 0 32px;
+      margin-top: 80px;
+    }
+    .footer-grid { display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: 48px; }
+    .footer-brand p { margin-top: 16px; font-size: 14px; color: var(--color-text-muted); max-width: 280px; }
+    .footer-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+    .footer-links { list-style: none; }
+    .footer-links li { margin-bottom: 12px; }
+    .footer-links a { font-size: 14px; color: var(--color-text-muted); text-decoration: none; transition: color 150ms; }
+    .footer-links a:hover { color: var(--color-primary); }
+    .footer-bottom { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; font-size: 14px; color: var(--color-text-muted); }
+
+    /* Status Badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 9999px;
+      font-size: 14px;
+      background-color: var(--color-muted);
+      color: var(--color-success);
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--color-success);
+      animation: pulse 2s infinite;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .bento-grid { grid-template-columns: repeat(3, 1fr); }
+      .footer-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .bento-grid { grid-template-columns: repeat(2, 1fr); }
+      .value-grid { grid-template-columns: 1fr; }
+      .stats { flex-wrap: wrap; gap: 16px; }
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .bento-grid { grid-template-columns: 1fr; }
+      .text-display { font-size: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="#" class="logo">
+        <div class="logo-icon">
+          <i data-lucide="layout-grid" style="width:20px;height:20px"></i>
+        </div>
+        <span class="logo-text">All-in-One</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#" class="nav-link active">Tools</a>
+        <a href="#" class="nav-link">Docs</a>
+        <a href="#" class="nav-link">About</a>
+        <a href="#" class="btn btn-primary" style="margin-left:8px">
+          Try It
+          <i data-lucide="arrow-right" style="width:16px;height:16px"></i>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="section" style="position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;opacity:0.3;background:radial-gradient(circle at 20% 30%, #0D9488 0%, transparent 40%), radial-gradient(circle at 80% 70%, #14B8A6 0%, transparent 40%)"></div>
+    <div class="container" style="position:relative">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center">
+        <div style="space-y:32px">
+          <div class="badge">
+            <span class="badge-dot"></span>
+            <span>Privacy-First Tools</span>
+          </div>
+          
+          <h1 class="text-display" style="margin:24px 0">
+            All-in-One <span style="background:linear-gradient(135deg, var(--color-primary), var(--color-secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Toolbox</span>
+          </h1>
+          
+          <p class="text-body-lg text-secondary" style="max-width:480px;margin-bottom:32px">
+            Free browser-based tools for documents, images, and productivity. 
+            No upload required — everything runs locally in your browser.
+          </p>
+          
+          <div style="display:flex;gap:16px;margin-bottom:32px">
+            <a href="#" class="btn btn-primary">
+              <span>Try Word to PDF</span>
+              <i data-lucide="arrow-right" style="width:16px;height:16px"></i>
+            </a>
+            <a href="#" class="btn btn-secondary">
+              <span>Browse All Tools</span>
+            </a>
+          </div>
+          
+          <div class="stats">
+            <div class="stat-item">
+              <div class="stat-value">14+</div>
+              <div class="stat-label">Tools</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <div class="stat-value">100%</div>
+              <div class="stat-label">Private</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <div class="stat-value">0</div>
+              <div class="stat-label">Uploads</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Feature Cards -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="card" style="grid-column:span 2">
+            <div style="display:flex;gap:16px;align-items:start">
+              <div class="card-icon"><i data-lucide="file-text" style="width:24px;height:24px"></i></div>
+              <div>
+                <h3 class="text-h3">Document Tools</h3>
+                <p class="text-body-sm text-muted">Word to PDF, Excel to PDF, PowerPoint, Merge & Split</p>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-icon"><i data-lucide="image" style="width:20px;height:20px"></i></div>
+            <h3 class="text-h3">Image Tools</h3>
+            <p class="text-body-sm text-muted">Resize, optimize, convert</p>
+          </div>
+          <div class="card">
+            <div class="card-icon"><i data-lucide="code" style="width:20px;height:20px"></i></div>
+            <h3 class="text-h3">Dev Tools</h3>
+            <p class="text-body-sm text-muted">Hash, JSON, UUID</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tools Section -->
+  <section class="section bg-surface">
+    <div class="container">
+      <div style="text-align:center;margin-bottom:48px">
+        <h2 class="text-h1" style="margin-bottom:16px">All Tools</h2>
+        <p class="text-body-lg text-muted">Everything you need, nothing you don&apos;t. Click any tool to start.</p>
+      </div>
+      
+      <div class="bento-grid">
+        <a href="#" class="tool-card" style="grid-column:span 2">
+          <div class="tool-icon"><i data-lucide="file-text" style="width:24px;height:24px"></i></div>
+          <div class="tool-card-title">Word to PDF</div>
+          <div class="tool-card-desc">Convert Word documents to PDF instantly</div>
+          <div class="tool-card-arrow"><i data-lucide="arrow-right" style="width:12px;height:12px"></i></div>
+        </a>
+        <a href="#" class="tool-card">
+          <div class="tool-icon"><i data-lucide="file-spreadsheet" style="width:24px;height:24px"></i></div>
+          <div class="tool-card-title">Excel to PDF</div>
+          <div class="tool-card-desc">Convert spreadsheets to PDF</div>
+          <div class="tool-card-arrow"><i data-lucide="arrow-right" style="width:12px;height:12px"></i></div>
+        </a>
+        <a href="#" class="tool-card">
+          <div class="tool-icon"><i data-lucide="presentation" style="width:24px;height:24px"></i></div>
+          <div class="tool-card-title">PowerPoint to PDF</div>
+          <div class="tool-card-desc">Transform slides to PDF</div>
+          <div class="tool-card-arrow"><i data-lucide="arrow-right" style="width:12px;height:12px"></i></div>
+        </a>
+        <a href="#" class="tool-card">
+          <div class="tool-icon"><i data-lucide="merge" style="width:24px;height:24px"></i></div>
+          <div class="tool-card-title">PDF Merge & Split</div>
+          <div class="tool-card-desc">Combine or divide PDFs</div>
+          <div class="tool-card-arrow"><i data-lucide="arrow-right" style="width:12px;height:12px"></i></div>
+        </a>
+        <a href="#" class="tool-card">
+          <div class="tool-icon"><i data-lucide="stamp" style="width:24px;height:24px"></i></div>
+          <div class="tool-card-title">PDF Watermark</div>
+          <div class="tool-card-desc">Add watermarks to PDFs</div>
+          <div class="tool-card-arrow"><i data-lucide="arrow-right" style="width:12px;height:12px"></i></div>
+        </a>
+        <a href="#" class="tool-card">
+          <div class="tool-icon"><i data-lucide="image" style="width:24px;height:24px"></i></div>
+          <div class="tool-card-title">Image Converter</div>
+          <div class="tool-card-desc">Convert between formats</div>
+          <div class="tool-card-arrow"><i data-lucide="arrow-right" style="width:12px;height:12px"></i></div>
+        </a>
+        <a href="#" class="tool-card">
+          <div class="tool-icon"><i data-lucide="minimize-2" style="width:24px;height:24px"></i></div>
+          <div class="tool-card-title">Image Optimizer</div>
+          <div class="tool-card-desc">Reduce file size</div>
+          <div class="tool-card-arrow"><i data-lucide="arrow-right" style="width:12px;height:12px"></i></div>
+        </a>
+        <a href="#" class="tool-card">
+          <div class="tool-icon"><i data-lucide="maximize-2" style="width:24px;height:24px"></i></div>
+          <div class="tool-card-title">Image Resizer</div>
+          <div class="tool-card-desc">Resize images</div>
+          <div class="tool-card-arrow"><i data-lucide="arrow-right" style="width:12px;height:12px"></i></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Values Section -->
+  <section class="section">
+    <div class="container">
+      <div class="value-grid">
+        <div class="value-card">
+          <div class="value-icon"><i data-lucide="shield" style="width:28px;height:28px"></i></div>
+          <h3 class="text-h2">100% Private</h3>
+          <p class="text-body text-muted" style="margin-top:12px">All processing happens locally in your browser. Your files never leave your device.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon"><i data-lucide="zap" style="width:28px;height:28px"></i></div>
+          <h3 class="text-h2">Lightning Fast</h3>
+          <p class="text-body text-muted" style="margin-top:12px">No server uploads means instant results. Process files in milliseconds.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon"><i data-lucide="lock" style="width:28px;height:28px"></i></div>
+          <h3 class="text-h2">No Sign-up</h3>
+          <p class="text-body text-muted" style="margin-top:12px">Start using immediately. No accounts, no subscriptions, no tracking.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- System Status -->
+  <section class="section-sm bg-surface">
+    <div class="container">
+      <div class="card" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+        <h2 class="text-h2">System Status</h2>
+        <div class="status-badge">
+          <span class="status-dot"></span>
+          <span>All Systems Operational</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="logo" style="margin-bottom:8px">
+            <div class="logo-icon" style="width:40px;height:40px"><i data-lucide="layout-grid" style="width:20px;height:20px"></i></div>
+            <span class="logo-text">All-in-One</span>
+          </a>
+          <p>Privacy-first browser tools. No upload, no tracking. All processing happens locally.</p>
+        </div>
+        <div>
+          <h4 class="footer-title">Tools</h4>
+          <ul class="footer-links">
+            <li><a href="#">Word to PDF</a></li>
+            <li><a href="#">Excel to PDF</a></li>
+            <li><a href="#">Image Converter</a></li>
+            <li><a href="#">JSON Formatter</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-title">Company</h4>
+          <ul class="footer-links">
+            <li><a href="#">About</a></li>
+            <li><a href="#">Docs</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-title">Legal</h4>
+          <ul class="footer-links">
+            <li><a href="#">Privacy</a></li>
+            <li><a href="#">Terms</a></li>
+            <li><a href="#">Cookies</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-title">Connect</h4>
+          <ul class="footer-links">
+            <li><a href="#">GitHub</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; 2025 All-in-One. MIT License.</span>
+        <span>Made with &#10084; for the community</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
