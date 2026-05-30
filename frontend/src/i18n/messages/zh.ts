@@ -107,6 +107,7 @@ export default {
       tools: '款在线工具',
       private: '完全本地处理',
       uploads: '文件从不离开浏览器',
+      percent: '100%',
     },
     feature: {
       doc: {

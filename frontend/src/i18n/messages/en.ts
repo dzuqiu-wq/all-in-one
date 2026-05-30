@@ -1027,5 +1027,6 @@ From a compliance standpoint, the client-side-only architecture eliminates any o
     learnMore: 'Learn more',
     more: 'More',
     legal: 'Legal',
+    company: 'Company',
   },
 };
