@@ -129,7 +129,7 @@ export default function Footer() {
               className="text-sm font-semibold mb-4"
               style={{ color: 'var(--color-text)' }}
             >
-              Company
+              {t('footer.company')}
             </h4>
             <ul className="space-y-3">
               <li>
@@ -158,7 +158,7 @@ export default function Footer() {
               className="text-sm font-semibold mb-4"
               style={{ color: 'var(--color-text)' }}
             >
-              Legal
+              {t('footer.legal')}
             </h4>
             <ul className="space-y-3">
               <li>

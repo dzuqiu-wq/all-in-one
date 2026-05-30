@@ -243,7 +243,7 @@ export default function HomeContent() {
                 <FileText className="w-5 h-5" />
               </div>
               <h3 className="font-semibold mb-2" style={{ color: "var(--color-text)" }}>
-                {t("home.feature.doc.title")}
+                {t("home.section.documentTools")}
               </h3>
               <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
                 {t("home.feature.doc.description")}
@@ -261,7 +261,7 @@ export default function HomeContent() {
                 <ImageIcon className="w-5 h-5" />
               </div>
               <h3 className="font-semibold mb-2" style={{ color: "var(--color-text)" }}>
-                {t("home.feature.image.title")}
+                {t("home.section.imageTools")}
               </h3>
               <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
                 {t("home.feature.image.description")}
@@ -279,7 +279,7 @@ export default function HomeContent() {
                 <Code className="w-5 h-5" />
               </div>
               <h3 className="font-semibold mb-2" style={{ color: "var(--color-text)" }}>
-                {t("home.feature.dev.title")}
+                {t("home.section.devTools")}
               </h3>
               <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
                 {t("home.feature.dev.description")}
